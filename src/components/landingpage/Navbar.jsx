@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const LOGO_URL =
   "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_176/v1767516621/logo_nzojy7.webp";
 
-const NAV_ITEMS = ["Home", "Services", "Blogs", "Contact", "Contest"];
+const NAV_ITEMS = ["Home", "Services", "Blogs", "Contact"];
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
