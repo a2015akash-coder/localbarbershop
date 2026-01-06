@@ -1,0 +1,182 @@
+import { memo } from "react";
+
+/* ---------------- CLOUDINARY OPTIMISATION ----------------
+   f_auto  -> auto format (WebP / AVIF)
+   q_auto  -> auto quality
+   w_800   -> ideal grid size (retina safe)
+   c_limit -> prevent upscaling
+---------------------------------------------------------- */
+
+const cdn = (path) =>
+  `https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_800,c_limit/${path}`;
+
+const STYLES = [
+  {
+    title: "Classic Haircut",
+    image: cdn("v1767627093/IMG_6223_ur5nnq.jpg"),
+    description:
+      "Clean classic and modern haircuts tailored to your style and head shape.",
+  },
+  {
+    title: "Beard Trim & Shave",
+    image: cdn("v1767626521/624158178e487621a677f49a_Parramatta-175_mexn85.jpg"),
+    description:
+      "Sharp beard trims, clean shaves, and precise line-ups for a polished look.",
+  },
+  {
+    title: "Kids Haircut",
+    image: cdn("v1767703082/kids_cskrcj.webp"),
+    description:
+      "Friendly, patient haircuts for kids of all ages in a comfortable setting.",
+  },
+  {
+    title: "Senior Haircut",
+    image: cdn("v1767514076/8922dcc0ec6ea25439b0c033ac1083a3_vovk97.png"),
+    description:
+      "Classic, comfortable haircuts for seniors with extra care and attention.",
+  },
+  {
+    title: "Blowout Taper",
+    image: cdn("v1767626520/IMG_2634_i4p6sk.jpg"),
+    description:
+      "Blowout taper fade cut for curly hair with clean blending and volume.",
+  },
+  {
+    title: "Taper Fade",
+    image: cdn("v1767703060/TAPER_FADE_fckneu.webp"),
+    description:
+      "Clean taper fades finished with precision and attention to detail.",
+  },
+  {
+    title: "Hair Design",
+    image: cdn("v1767626526/25493682304_cipoxh.png"),
+    description:
+      "Custom hair designs and detailed line work for a bold, unique look.",
+  },
+  {
+    title: "Fade",
+    image: cdn("v1767703352/FADE_fal5m5.webp"),
+    description:
+      "Blended, razor and zero fades delivered by experienced barbers.",
+  },
+  {
+    title: "Short Back & Sides",
+    image: cdn("v1767703404/short_ihfvkf.webp"),
+    description:
+      "Clean short back and sides with sharp edges and natural finish.",
+  },
+];
+
+const OurService = memo(function OurService() {
+  return (
+    <section className="bg-white section-spacing">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* HEADER */}
+        <div className="max-w-2xl mb-16">
+          <span className="inline-block mb-4 rounded-full bg-orange-50 px-6 py-2 text-base font-semibold text-orange-600">
+            Our Services
+          </span>
+
+          <h2
+            className="font-semibold leading-tight tracking-tight bg-clip-text text-transparent"
+            style={{
+              backgroundImage: "linear-gradient(90deg, #0f172a, #E6C35C)",
+              fontSize: "clamp(2.3rem, 4.8vw, 3.3rem)",
+            }}
+          >
+            Our Premium Grooming services
+          </h2>
+
+          <p className="mt-5 text-base sm:text-lg text-gray-600">
+            Your local barbershop around Hills. Bring a reference or let our barbers tailor a look that suits you.
+          </p>
+        </div>
+
+        {/* GRID */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+          {STYLES.map((style) => (
+            <div
+              key={style.title}
+              className="
+                group
+                rounded-3xl
+                bg-white
+                shadow-sm
+                hover:shadow-xl
+                transition-shadow
+                overflow-hidden
+              "
+            >
+              {/* IMAGE */}
+              <div className="bg-gray-50 flex items-center justify-center">
+                <img
+                  src={style.image}
+                  alt={style.title}
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(max-width: 640px) 100vw,
+                         (max-width: 1024px) 50vw,
+                         33vw"
+                  className="
+                    h-[260px] sm:h-[280px] lg:h-[300px]
+                    w-full
+                    object-contain
+                    transition-transform duration-500
+                    group-hover:scale-[1.03]
+                  "
+                />
+              </div>
+
+              {/* CONTENT */}
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {style.title}
+                </h3>
+
+                <div className="mt-2 h-[3px] w-10 rounded-full bg-orange-500" />
+
+                <p className="mt-4 text-sm text-gray-600 leading-relaxed">
+                  {style.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-20 flex flex-col sm:flex-row justify-center gap-4">
+          <a
+            href="tel:+61288831729"
+            className="
+              inline-flex items-center justify-center
+              rounded-full px-10 py-4
+              font-semibold text-white
+              bg-[#FF7A00] hover:bg-[#FF6A00]
+              transition shadow-md
+            "
+          >
+            Call to Book
+          </a>
+
+          <a
+            href="/services"
+            className="
+              inline-flex items-center justify-center
+              rounded-full px-10 py-4
+              font-semibold text-gray-900
+              border border-gray-300
+              hover:bg-gray-50
+              transition
+            "
+          >
+            View All Services
+          </a>
+        </div>
+
+      </div>
+    </section>
+  );
+});
+
+export default OurService;

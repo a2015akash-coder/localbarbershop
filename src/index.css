@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@layer base {
+  html,
+  body {
+    text-rendering: optimizeLegibility;
+     width: 100%;
+  font-family: poppins;
+  }
+}
+
+
+@layer utilities {
+  .section-spacing {
+    @apply py-16 sm:py-20 lg:py-24;
+  }
+}

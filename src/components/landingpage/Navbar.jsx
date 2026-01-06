@@ -1,0 +1,162 @@
+import { memo, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+const LOGO_URL =
+  "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_176/v1767516621/logo_nzojy7.webp";
+
+const NAV_ITEMS = ["Home", "Services", "Blogs", "Contact", "Contest"];
+
+const Navbar = () => {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  /* ------------------ SCROLL STATE ------------------ */
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header
+      className={`
+        sticky top-0 z-50
+        transition-colors duration-300
+        ${
+          scrolled
+            ? "bg-black/85 backdrop-blur-md border-b border-white/10"
+            : "bg-black"
+        }
+      `}
+    >
+      <nav className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+        {/* MAIN BAR */}
+        <div className="relative flex h-18 items-center w-full">
+
+          {/* LOGO — LEFT */}
+          <Link to="/" className="flex items-center shrink-0">
+            <img
+              src={LOGO_URL}
+              alt="The Grooming Room Barbershop"
+              width="176"
+              height="44"
+              className="h-11 w-auto object-contain"
+              loading="eager"
+              decoding="async"
+            />
+          </Link>
+
+          {/* CENTER NAV */}
+          <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex">
+            <ul className="flex items-center gap-12 text-[15px] font-medium text-gray-300">
+              {NAV_ITEMS.map((item) => (
+                <li key={item}>
+                  <Link
+                    to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                    className="
+                      relative transition-colors
+                      hover:text-white
+                      after:absolute after:-bottom-1 after:left-0
+                      after:h-[2px] after:w-0 after:bg-orange-500
+                      after:transition-all after:duration-300
+                      hover:after:w-full
+                    "
+                  >
+                    {item}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* CTA + MOBILE — RIGHT */}
+          <div className="ml-auto flex items-center gap-4">
+
+            {/* DESKTOP CTA */}
+            <a
+              href="tel:+61288831729"
+              className="
+                hidden md:inline-flex
+                items-center justify-center
+                rounded-full px-7 py-3
+                text-sm font-semibold text-white
+                bg-[#FF7A00] hover:bg-[#FF6A00]
+                transition-colors shadow-md
+              "
+            >
+              +61 2 8883 1729
+            </a>
+
+            {/* MOBILE CTA */}
+            <a
+              href="tel:+61288831729"
+              className="
+                md:hidden
+                rounded-full px-5 py-2.5
+                text-sm font-semibold text-white
+                bg-[#FF7A00]
+              "
+            >
+               +61 2 8883 1729
+            </a>
+
+            {/* MOBILE MENU BUTTON */}
+            <button
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle Menu"
+              className="
+                md:hidden
+                rounded-lg p-2.5
+                text-gray-300
+                hover:bg-white/10
+                transition
+              "
+            >
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={
+                    open
+                      ? "M6 18L18 6M6 6l12 12"
+                      : "M4 6h16M4 12h16M4 18h16"
+                  }
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* MOBILE MENU */}
+        {open && (
+          <div className="md:hidden border-t border-white/10 py-6">
+            <ul className="flex flex-col gap-5 text-[15px] font-medium text-gray-300">
+              {NAV_ITEMS.map((item) => (
+                <li key={item}>
+                  <Link
+                    to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                    onClick={() => setOpen(false)}
+                    className="block px-2 py-2 hover:text-white transition"
+                  >
+                    {item}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </nav>
+    </header>
+  );
+};
+
+export default memo(Navbar);
