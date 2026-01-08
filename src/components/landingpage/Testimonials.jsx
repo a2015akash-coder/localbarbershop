@@ -1,126 +1,140 @@
-import { memo } from "react";
-import { Star, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-/* ------------------ REVIEWS ------------------ */
-const REVIEWS = [
-  {
-    name: "Bruce Wright",
-    rating: 5,
-    text: "Dani is the ultimate barber. Been following him around for years and the quality is always consistent.",
-  },
-  {
-    name: "Paul Jefferson",
-    rating: 5,
-    text: "A wonderful service. Dilen does an excellent job every time. Highly recommended.",
-  },
-  {
-    name: "TM Hng",
-    rating: 4,
-    text: "Great service and friendly staff. Always a good experience.",
-  },
+const testimonials = [
+  { name: "Alex Parker", date: "07 Dec 2025", initial: "A", text: "Great with kids and very professional service.", color: "bg-pink-100 text-pink-700" },
+  { name: "Paul Jefferson", date: "15 Dec 2025", initial: "P", text: "Wonderful service. Dilen does an excellent job every time.", color: "bg-orange-100 text-orange-700" },
+  { name: "Anthony Coombs", date: "15 Dec 2025", initial: "A", text: "Fantastic job. Dylan says I look five years younger.", color: "bg-yellow-100 text-yellow-700" },
+  { name: "Michael Turner", date: "10 Dec 2025", initial: "M", text: "Clean shop, great fades, and friendly staff. Highly recommend.", color: "bg-blue-100 text-blue-700" },
+  { name: "Bruce Wright", date: "17 Dec 2025", initial: "B", text: "Dani is the ultimate barber. Been following him around for years.", color: "bg-green-100 text-green-700" },
 ];
 
-function Testimonials() {
-  return (
-   <section className="bg-white section-spacing">
+const CARD_WIDTH = 380; // must match CSS
+const GAP = 32;
+const SLIDE_DISTANCE = CARD_WIDTH + GAP;
+const VISIBLE = 3;
 
+export default function Testimonials() {
+  const [items, setItems] = useState(testimonials);
+  const [offset, setOffset] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const slideNext = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setOffset(-SLIDE_DISTANCE);
+  };
+
+  const slidePrev = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setOffset(SLIDE_DISTANCE);
+  };
+
+  useEffect(() => {
+    if (!isAnimating) return;
+
+    const timer = setTimeout(() => {
+      if (offset < 0) {
+        setItems((prev) => [...prev.slice(1), prev[0]]);
+      } else {
+        setItems((prev) => [prev[prev.length - 1], ...prev.slice(0, -1)]);
+      }
+      setOffset(0);
+      setIsAnimating(false);
+    }, 450); // match animation duration
+
+    return () => clearTimeout(timer);
+  }, [isAnimating, offset]);
+
+  return (
+    <section className="bg-orange-50 section-spacing">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 
         {/* HEADER */}
-        <div className="mb-16 max-w-2xl">
-          {/* LABEL */}
-          <span className="inline-block rounded-full bg-orange-50 px-5 py-2 text-base font-semibold tracking-wide text-orange-600">
-            Testimonials
-          </span>
-
-          {/* HEADING */}
+        <div className="mb-14 max-w-2xl">
           <h2
-            className="mt-7 font-semibold leading-tight tracking-tight"
+            className="font-semibold tracking-tight"
             style={{
-              fontSize: "clamp(2.3rem, 4.8vw, 3.2rem)",
-              backgroundImage: "linear-gradient(90deg, #0f172a, #E6C35C)",
+              fontSize: "clamp(2rem, 3.5vw, 2.6rem)",
+              backgroundImage:
+                "linear-gradient(90deg, #0f172a 0%, #a88c3a 60%, #e6c35c 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
           >
-            Trusted by Local Clients
+            What Our Clients Say
           </h2>
 
-          {/* DESCRIPTION */}
-          <p className="mt-6 max-w-lg text-base sm:text-lg text-gray-600 leading-relaxed">
-            Real feedback from clients who trust us for consistent,
-            high-quality grooming.
+          <p className="mt-4 text-base text-slate-600">
+            Rated 4.4★ on Google by 200+ locals for consistent results.
           </p>
         </div>
 
-        {/* GOOGLE SUMMARY */}
-        <div className="mb-12 flex items-center gap-4">
-          <div className="flex items-center gap-1 text-[#FFB400]">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} size={18} fill="currentColor" stroke="none" />
-            ))}
-          </div>
+        {/* CAROUSEL */}
+        <div className="relative">
 
-          <p className="text-gray-700 font-medium">
-            4.4 out of 5 based on 200+ Google reviews
-          </p>
-        </div>
-
-        {/* REVIEWS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {REVIEWS.map((review) => (
+          {/* VIEWPORT (only hides overflow, NOT arrows) */}
+          <div className="overflow-hidden px-2">
             <div
-              key={review.name}
-              className="rounded-2xl border border-gray-100 p-6 shadow-sm transition-shadow hover:shadow-lg"
+              className="flex gap-8"
+              style={{
+                transform: `translateX(${offset}px)`,
+                transition: isAnimating
+                  ? "transform 450ms cubic-bezier(0.4, 0.0, 0.2, 1)"
+                  : "none",
+              }}
             >
-              {/* PROFILE */}
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm font-semibold text-gray-700">
-                  {review.name.charAt(0)}
-                </div>
+              {items.slice(0, VISIBLE + 1).map((t, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 w-[380px] rounded-3xl bg-white p-10 shadow-sm text-center"
+                >
+                  {/* Avatar */}
+                  <div
+                    className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full text-xl font-semibold ${t.color}`}
+                  >
+                    {t.initial}
+                  </div>
 
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {review.name}
+                  {/* Stars */}
+                  <div className="mb-4 flex justify-center text-orange-500 text-lg">
+                    ★★★★★
+                  </div>
+
+                  {/* Text */}
+                  <p className="text-base text-slate-600 leading-relaxed">
+                    “{t.text}”
                   </p>
 
-                  <div className="flex items-center gap-1 text-[#FFB400]">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        fill="currentColor"
-                        stroke="none"
-                      />
-                    ))}
+                  <div className="mt-6 font-semibold text-slate-900">
+                    {t.name}
+                  </div>
+
+                  <div className="mt-1 text-sm text-slate-500">
+                    {t.date}
                   </div>
                 </div>
-              </div>
-
-              {/* REVIEW TEXT */}
-              <p className="mt-4 text-gray-700 leading-relaxed">
-                “{review.text}”
-              </p>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* CTA */}
-        <div className="mt-16 text-center">
-          <a
-            href="https://www.google.com/maps/place/The+Grooming+Room+Barber+Shop+%E2%80%93+Kellyville+Barber/@-33.7129269,150.9722231,17z/data=!3m1!4b1!4m6!3m5!1s0x6b12a1c8d7851943:0x7afe96792994c1c0!8m2!3d-33.7129269!4d150.9722231!16s%2Fg%2F11clwnkk_c?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA3MUgBUAM%3D"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-orange-200 px-8 py-3 font-semibold text-orange-600 hover:bg-orange-50 transition-colors"
+          {/* CONTROLS (outside clipping) */}
+          <button
+            onClick={slidePrev}
+            className="absolute -left-6 top-1/2 -translate-y-1/2 hidden lg:flex h-12 w-12 items-center justify-center rounded-full bg-white shadow hover:bg-orange-50 transition"
           >
-            Read all reviews on Google
-            <ExternalLink size={16} />
-          </a>
-        </div>
+            <ChevronLeft />
+          </button>
 
+          <button
+            onClick={slideNext}
+            className="absolute -right-6 top-1/2 -translate-y-1/2 hidden lg:flex h-12 w-12 items-center justify-center rounded-full bg-white shadow hover:bg-orange-50 transition"
+          >
+            <ChevronRight />
+          </button>
+        </div>
       </div>
     </section>
   );
 }
-
-export default memo(Testimonials);

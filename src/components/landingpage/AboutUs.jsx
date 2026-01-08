@@ -6,9 +6,22 @@ function AboutUs() {
     <section className="bg-white py-16">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          
+          {/* IMAGE BLOCK */}
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-3xl bg-slate-100 hidden lg:block" />
+            <div className="relative overflow-hidden rounded-3xl">
+              <img
+                src="https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1767623965/IMG_2628_wzzrmi.jpg"
+                alt="Inside the barbershop in Kellyville"
+                className="h-[320px] w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          </div>
 
-          {/* CONTENT PANEL — FIRST ON MOBILE */}
-          <div className="relative bg-white rounded-3xl p-8 lg:p-10 shadow-sm order-1 lg:order-2">
+          {/* CONTENT PANEL */}
+          <div className="relative bg-white rounded-3xl p-8 lg:p-10 shadow-sm">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
               About Us
             </h3>
@@ -40,28 +53,12 @@ function AboutUs() {
             <div className="mt-7">
               <Link
                 to="/contact"
-                className="
-                  inline-flex items-center justify-center rounded-full
-                  border border-orange-300 px-8 py-3 font-semibold
-                  text-orange-600 hover:bg-orange-50 transition
-                "
+                className="inline-flex items-center justify-center rounded-full
+                           border border-orange-300 px-8 py-3 font-semibold
+                           text-orange-600 hover:bg-orange-50 transition"
               >
                 Get in Touch
               </Link>
-            </div>
-          </div>
-
-          {/* IMAGE BLOCK — BELOW CTA ON MOBILE */}
-          <div className="relative order-2 lg:order-1">
-            <div className="absolute -inset-4 rounded-3xl bg-slate-100 hidden lg:block" />
-
-            <div className="relative overflow-hidden rounded-3xl">
-              <img
-                src="https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1767623965/IMG_2628_wzzrmi.jpg"
-                alt="Inside the barbershop in Kellyville"
-                className="h-[260px] sm:h-[300px] lg:h-[320px] w-full object-cover"
-                loading="lazy"
-              />
             </div>
           </div>
 

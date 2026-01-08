@@ -4,24 +4,30 @@ const ServicesHero = memo(function ServicesHero() {
   return (
     <section className="bg-white pt-16 pb-14">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* EYEBROW */}
         <span className="inline-block mb-5 rounded-full bg-orange-50 px-6 py-2 text-base font-semibold text-orange-600">
-         Men’s Haircuts & Beard Trims in Kellyville
+          Men’s Haircuts & Beard Trims in Kellyville
 
         </span>
 
         {/* H1 */}
         <h1
-          className="font-semibold leading-tight tracking-tight bg-clip-text text-transparent"
+          className="
+    font-semibold tracking-tight
+    leading-[1.15] sm:leading-tight
+    max-w-[18ch] sm:max-w-[22ch] lg:max-w-none
+    whitespace-normal lg:whitespace-nowrap
+    bg-clip-text text-transparent
+  "
           style={{
             backgroundImage: "linear-gradient(90deg, #0f172a, #E6C35C)",
-            fontSize: "clamp(2.6rem, 5vw, 3.6rem)",
+            fontSize: "clamp(2rem, 4vw, 3rem)",
           }}
         >
           Precision Haircuts & Expert Beard Barbers
-
         </h1>
+
 
         {/* SUPPORTING COPY */}
         <p className="mt-6 max-w-2xl text-base sm:text-lg text-gray-600 leading-relaxed">

@@ -47,8 +47,6 @@ const WhyChooseUs = memo(function WhyChooseUs() {
               Why Choose The Grooming Room Barbershop?
             </h2>
 
-            
-
             {/* IMAGE */}
             <div className="mt-8 overflow-hidden rounded-2xl bg-gray-100">
               <div className="aspect-video">
@@ -61,8 +59,8 @@ const WhyChooseUs = memo(function WhyChooseUs() {
               </div>
             </div>
 
-            {/* CTA */}
-            <div className="mt-auto pt-8 flex flex-col sm:flex-row gap-4">
+            {/* CTA — DESKTOP ONLY */}
+            <div className="mt-auto pt-8 hidden lg:flex flex-row gap-4">
               <a
                 href="tel:+61288831729"
                 className="
@@ -111,6 +109,38 @@ const WhyChooseUs = memo(function WhyChooseUs() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* CTA — MOBILE ONLY (below BOTH cards) */}
+          <div className="flex lg:hidden flex-col gap-4">
+            <a
+              href="tel:+61288831729"
+              className="
+                inline-flex items-center justify-center
+                rounded-full px-8 py-3
+                font-semibold text-white
+                bg-[#FF7A00] hover:bg-[#FF6A00]
+                transition shadow-sm
+              "
+            >
+              Call to Book
+            </a>
+
+            <a
+              href="https://maps.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+                inline-flex items-center justify-center
+                rounded-full px-8 py-3
+                font-semibold text-gray-900
+                border border-gray-300
+                hover:bg-gray-50
+                transition
+              "
+            >
+              Get Directions
+            </a>
           </div>
 
         </div>

@@ -25,7 +25,7 @@ function OurWork() {
         </div>
 
         {/* SERVICES GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-white">
           {/* MEN'S HAIRCUTS */}
           <Link
             to="/services"

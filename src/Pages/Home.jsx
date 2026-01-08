@@ -6,6 +6,7 @@ import LocationHours from '../components/landingpage/LocationHours';
 import InstagramSection from '../components/landingpage/InstagramSection';
 import WhyLocalsChooseUs from '../components/landingpage/WhyLocalsChooseUs';
 import AboutUs from '../components/landingpage/AboutUs';
+import Testimonials from '../components/landingpage/Testimonials';
 const Home = () => {
   return (
     <main>
@@ -16,6 +17,7 @@ const Home = () => {
       <WhyLocalsChooseUs />
       <WhyChooseUs />
       <InstagramSection />
+      <Testimonials/>
       <LocationHours />
     </main>
   );

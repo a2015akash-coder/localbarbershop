@@ -23,7 +23,7 @@ function LocationHours() {
   }, []);
 
   return (
-    <section className="bg-white py-12">
+    <section className="bg-gray-50 py-12">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 
         {/* HEADER */}

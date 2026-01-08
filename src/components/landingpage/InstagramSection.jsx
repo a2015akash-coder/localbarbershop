@@ -27,7 +27,7 @@ const INSTAGRAM_POSTS = [
 
 function InstagramSection() {
   return (
-   <section className="bg-slate-50 section-spacing">
+   <section className="bg-white section-spacing">
 
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 
