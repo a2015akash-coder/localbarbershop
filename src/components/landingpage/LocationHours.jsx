@@ -31,14 +31,14 @@ function LocationHours() {
           <h2
             className="font-semibold tracking-tight lg:whitespace-nowrap"
             style={{
-              fontSize: "clamp(2.4rem, 4.6vw, 3.4rem)",
+              fontSize: "clamp(2rem, 4vw, 2.8rem)",
               backgroundImage:
                 "linear-gradient(90deg, #0f172a 0%, #a88c3a 60%, #e6c35c 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
           >
-            Location, Map & Opening Hours
+            Visit Our Kellyville Barbershop
           </h2>
 
         </div>

@@ -33,6 +33,12 @@ const slugify = (text) =>
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-");
 
+const createUniqueSlug = (title) =>
+  `${slugify(title)}-${Date.now()}`;
+
+const sanitizeText = (text) =>
+  text.replace(/\s+/g, " ").trim();
+
 /* ================= PAGE ================= */
 export default function UploadBlogPage() {
   const [title, setTitle] = useState("");
@@ -40,53 +46,62 @@ export default function UploadBlogPage() {
   const [coverImage, setCoverImage] = useState("");
   const [category, setCategory] = useState("Hairstyle");
   const [status, setStatus] = useState("draft");
+  const [saving, setSaving] = useState(false);
 
   const [content, setContent] = useState([
     { type: "paragraph", text: "" },
   ]);
 
-  /* ---------- BLOCK HELPERS ---------- */
   const addBlock = (type) => {
-    if (type === "image") {
-      setContent([...content, { type: "image", src: "", alt: "" }]);
-    } else {
-      setContent([...content, { type, text: "" }]);
-    }
+    setContent((prev) => [
+      ...prev,
+      type === "image"
+        ? { type: "image", src: "", alt: "" }
+        : { type, text: "" },
+    ]);
   };
 
   const updateBlock = (index, key, value) => {
-    const updated = [...content];
-    updated[index][key] = value;
-    setContent(updated);
+    setContent((prev) => {
+      const copy = [...prev];
+      copy[index][key] = value;
+      return copy;
+    });
   };
 
   const removeBlock = (index) => {
-    setContent(content.filter((_, i) => i !== index));
+    setContent((prev) => prev.filter((_, i) => i !== index));
   };
 
-  /* ---------- SUBMIT ---------- */
   const submitBlog = async () => {
-    if (!title || !excerpt || content.length === 0) {
+    if (!title || !excerpt || content.length === 0 || saving) {
       alert("Please fill required fields");
       return;
     }
 
+    setSaving(true);
+
     try {
+      const sanitizedContent = content.map((block) => ({
+        ...block,
+        text: block.text ? sanitizeText(block.text) : "",
+        alt: block.alt ? sanitizeText(block.alt) : "",
+      }));
+
       await addDoc(collection(db, "blogs"), {
-        title,
-        slug: slugify(title),
-        excerpt,
+        title: sanitizeText(title),
+        slug: createUniqueSlug(title),
+        excerpt: sanitizeText(excerpt),
         coverImage,
         category,
         status,
-        content,
+        content: sanitizedContent,
         publishedAt: status === "published" ? serverTimestamp() : null,
         createdAt: serverTimestamp(),
       });
 
       alert("Blog saved successfully");
 
-      // Reset
       setTitle("");
       setExcerpt("");
       setCoverImage("");
@@ -96,18 +111,19 @@ export default function UploadBlogPage() {
     } catch (err) {
       console.error(err);
       alert("Error saving blog");
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
     <section className="bg-white section-spacing">
       <div className="max-w-3xl mx-auto px-4">
-
         <h1 className="text-3xl font-semibold text-gray-900">
           Upload Blog Post
         </h1>
 
-        {/* ================= BASIC INFO ================= */}
+        {/* BASIC INFO */}
         <div className="mt-8 space-y-5">
           <input
             type="text"
@@ -125,26 +141,21 @@ export default function UploadBlogPage() {
             onChange={(e) => setExcerpt(e.target.value)}
           />
 
-          {/* Cover Image Upload */}
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() =>
-                openCloudinaryWidget((url) => setCoverImage(url))
-              }
-              className="inline-flex rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50"
-            >
-              Upload Cover Image
-            </button>
+          <button
+            type="button"
+            onClick={() => openCloudinaryWidget(setCoverImage)}
+            className="inline-flex rounded-md border px-4 py-2 text-sm"
+          >
+            Upload Cover Image
+          </button>
 
-            {coverImage && (
-              <img
-                src={coverImage}
-                alt="Cover preview"
-                className="h-48 rounded-lg object-cover"
-              />
-            )}
-          </div>
+          {coverImage && (
+            <img
+              src={coverImage}
+              alt="Cover preview"
+              className="h-48 rounded-lg object-cover"
+            />
+          )}
 
           <div className="flex gap-4">
             <select
@@ -169,116 +180,85 @@ export default function UploadBlogPage() {
           </div>
         </div>
 
-        {/* ================= CONTENT BLOCKS ================= */}
-        <div className="mt-12">
-          <h2 className="text-xl font-semibold">Content</h2>
+        {/* CONTENT BLOCKS */}
+        <div className="mt-12 space-y-6">
+          {content.map((block, i) => (
+            <div key={i} className="border rounded-lg p-4 space-y-3">
+              <div className="flex justify-between">
+                <span className="text-sm font-medium">{block.type}</span>
+                <button
+                  onClick={() => removeBlock(i)}
+                  className="text-sm text-red-500"
+                >
+                  Remove
+                </button>
+              </div>
 
-          <div className="mt-4 space-y-6">
-            {content.map((block, i) => (
-              <div
-                key={i}
-                className="rounded-lg border p-4 space-y-3"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-600">
-                    {block.type.toUpperCase()}
-                  </span>
+              {block.type !== "image" && (
+                <textarea
+                  className="w-full border rounded px-3 py-2"
+                  rows={block.type === "paragraph" ? 4 : 2}
+                  value={block.text}
+                  onChange={(e) =>
+                    updateBlock(i, "text", e.target.value)
+                  }
+                />
+              )}
+
+              {block.type === "image" && (
+                <>
                   <button
-                    onClick={() => removeBlock(i)}
-                    className="text-sm text-red-500"
-                  >
-                    Remove
-                  </button>
-                </div>
-
-                {block.type === "paragraph" && (
-                  <textarea
-                    rows={4}
-                    className="w-full border rounded px-3 py-2"
-                    value={block.text}
-                    onChange={(e) =>
-                      updateBlock(i, "text", e.target.value)
+                    onClick={() =>
+                      openCloudinaryWidget((url) =>
+                        updateBlock(i, "src", url)
+                      )
                     }
-                  />
-                )}
+                    className="border px-4 py-2 rounded"
+                  >
+                    Upload Image
+                  </button>
 
-                {block.type === "heading" && (
+                  {block.src && (
+                    <img
+                      src={block.src}
+                      alt="Preview"
+                      className="h-40 rounded-lg object-cover"
+                    />
+                  )}
+
                   <input
                     type="text"
+                    placeholder="Alt text"
                     className="w-full border rounded px-3 py-2"
-                    value={block.text}
+                    value={block.alt}
                     onChange={(e) =>
-                      updateBlock(i, "text", e.target.value)
+                      updateBlock(i, "alt", e.target.value)
                     }
                   />
-                )}
-
-                {block.type === "image" && (
-                  <div className="space-y-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openCloudinaryWidget((url) =>
-                          updateBlock(i, "src", url)
-                        )
-                      }
-                      className="inline-flex rounded-md border px-4 py-2 text-sm hover:bg-gray-50"
-                    >
-                      Upload Image
-                    </button>
-
-                    {block.src && (
-                      <img
-                        src={block.src}
-                        alt="Preview"
-                        className="h-40 rounded-lg object-cover"
-                      />
-                    )}
-
-                    <input
-                      type="text"
-                      placeholder="Alt text"
-                      className="w-full border rounded px-3 py-2"
-                      value={block.alt}
-                      onChange={(e) =>
-                        updateBlock(i, "alt", e.target.value)
-                      }
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* ADD BLOCK BUTTONS */}
-          <div className="mt-6 flex gap-3 flex-wrap">
-            <button
-              onClick={() => addBlock("paragraph")}
-              className="px-4 py-2 rounded border"
-            >
-              + Paragraph
-            </button>
-            <button
-              onClick={() => addBlock("heading")}
-              className="px-4 py-2 rounded border"
-            >
-              + Heading
-            </button>
-            <button
-              onClick={() => addBlock("image")}
-              className="px-4 py-2 rounded border"
-            >
-              + Image
-            </button>
-          </div>
+                </>
+              )}
+            </div>
+          ))}
         </div>
 
-        {/* ================= SUBMIT ================= */}
+        <div className="mt-6 flex gap-3">
+          <button onClick={() => addBlock("paragraph")} className="border px-4 py-2">
+            + Paragraph
+          </button>
+          <button onClick={() => addBlock("heading")} className="border px-4 py-2">
+            + Heading
+          </button>
+          <button onClick={() => addBlock("image")} className="border px-4 py-2">
+            + Image
+          </button>
+        </div>
+
         <button
           onClick={submitBlog}
-          className="mt-12 rounded-full bg-orange-600 px-8 py-3 text-white font-semibold"
+          disabled={saving}
+          className="mt-12 rounded-full bg-orange-600 px-8 py-3 text-white font-semibold disabled:opacity-60"
         >
-          Save Blog
+          {saving ? "Saving…" : "Save Blog"}
         </button>
       </div>
     </section>

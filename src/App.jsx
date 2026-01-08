@@ -8,13 +8,17 @@ import ScrollToTop from "./utils/ScrollToTop.jsx";
 // EAGER (core landing experience)
 import Home from "./Pages/Home.jsx";
 import Contact from "./Pages/Contact.jsx";
-import Win from "./Pages/Win.jsx";
+import MonthlyDraw from "./Pages/MonthlyDraw.jsx";
 
 // LAZY (secondary / heavy pages)
 const Services = lazy(() => import("./Pages/Services.jsx"));
 const BlogListPage = lazy(() => import("./Pages/BlogListPage.jsx"));
 const BlogDetailsPage = lazy(() => import("./Pages/BlogDetailsPage.jsx"));
+
+// ADMIN
 const UploadBlogPage = lazy(() => import("./admin/UploadBlogPage.jsx"));
+const LoginPage = lazy(() => import("./components/Login/Login.jsx"));
+const AdminGuard = lazy(() => import("./utils/AdminGuard.jsx"));
 
 function App() {
   return (
@@ -22,7 +26,7 @@ function App() {
       <ScrollToTop />
       <Navbar />
 
-      {/* Page-level suspense (correct placement) */}
+      {/* Page-level suspense */}
       <Suspense
         fallback={
           <div className="py-24 text-center text-gray-500">
@@ -31,17 +35,28 @@ function App() {
         }
       >
         <Routes>
+          {/* PUBLIC */}
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/contest" element={<Win />} />
+          <Route path="/contest" element={<MonthlyDraw />} />
 
-          {/* BLOG */}
+          {/* BLOG (PUBLIC) */}
           <Route path="/blogs" element={<BlogListPage />} />
           <Route path="/blog/:slug" element={<BlogDetailsPage />} />
 
-          {/* ADMIN (lazy + isolated) */}
-          <Route path="/admin" element={<UploadBlogPage />} />
+          {/* AUTH */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* ADMIN (PROTECTED) */}
+          <Route
+            path="/admin"
+            element={
+              <AdminGuard>
+                <UploadBlogPage />
+              </AdminGuard>
+            }
+          />
         </Routes>
       </Suspense>
 

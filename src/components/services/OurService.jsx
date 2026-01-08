@@ -74,9 +74,7 @@ const OurService = memo(function OurService() {
 
         {/* HEADER */}
         <div className="max-w-2xl mb-16">
-          <span className="inline-block mb-4 rounded-full bg-orange-50 px-6 py-2 text-base font-semibold text-orange-600">
-            Our Services
-          </span>
+          
 
           <h2
             className="font-semibold leading-tight tracking-tight bg-clip-text text-transparent"
@@ -85,11 +83,12 @@ const OurService = memo(function OurService() {
               fontSize: "clamp(2.3rem, 4.8vw, 3.3rem)",
             }}
           >
-            Our Premium Grooming services
+            Our Services
           </h2>
 
           <p className="mt-5 text-base sm:text-lg text-gray-600">
-            Your local barbershop around Hills. Bring a reference or let our barbers tailor a look that suits you.
+            Your local barbershop around Hills. Bring a reference or let our
+            barbers tailor a look that suits you.
           </p>
         </div>
 
@@ -108,8 +107,8 @@ const OurService = memo(function OurService() {
                 overflow-hidden
               "
             >
-              {/* IMAGE */}
-              <div className="bg-gray-50 flex items-center justify-center">
+              {/* IMAGE — FIXED SIZE, CONSISTENT */}
+              <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
                 <img
                   src={style.image}
                   alt={style.title}
@@ -119,11 +118,11 @@ const OurService = memo(function OurService() {
                          (max-width: 1024px) 50vw,
                          33vw"
                   className="
-                    h-[260px] sm:h-[280px] lg:h-[300px]
-                    w-full
-                    object-contain
+                    absolute inset-0
+                    h-full w-full
+                    object-cover
                     transition-transform duration-500
-                    group-hover:scale-[1.03]
+                    group-hover:scale-[1.05]
                   "
                 />
               </div>
@@ -144,35 +143,7 @@ const OurService = memo(function OurService() {
           ))}
         </div>
 
-        {/* CTA */}
-        <div className="mt-20 flex flex-col sm:flex-row justify-center gap-4">
-          <a
-            href="tel:+61288831729"
-            className="
-              inline-flex items-center justify-center
-              rounded-full px-10 py-4
-              font-semibold text-white
-              bg-[#FF7A00] hover:bg-[#FF6A00]
-              transition shadow-md
-            "
-          >
-            Call to Book
-          </a>
-
-          <a
-            href="/services"
-            className="
-              inline-flex items-center justify-center
-              rounded-full px-10 py-4
-              font-semibold text-gray-900
-              border border-gray-300
-              hover:bg-gray-50
-              transition
-            "
-          >
-            View All Services
-          </a>
-        </div>
+       
 
       </div>
     </section>

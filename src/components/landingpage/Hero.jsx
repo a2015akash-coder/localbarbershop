@@ -74,14 +74,16 @@ function Hero() {
                 fontSize: "clamp(2rem, 5vw, 3.1rem)",
               }}
             >
-              Kellyville Barber for
+             Premium Barber Shop 
+
               <br />
-              Men & Kids
+             in Kellyville
             </h1>
 
             <p className="mt-4 text-gray-700 max-w-xl">
-              Beard trims, classic cuts and all men’s haircuts — fast service,
-              no appointment needed.
+              The Grooming Room Barber Shop provides men’s haircuts, skin fades, coloring and beard trimming services in Kellyville. Walk-ins are welcome.
+
+
             </p>
 
             <ul className="mt-5 space-y-2 list-disc list-inside">

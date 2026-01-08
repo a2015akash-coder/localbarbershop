@@ -5,26 +5,26 @@ const REASONS = [
   {
     Icon: Scissors,
     color: "bg-blue-50 text-blue-600",
-    title: "Skilled Barbers, Consistent Results",
-    text: "Experienced barbers who take the time to get your cut right — clean fades, sharp beards, and styles that suit you.",
+    title: "Skilled Barbers",
+    text: "We provide haircuts, beard trims, and grooming services for men and children in Kellyville and nearby areas.",
   },
   {
     Icon: Star,
     color: "bg-yellow-50 text-yellow-700",
-    title: "Walk In When It Suits You",
-    text: "No appointments needed. We keep things moving without rushing your cut or cutting corners.",
+    title: "Walk-Ins Welcome",
+    text: "No booking required. Walk in during opening hours for a haircut or beard trim.",
   },
   {
     Icon: ShieldCheck,
     color: "bg-orange-50 text-orange-600",
-    title: "Clean, Comfortable Environment",
-    text: "A hygienic, relaxed space where adults and kids alike can sit back and enjoy the experience.",
+    title: "Community Pricing",
+    text: "Special pricing is available for kids, seniors, and new customers",
   },
   {
     Icon: MapPin,
     color: "bg-blue-50 text-blue-600",
-    title: "Trusted by Kellyville Locals",
-    text: "Proudly serving the local community with loyal regulars and hundreds of positive reviews.",
+    title: "Convenient Location",
+    text: "Located at Kellyville Village Shopping Centre with free parking and nearby shops.",
   },
 ];
 
@@ -40,21 +40,18 @@ function WhyChooseUs() {
 
             {/* TEXT BLOCK */}
             <div>
-              <span className="inline-block rounded-full bg-orange-50 px-5 py-2 text-base font-semibold tracking-wide text-orange-600">
-                Why Choose Us
-              </span>
-
+             
               <h2
                 id="why-choose-us"
                 className="mt-6 font-semibold leading-tight tracking-tight"
                 style={{
-                  fontSize: "clamp(2.2rem, 4.6vw, 3.1rem)",
+                  fontSize: "clamp(2rem, 4vw, 2.8rem)",
                   backgroundImage: "linear-gradient(90deg, #0f172a, #E6C35C)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                A Local Barbershop You Can Rely On
+                Why Visit The Grooming Room Barber Shop
               </h2>
 
               <p className="mt-5 max-w-lg text-base sm:text-lg text-gray-600 leading-relaxed">

@@ -3,17 +3,17 @@ import { memo } from "react";
 const products = [
   {
     title: "Deluxe Grooming Set",
-    desc: "Complete grooming essentials for wash, shave, and style.",
+    desc: "Wash, shave, and style products for regular grooming use.",
     img: "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto:good,e_sharpen:60,dpr_auto,w_600/v1767540191/rs_w_720_h_541_cg_true_oystvt.webp",
   },
   {
     title: "Hair Styling",
-    desc: "Professional styling products with the right wax and hold.",
+    desc: "Hair styling wax, including Layrite Wax, for everyday hold and finish.",
     img: "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto:good,e_sharpen:60,dpr_auto,w_600/v1767540187/rs_w_720_h_541_cg_true_1_wdvier.webp",
   },
   {
     title: "Hair & Body",
-    desc: "Shampoo, conditioner, wax, and more for everyday care.",
+    desc: "Shampoos, conditioners, wax, and general grooming products.",
     img: "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto:good,e_sharpen:60,dpr_auto,w_600/v1767540183/rs_w_720_h_541_cg_true_m_doi2xa.webp",
   },
 ];
@@ -26,17 +26,16 @@ const ProductsSection = memo(function ProductsSection() {
 
         {/* Section Header */}
         <div className="max-w-2xl mb-16">
-          <span className="inline-block mb-3 rounded-full bg-orange-50 px-4 py-1 text-sm font-semibold text-orange-600">
-            Products
-          </span>
+         
 
           <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900">
-            Products We Use & Sell In-Store
+            Products Available In-Store
+
           </h2>
 
           <p className="mt-4 text-gray-600 text-base sm:text-lg">
-            Quality grooming products available at the shop —
-            just ask our barbers.
+           The following products are available at The Grooming Room Barber Shop.
+
           </p>
         </div>
 

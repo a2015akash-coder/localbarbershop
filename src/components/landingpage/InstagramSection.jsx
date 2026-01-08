@@ -35,14 +35,14 @@ function InstagramSection() {
        {/* HEADER */}
 <div className="mb-16 text-center">
   <h2 className="flex items-center justify-center gap-3 font-semibold tracking-tight text-gray-900"
-      style={{ fontSize: "clamp(2.2rem, 4.5vw, 3.1rem)" }}>
+      style={{ fontSize: "clamp(2rem, 4vw, 2.8rem)" }}>
     <Instagram size={36} className="text-[#E1306C]" />
-    See Our Latest On Instagram
+    Follow The Grooming Room on Instagram
   </h2>
 
   <p className="mt-5 max-w-xl mx-auto text-base sm:text-lg text-gray-600 leading-relaxed">
-    Fresh cuts, clean fades, and behind-the-chair moments —
-    straight from our barbershop.
+    View recent haircuts, beard trims, and shop updates.
+
   </p>
 </div>
 
