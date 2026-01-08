@@ -20,7 +20,7 @@ function OurWork() {
           </h2>
 
           <p className="mt-4 text-lg text-gray-600">
-            Professional barbering services delivered with precision, care, and consistency.
+            We aim to provide consistent barbering services so you leave well-groomed and comfortable. Our barbers work carefully and take the time to get the cut right.
           </p>
         </div>
 

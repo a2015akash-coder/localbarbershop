@@ -1,5 +1,6 @@
 import { memo, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
 
 const LOGO_URL =
   "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_176/v1767516621/logo_nzojy7.webp";
@@ -77,7 +78,7 @@ const Navbar = () => {
 
             {/* DESKTOP CTA */}
             <a
-              href="tel:+61288831729"
+              href={PHONE_LINK}
               className="
                 hidden md:inline-flex
                 items-center justify-center
@@ -87,12 +88,12 @@ const Navbar = () => {
                 transition-colors shadow-md
               "
             >
-              +61 2 8883 1729
+              {PHONE_NUMBER}
             </a>
 
             {/* MOBILE CTA */}
             <a
-              href="tel:+61288831729"
+              href={PHONE_LINK}
               className="
                 md:hidden
                 rounded-full px-5 py-2.5
@@ -100,7 +101,7 @@ const Navbar = () => {
                 bg-[#FF7A00]
               "
             >
-               +61 2 8883 1729
+               {PHONE_NUMBER}
             </a>
 
             {/* MOBILE MENU BUTTON */}

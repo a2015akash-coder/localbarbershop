@@ -2,9 +2,9 @@ import { memo } from "react";
 
 const FEATURES = [
   {
-    title: "200+ Google Reviews",
+    title: "4.4★ Rating · 200+ Reviews",
     subtitle:
-      "Rated highly by 200+ local customers. We deliver consistent results, professional barbering & welcoming experience",
+      "Rated 4.4 stars on Google by 200+ local customers. Known for consistent results, professional barbering, and a friendly experience.",
     image:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1767729569/Gemini_Generated_Image_5citxn5citxn5cit_wmnse9.png",
   },

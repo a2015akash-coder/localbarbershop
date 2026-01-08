@@ -5,6 +5,8 @@ import Navbar from "./components/landingpage/Navbar.jsx";
 import Footer from "./components/landingpage/Footer.jsx";
 import ScrollToTop from "./utils/ScrollToTop.jsx";
 
+import LoadingSpinner from "./components/LoadingSpinner.jsx";
+
 // EAGER (core landing experience)
 import Home from "./Pages/Home.jsx";
 import Contact from "./Pages/Contact.jsx";
@@ -27,13 +29,7 @@ function App() {
       <Navbar />
 
       {/* Page-level suspense */}
-      <Suspense
-        fallback={
-          <div className="py-24 text-center text-gray-500">
-            Loading…
-          </div>
-        }
-      >
+      <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           {/* PUBLIC */}
           <Route path="/" element={<Home />} />

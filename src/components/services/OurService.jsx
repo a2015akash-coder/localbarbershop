@@ -12,28 +12,28 @@ const cdn = (path) =>
 
 const STYLES = [
   {
-    title: "Classic Haircut",
+    title: "Men's Haircut",
     image: cdn("v1767627093/IMG_6223_ur5nnq.jpg"),
     description:
-      "Clean classic and modern haircuts tailored to your style and head shape.",
+      "Classic men’s haircuts finished neatly for work, weekends, and regular upkeep.",
   },
   {
     title: "Beard Trim & Shave",
     image: cdn("v1767626521/624158178e487621a677f49a_Parramatta-175_mexn85.jpg"),
     description:
-      "Sharp beard trims, clean shaves, and precise line-ups for a polished look.",
+      "Basic beard trims with clean lines, tidy edges, and simple shaping on request.",
   },
   {
     title: "Kids Haircut",
     image: cdn("v1767703082/kids_cskrcj.webp"),
     description:
-      "Friendly, patient haircuts for kids of all ages in a comfortable setting.",
+      "Children’s haircuts provided in a calm setting with patient service and simple styling.",
   },
   {
     title: "Senior Haircut",
     image: cdn("v1767514076/8922dcc0ec6ea25439b0c033ac1083a3_vovk97.png"),
     description:
-      "Classic, comfortable haircuts for seniors with extra care and attention.",
+      "Senior haircuts offered with straightforward service and attention to comfort and ease.",
   },
   {
     title: "Blowout Taper",
@@ -54,10 +54,10 @@ const STYLES = [
       "Custom hair designs and detailed line work for a bold, unique look.",
   },
   {
-    title: "Fade",
+    title: "Skin Fade",
     image: cdn("v1767703352/FADE_fal5m5.webp"),
     description:
-      "Blended, razor and zero fades delivered by experienced barbers.",
+      "Clean skin fades tailored to hair type with sharp finish and balanced shape",
   },
   {
     title: "Short Back & Sides",

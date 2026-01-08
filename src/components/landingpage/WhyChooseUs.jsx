@@ -45,7 +45,7 @@ function WhyChooseUs() {
                 id="why-choose-us"
                 className="mt-6 font-semibold leading-tight tracking-tight"
                 style={{
-                  fontSize: "clamp(2rem, 4vw, 2.8rem)",
+                   fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)",
                   backgroundImage: "linear-gradient(90deg, #0f172a, #E6C35C)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
