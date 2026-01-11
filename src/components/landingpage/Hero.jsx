@@ -81,7 +81,7 @@ function Hero() {
             </h1>
 
             <p className="mt-4 text-gray-700 max-w-xl">
-              The Grooming Room Barber Shop provides men’s haircuts, skin fades, coloring and beard trimming services in Kellyville. Walk-ins are welcome.
+              The Grooming Room Barber Shop provides men’s haircuts, skin fades, coloring and beard trimming services in Kellyville. 
 
 
             </p>
@@ -89,7 +89,7 @@ function Hero() {
             <ul className="mt-5 space-y-2 list-disc list-inside">
               <li>Walk-ins Welcome</li>
               <li>Free On-Site Parking</li>
-              <li>Men & Kids Friendly</li>
+              <li>Special deals available for Senior & Kids</li>
             </ul>
 
             {/* CTA */}

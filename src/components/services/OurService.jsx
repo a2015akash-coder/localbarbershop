@@ -61,7 +61,7 @@ const STYLES = [
   },
   {
     title: "Hair Colouring",
-    image: cdn("/v1767539574/2c9c75fc860545b486d7a863d5368359_vdrt0f.png"),
+    image: cdn("/v1768167322/WhatsApp_Image_2026-01-11_at_17.25.03_vi332u.jpg"),
     description:
       "Men’s hair colouring services for grey coverage, refresh, or full colour change.",
   },

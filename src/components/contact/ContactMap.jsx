@@ -9,9 +9,17 @@ const ContactMap = memo(function ContactMap() {
 
           {/* HEADER */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Find Us on the Map
-            </h3>
+           <h2
+            className="font-semibold tracking-tight"
+            style={{
+              fontSize: "clamp(2rem, 4vw, 2.8rem)",
+              backgroundImage: "linear-gradient(90deg, #0f172a, #E6C35C)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+           Find us on Map
+          </h2>
 
             <p className="mt-2 text-base text-gray-600">
               We’re conveniently located and easy to find.

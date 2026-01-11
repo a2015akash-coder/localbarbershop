@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { label: "Services", to: "/mens-haircuts-beard-trims-kellyville" },
   { label: "Blogs", to: "/blogs" },
   { label: "Contact", to: "/contact" },
-  { label: "Contest", to: "/contest" },
+  { label: "Win", to: "/contest" },
 ];
 
 const Navbar = () => {

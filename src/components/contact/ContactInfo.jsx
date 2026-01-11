@@ -1,98 +1,122 @@
 import { memo } from "react";
+import { Phone, Mail, MapPin, Clock } from "lucide-react";
+
+const Card = ({ icon: Icon, title, children }) => (
+  <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 flex flex-col justify-between">
+    <div>
+      <div className="flex items-center gap-3">
+        <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
+          <Icon size={18} />
+        </span>
+        <h3 className="font-semibold text-slate-900">{title}</h3>
+      </div>
+
+      <div className="mt-5 space-y-2 text-slate-700">
+        {children}
+      </div>
+    </div>
+  </div>
+);
 
 const ContactInfo = memo(function ContactInfo() {
   return (
-   <section className="bg-slate-50 section-spacing">
-
+    <section className="bg-slate-50 section-spacing">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Section Header */}
-        <div className="max-w-2xl mb-16">
-          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900">
-            Contact Details
-          </h2> 
-
-          <p className="mt-4 text-gray-600 text-base sm:text-lg">
-            Everything you need to know before visiting — location,
-            contact details, and opening hours.
+        {/* Header */}
+        <div className="max-w-2xl mb-14">
+         <h2
+            className="font-semibold tracking-tight"
+            style={{
+              fontSize: "clamp(2rem, 4vw, 2.8rem)",
+              backgroundImage: "linear-gradient(90deg, #0f172a, #E6C35C)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Our Contact Details
+          </h2>
+          <p className="mt-4 text-slate-600 text-base sm:text-lg">
+            Everything you need to know before visiting — location, contact details,
+            and opening hours.
           </p>
         </div>
 
-        {/* Bento Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Uniform Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-          {/* Address (Wide) */}
-          <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-gray-50 p-6">
-            <h3 className="text-sm font-semibold text-gray-900">
-              Address
-            </h3>
+          {/* Phone */}
+          <Card icon={Phone} title="Phone">
+            <a
+              href="tel:+61288831729"
+              className="text-lg font-semibold text-slate-900 hover:text-orange-600 transition"
+            >
+              (02) 8883 1729
+            </a>
+            <p className="text-sm text-slate-500">
+              Call us for quick questions or availability.
+            </p>
+          </Card>
 
-            <div className="mt-2 h-1 w-10 bg-orange-500 rounded-full" />
+          {/* Email */}
+          <Card icon={Mail} title="Email">
+            <a
+              href="mailto:groomingroombarber@gmail.com"
+              className="
+    font-medium
+    text-orange-600
+    underline
+    underline-offset-4
+    break-all
+    transition
+    hover:text-orange-700
+  "
+            >
+              groomingroombarber@gmail.com
+            </a>
 
-            <p className="mt-4 text-gray-700 leading-relaxed">
+            <p className="text-sm text-slate-500">
+              For general enquiries only.
+            </p>
+          </Card>
+
+          {/* Opening Hours */}
+          <Card icon={Clock} title="Opening Hours">
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span>Mon – Wed, Fri</span>
+                <span className="font-medium">09:00 – 17:30</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Thursday</span>
+                <span className="font-medium">09:00 – 21:00</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Saturday</span>
+                <span className="font-medium">09:00 – 17:00</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Sunday</span>
+                <span className="font-medium">09:00 – 16:00</span>
+              </div>
+            </div>
+
+            <p className="pt-2 text-sm text-slate-500">
+              Walk-ins welcome during business hours.
+            </p>
+          </Card>
+
+          {/* Address */}
+          <Card icon={MapPin} title="Address">
+            <p className="leading-relaxed">
               90 Wrights Road,<br />
               Kellyville, New South Wales 2155,<br />
               Australia
             </p>
-
-            <p className="mt-3 text-sm text-gray-500">
+            <p className="text-sm text-slate-500">
               Easy access with nearby parking available.
             </p>
-          </div>
-
-          {/* Phone */}
-          <div className="rounded-xl border border-gray-200 bg-white p-6">
-            <h3 className="text-sm font-semibold text-gray-900">
-              Phone
-            </h3>
-
-            <div className="mt-2 h-1 w-10 bg-orange-500 rounded-full" />
-
-            <p className="mt-4 text-gray-700 text-lg font-medium">
-              (02) 8883 1729
-            </p>
-
-            <p className="mt-2 text-sm text-gray-500">
-              Call us for quick questions or availability.
-            </p>
-          </div>
-
-          {/* Email */}
-          <div className="rounded-xl border border-gray-200 bg-white p-6">
-            <h3 className="text-sm font-semibold text-gray-900">
-              Email
-            </h3>
-
-            <div className="mt-2 h-1 w-10 bg-orange-500 rounded-full" />
-
-            <p className="mt-4 text-gray-700 break-all">
-              groomingroombarber@gmail.com
-            </p>
-
-            <p className="mt-2 text-sm text-gray-500">
-              For general enquiries only.
-            </p>
-          </div>
-
-          {/* Opening Hours (Tall) */}
-          <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-gray-50 p-6">
-            <h3 className="text-sm font-semibold text-gray-900">
-              Opening Hours
-            </h3>
-
-            <div className="mt-2 h-1 w-10 bg-orange-500 rounded-full" />
-
-            <ul className="mt-4 space-y-2 text-gray-700">
-              <li>Mon – Wed,Fri: 09:00 – 17:30</li>
-               <li>Thursday: 09:00 – 21:00</li>
-              <li>Saturday: 09:00 – 17:00</li>
-              <li>Sunday: 09:00 – 16:00</li>
-            </ul>   
-
-            <p className="mt-3 text-sm text-gray-500">
-              Walk-ins welcome during business hours.
-            </p>
-          </div>
+          </Card>
 
         </div>
       </div>

@@ -61,7 +61,7 @@ function OurWork() {
           >
             <div className="relative h-48 overflow-hidden">
               <img
-                src="https://res.cloudinary.com/dvtbbuxon/image/upload/v1767626521/624158178e487621a677f49a_Parramatta-175_mexn85.jpg"
+                src="https://res.cloudinary.com/dvtbbuxon/image/upload/v1768167106/WhatsApp_Image_2026-01-11_at_17.25.03_2_f88hyp.jpg"
                 alt="Beard Trims and Shaping"
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                 loading="lazy"

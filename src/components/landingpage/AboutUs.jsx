@@ -53,9 +53,7 @@ function AboutUs() {
             <div className="mt-7">
               <Link
                 to="/contact"
-                className="inline-flex items-center justify-center rounded-full
-                           border border-orange-300 px-8 py-3 font-semibold
-                           text-orange-600 hover:bg-orange-50 transition"
+               className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold hover:opacity-90 transition"
               >
                 Get in Touch
               </Link>

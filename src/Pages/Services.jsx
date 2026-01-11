@@ -5,7 +5,7 @@ import FAQs from "../components/services/FAQs";
 import QuoteBanner from "../components/services/QuoteCard.jsx";
 import OurService from "../components/services/OurService.jsx";
 import ServicesHero from "../components/services/ServicesHero.jsx";
-import WhyChooseUs from "../components/services/WhyChooseUs.jsx";
+// import WhyChooseUs from "../components/services/WhyChooseUs.jsx";
 
 import SEO from "../components/SEO";
 import { seoPages } from "../seo/pages";
@@ -20,7 +20,7 @@ const Services = () => {
       <ServicesHero />
       <OurService />
       <ProductsSection />
-      <WhyChooseUs />
+      {/* <WhyChooseUs /> */}
       <QuoteBanner />
       <FAQs />
     </main>

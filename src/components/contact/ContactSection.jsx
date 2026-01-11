@@ -2,14 +2,23 @@ import { memo } from "react";
 
 function ContactSection() {
   return (
-    <section className="bg-white section-spacing">
+    <section className="bg-white pt-20 pb-24">
+
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 
         {/* HEADER */}
-        <div className="max-w-2xl mb-16">
-          <h2 className="text-3xl sm:text-4xl font-semibold text-gray-900">
-            Reach Us Today
-          </h2>
+       <div className="max-w-2xl mb-12">
+
+            <h1
+              className=" font-bold leading-tight bg-clip-text text-transparent"
+              style={{
+                backgroundImage: "linear-gradient(90deg, #000000, #E6C35C)",
+                fontSize: "clamp(2rem, 5vw, 3.1rem)",
+              }}
+            >
+             Reach Us Today
+
+            </h1>
 
           <p className="mt-4 text-base sm:text-lg text-gray-600">
             Whether you’re planning a visit or have a quick question,

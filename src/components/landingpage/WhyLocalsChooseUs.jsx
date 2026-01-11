@@ -6,7 +6,7 @@ const FEATURES = [
     subtitle:
       "Rated 4.4 stars on Google by 200+ local customers. Known for consistent results, professional barbering, and a friendly experience.",
     image:
-      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1767729569/Gemini_Generated_Image_5citxn5citxn5cit_wmnse9.png",
+      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1768167196/WhatsApp_Image_2026-01-11_at_17.25.04_tmugsj.jpg",
   },
   {
     title: "Experienced & Professional",
