@@ -3,12 +3,12 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAbIR3eBsJnG9QOhROdwiThK4JeAw7MLJw",
-  authDomain: "barbershop-e57a8.firebaseapp.com",
-  projectId: "barbershop-e57a8",
-  storageBucket: "barbershop-e57a8.firebasestorage.app",
-  messagingSenderId: "893284898174",
-  appId: "1:893284898174:web:0776274172924acac60f2f",
+  apiKey: "AIzaSyAcbyXUonl5oy9q6Vi2hi8i7eOdjWx165U",
+  authDomain: "thegroomingroom-ee47a.firebaseapp.com",
+  projectId: "thegroomingroom-ee47a",
+  storageBucket: "thegroomingroom-ee47a.firebasestorage.app",
+  messagingSenderId: "72313877032",
+  appId: "1:72313877032:web:516c49fb9632d0524abb1d"
 };
 
 const app = initializeApp(firebaseConfig);
