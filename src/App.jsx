@@ -33,7 +33,11 @@ function App() {
         <Routes>
           {/* PUBLIC */}
           <Route path="/" element={<Home />} />
-          <Route path="/services" element={<Services />} />
+          <Route
+            path="/mens-haircuts-beard-trims-kellyville"
+            element={<Services />}
+          />
+
           <Route path="/contact" element={<Contact />} />
           <Route path="/contest" element={<MonthlyDraw />} />
 

@@ -7,12 +7,12 @@ const products = [
     img: "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto:good,e_sharpen:60,dpr_auto,w_600/v1767540191/rs_w_720_h_541_cg_true_oystvt.webp",
   },
   {
-    title: "Hair Styling",
+    title: "Hair Styling Products",
     desc: "Hair styling wax, including Layrite Wax, for everyday hold and finish.",
     img: "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto:good,e_sharpen:60,dpr_auto,w_600/v1767540187/rs_w_720_h_541_cg_true_1_wdvier.webp",
   },
   {
-    title: "Hair & Body",
+    title: "Hair & Body Products",
     desc: "Shampoos, conditioners, wax, and general grooming products.",
     img: "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto:good,e_sharpen:60,dpr_auto,w_600/v1767540183/rs_w_720_h_541_cg_true_m_doi2xa.webp",
   },

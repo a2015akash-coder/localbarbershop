@@ -5,7 +5,14 @@ import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
 const LOGO_URL =
   "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_176/v1767516621/logo_nzojy7.webp";
 
-const NAV_ITEMS = ["Home", "Services", "Blogs", "Contact", "Contest"];
+/* Explicit label → route mapping (SEO-safe) */
+const NAV_ITEMS = [
+  { label: "Home", to: "/" },
+  { label: "Services", to: "/mens-haircuts-beard-trims-kellyville" },
+  { label: "Blogs", to: "/blogs" },
+  { label: "Contact", to: "/contact" },
+  { label: "Contest", to: "/contest" },
+];
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -50,13 +57,13 @@ const Navbar = () => {
             />
           </Link>
 
-          {/* CENTER NAV */}
+          {/* CENTER NAV (DESKTOP) */}
           <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex">
             <ul className="flex items-center gap-12 text-[15px] font-medium text-gray-300">
               {NAV_ITEMS.map((item) => (
-                <li key={item}>
+                <li key={item.label}>
                   <Link
-                    to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                    to={item.to}
                     className="
                       relative transition-colors
                       hover:text-white
@@ -66,7 +73,7 @@ const Navbar = () => {
                       hover:after:w-full
                     "
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -101,7 +108,7 @@ const Navbar = () => {
                 bg-[#FF7A00]
               "
             >
-               {PHONE_NUMBER}
+              {PHONE_NUMBER}
             </a>
 
             {/* MOBILE MENU BUTTON */}
@@ -142,13 +149,13 @@ const Navbar = () => {
           <div className="md:hidden border-t border-white/10 py-6">
             <ul className="flex flex-col gap-5 text-[15px] font-medium text-gray-300">
               {NAV_ITEMS.map((item) => (
-                <li key={item}>
+                <li key={item.label}>
                   <Link
-                    to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                    to={item.to}
                     onClick={() => setOpen(false)}
                     className="block px-2 py-2 hover:text-white transition"
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}

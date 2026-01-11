@@ -18,13 +18,13 @@ const STYLES = [
       "Classic men’s haircuts finished neatly for work, weekends, and regular upkeep.",
   },
   {
-    title: "Beard Trim & Shave",
+    title: "Beard Trims",
     image: cdn("v1767626521/624158178e487621a677f49a_Parramatta-175_mexn85.jpg"),
     description:
       "Basic beard trims with clean lines, tidy edges, and simple shaping on request.",
   },
   {
-    title: "Kids Haircut",
+    title: "Kids’ Haircuts (Ages 0–12)",
     image: cdn("v1767703082/kids_cskrcj.webp"),
     description:
       "Children’s haircuts provided in a calm setting with patient service and simple styling.",
@@ -48,22 +48,22 @@ const STYLES = [
       "Clean taper fades finished with precision and attention to detail.",
   },
   {
-    title: "Hair Design",
+    title: "Fade & Hair Design Services",
     image: cdn("v1767626526/25493682304_cipoxh.png"),
     description:
-      "Custom hair designs and detailed line work for a bold, unique look.",
+      "Fade variations and hair designs suited to customers wanting sharper detail and defined finishes.",
   },
   {
-    title: "Skin Fade",
+    title: "Skin Fades",
     image: cdn("v1767703352/FADE_fal5m5.webp"),
     description:
       "Clean skin fades tailored to hair type with sharp finish and balanced shape",
   },
   {
-    title: "Short Back & Sides",
-    image: cdn("v1767703404/short_ihfvkf.webp"),
+    title: "Hair Colouring",
+    image: cdn("/v1767539574/2c9c75fc860545b486d7a863d5368359_vdrt0f.png"),
     description:
-      "Clean short back and sides with sharp edges and natural finish.",
+      "Men’s hair colouring services for grey coverage, refresh, or full colour change.",
   },
 ];
 

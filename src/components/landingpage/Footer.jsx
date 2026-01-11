@@ -1,5 +1,8 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
+import { FaInstagram, FaFacebookF, FaYoutube } from "react-icons/fa";
+import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
+
 
 const LOGO_URL =
   "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_176/v1767516621/logo_nzojy7.webp";
@@ -28,6 +31,62 @@ function Footer() {
               Professional barber services delivering clean cuts, sharp details,
               and consistent results — trusted by local clients.
             </p>
+
+            {/* SOCIAL ICONS */}
+           {/* SOCIAL ICONS */}
+<div className="mt-5 flex items-center gap-4">
+  <a
+    href="https://www.instagram.com/kellyvillebarber/"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Instagram"
+    className="
+      flex h-9 w-9 items-center justify-center
+      rounded-full
+      bg-white/5
+      text-gray-300
+      hover:bg-orange-600 hover:text-white
+      transition-colors
+    "
+  >
+    <FaInstagram className="h-4 w-4" />
+  </a>
+
+  <a
+    href="https://www.facebook.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Facebook"
+    className="
+      flex h-9 w-9 items-center justify-center
+      rounded-full
+      bg-white/5
+      text-gray-300
+      hover:bg-orange-600 hover:text-white
+      transition-colors
+    "
+  >
+    <FaFacebookF className="h-4 w-4" />
+  </a>
+
+  <a
+    href="https://www.youtube.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="YouTube"
+    className="
+      flex h-9 w-9 items-center justify-center
+      rounded-full
+      bg-white/5
+      text-gray-300
+      hover:bg-orange-600 hover:text-white
+      transition-colors
+    "
+  >
+    <FaYoutube className="h-4 w-4" />
+  </a>
+</div>
+
           </div>
 
           {/* NAVIGATION */}
@@ -83,14 +142,13 @@ function Footer() {
                 shadow-md
               "
             >
-              Call Now
+               {PHONE_NUMBER}
             </a>
           </div>
         </div>
 
         {/* DIVIDER */}
         <div className="mt-14 border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-
           <p className="text-xs text-gray-400">
             © {new Date().getFullYear()} The Grooming Room. All rights reserved.
           </p>

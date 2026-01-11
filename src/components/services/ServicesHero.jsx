@@ -31,8 +31,10 @@ const ServicesHero = memo(function ServicesHero() {
 
         {/* SUPPORTING COPY */}
         <p className="mt-6 max-w-2xl text-base sm:text-lg text-gray-600 leading-relaxed">
-          Clean fades, sharp lines, and professional grooming services delivered by
-          experienced barbers. Walk-ins welcome at The Grooming Room Barbershop.
+          Clean fades. Sharp lines. No rushed appointments.
+At The Grooming Room Barbershop, we provide men’s haircuts, skin fades, taper fades, and hair colouring services in Kellyville and the Hills District.
+
+
         </p>
 
         {/* TRUST SIGNAL ROW */}

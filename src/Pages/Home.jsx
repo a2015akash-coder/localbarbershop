@@ -7,10 +7,12 @@ import InstagramSection from '../components/landingpage/InstagramSection';
 import WhyLocalsChooseUs from '../components/landingpage/WhyLocalsChooseUs';
 import AboutUs from '../components/landingpage/AboutUs';
 import Testimonials from '../components/landingpage/Testimonials';
+import { seoPages } from '../seo/pages';
+import SEO from '../components/SEO';
 const Home = () => {
   return (
     <main>
-
+<SEO {...seoPages.home} />
       <Hero />
       <AboutUs />
       <OurWork />
