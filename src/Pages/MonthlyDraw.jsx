@@ -3,16 +3,19 @@ import DrawHero from "../components/monthlyDraw/DrawHero";
 import DrawDetails from "../components/monthlyDraw/DrawDetails";
 // import DrawWhyUs from "../components/monthlyDraw/DrawWhyUs";
 import DrawEntry from "../components/monthlyDraw/DrawEntry";
+import MonthlyLuckyDrawSection from "../components/monthlyDraw/MonthlyLuckyDrawSection";
 
 
 
 const MonthlyDraw = memo(function MonthlyDraw() {
   return (
     <main className="bg-white">
-     <DrawHero/>
-     <DrawDetails/>
-     {/* <DrawWhyUs/> */}
-     <DrawEntry/>
+     {/* <DrawHero/> */}
+      <MonthlyLuckyDrawSection/>
+     <DrawDetails/> 
+    
+     {/* <DrawWhyUs/>
+     <DrawEntry/> */}
     </main>
   );
 });
