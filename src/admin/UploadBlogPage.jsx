@@ -16,10 +16,9 @@ const openCloudinaryWidget = (onUpload) => {
       uploadPreset: "blog_uploads",
       multiple: false,
       folder: "blog-images",
-      resourceType: "image",
     },
-    (error, result) => {
-      if (!error && result.event === "success") {
+    (_, result) => {
+      if (result?.event === "success") {
         onUpload(result.info.secure_url);
       }
     }
@@ -35,8 +34,22 @@ const slugify = (text) =>
     .replace(/\s+/g, "-");
 
 const createUniqueSlug = (title) => `${slugify(title)}-${Date.now()}`;
-
 const sanitizeText = (text) => text.replace(/\s+/g, " ").trim();
+
+/* ---------------- CARD ---------------- */
+function Card({ title, children, action }) {
+  return (
+    <div className="rounded-2xl bg-white p-6 shadow-sm">
+      {(title || action) && (
+        <div className="mb-5 flex items-center justify-between">
+          {title && <h3 className="font-semibold text-gray-900">{title}</h3>}
+          {action}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
 
 /* ================= PAGE ================= */
 export default function UploadBlogPage() {
@@ -48,8 +61,6 @@ export default function UploadBlogPage() {
   const [category, setCategory] = useState("Hairstyle");
   const [status, setStatus] = useState("draft");
   const [saving, setSaving] = useState(false);
-
-  // NEW: store last created blog id so admin can jump to edit
   const [lastCreatedId, setLastCreatedId] = useState(null);
 
   const [content, setContent] = useState([{ type: "paragraph", text: "" }]);
@@ -57,37 +68,29 @@ export default function UploadBlogPage() {
   const addBlock = (type) => {
     setContent((prev) => [
       ...prev,
-      type === "image" ? { type: "image", src: "", alt: "" } : { type, text: "" },
+      type === "image"
+        ? { type: "image", src: "", alt: "" }
+        : { type, text: "" },
     ]);
   };
 
-  const updateBlock = (index, key, value) => {
+  const updateBlock = (i, key, value) => {
     setContent((prev) => {
       const copy = [...prev];
-      copy[index][key] = value;
+      copy[i][key] = value;
       return copy;
     });
   };
 
-  const removeBlock = (index) => {
-    setContent((prev) => prev.filter((_, i) => i !== index));
+  const removeBlock = (i) => {
+    setContent((prev) => prev.filter((_, idx) => idx !== i));
   };
 
   const submitBlog = async () => {
-    if (!title || !excerpt || content.length === 0 || saving) {
-      alert("Please fill required fields");
-      return;
-    }
-
+    if (!title || !excerpt || saving) return alert("Missing required fields");
     setSaving(true);
 
     try {
-      const sanitizedContent = content.map((block) => ({
-        ...block,
-        text: block.text ? sanitizeText(block.text) : "",
-        alt: block.alt ? sanitizeText(block.alt) : "",
-      }));
-
       const docRef = await addDoc(collection(db, "blogs"), {
         title: sanitizeText(title),
         slug: createUniqueSlug(title),
@@ -95,67 +98,52 @@ export default function UploadBlogPage() {
         coverImage,
         category,
         status,
-        content: sanitizedContent,
-        publishedAt: status === "published" ? serverTimestamp() : null,
+        content: content.map((b) => ({
+          ...b,
+          text: b.text ? sanitizeText(b.text) : "",
+          alt: b.alt ? sanitizeText(b.alt) : "",
+        })),
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(), // ✅ useful for admin sorting later
+        updatedAt: serverTimestamp(),
+        publishedAt: status === "published" ? serverTimestamp() : null,
       });
 
-      // store id for edit navigation
       setLastCreatedId(docRef.id);
-
-      alert("Blog saved successfully");
-
-      // Option A (recommended): redirect to dashboard automatically
       navigate("/admin");
-
-      // If you do NOT want auto redirect and want to stay on page:
-      // comment the navigate("/admin") and keep reset below
-
-      // Reset form (optional if redirecting anyway)
-      setTitle("");
-      setExcerpt("");
-      setCoverImage("");
-      setCategory("Hairstyle");
-      setStatus("draft");
-      setContent([{ type: "paragraph", text: "" }]);
-    } catch (err) {
-      console.error(err);
-      alert("Error saving blog");
+    } catch {
+      alert("Failed to save blog");
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <section className="bg-white section-spacing">
-      <div className="max-w-3xl mx-auto px-4">
-        {/* TOP BAR */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-3xl font-semibold text-gray-900">
-            Upload Blog Post
-          </h1>
+    <section className="bg-gray-50 py-16">
+      <div className="mx-auto max-w-screen-lg px-4 space-y-8">
 
-          <div className="flex gap-3 flex-wrap">
-            {/* Dashboard navigation */}
+        {/* HEADER */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-semibold text-gray-900">
+              Upload Blog Post
+            </h1>
+            <p className="mt-1 text-sm text-gray-600">
+              Create and publish a new article.
+            </p>
+          </div>
+
+          <div className="flex gap-3">
             <Link
               to="/admin"
-              className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50"
+              className="rounded-xl border px-4 py-2 text-sm hover:bg-gray-100"
             >
               ← Dashboard
             </Link>
 
-            {/* Edit last created blog */}
             <button
-              type="button"
               disabled={!lastCreatedId}
               onClick={() => navigate(`/admin/blogs/${lastCreatedId}/edit`)}
-              className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              title={
-                lastCreatedId
-                  ? "Edit the blog you just created"
-                  : "Create a blog first to enable edit"
-              }
+              className="rounded-xl border px-4 py-2 text-sm hover:bg-gray-100 disabled:opacity-50"
             >
               Edit Last Created
             </button>
@@ -163,44 +151,19 @@ export default function UploadBlogPage() {
         </div>
 
         {/* BASIC INFO */}
-        <div className="mt-8 space-y-5">
-          <input
-            type="text"
-            placeholder="Blog title"
-            className="w-full rounded-lg border px-4 py-3"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-
-          <textarea
-            placeholder="Short excerpt"
-            className="w-full rounded-lg border px-4 py-3"
-            rows={3}
-            value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-          />
-
-          <button
-            type="button"
-            onClick={() => openCloudinaryWidget(setCoverImage)}
-            className="inline-flex rounded-md border px-4 py-2 text-sm"
-          >
-            Upload Cover Image
-          </button>
-
-          {coverImage && (
-            <img
-              src={coverImage}
-              alt="Cover preview"
-              className="h-48 rounded-lg object-cover"
+        <Card title="Post details">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <input
+              className="rounded-xl border px-4 py-3"
+              placeholder="Blog title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
-          )}
 
-          <div className="flex gap-4">
             <select
+              className="rounded-xl border px-4 py-3"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="rounded-lg border px-4 py-2"
             >
               <option>Hairstyle</option>
               <option>Beard</option>
@@ -208,106 +171,139 @@ export default function UploadBlogPage() {
               <option>Grooming</option>
             </select>
 
+            <textarea
+              rows={3}
+              className="md:col-span-2 rounded-xl border px-4 py-3"
+              placeholder="Short excerpt (used in listings & SEO)"
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+            />
+
             <select
+              className="rounded-xl border px-4 py-3"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="rounded-lg border px-4 py-2"
             >
               <option value="draft">Draft</option>
               <option value="published">Published</option>
             </select>
           </div>
-        </div>
+        </Card>
 
-        {/* CONTENT BLOCKS */}
-        <div className="mt-12 space-y-6">
-          {content.map((block, i) => (
-            <div key={i} className="border rounded-lg p-4 space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm font-medium">{block.type}</span>
-                <button
-                  type="button"
-                  onClick={() => removeBlock(i)}
-                  className="text-sm text-red-500"
-                >
-                  Remove
-                </button>
-              </div>
-
-              {block.type !== "image" && (
-                <textarea
-                  className="w-full border rounded px-3 py-2"
-                  rows={block.type === "paragraph" ? 4 : 2}
-                  value={block.text}
-                  onChange={(e) => updateBlock(i, "text", e.target.value)}
-                />
-              )}
-
-              {block.type === "image" && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openCloudinaryWidget((url) => updateBlock(i, "src", url))
-                    }
-                    className="border px-4 py-2 rounded"
-                  >
-                    Upload Image
-                  </button>
-
-                  {block.src && (
-                    <img
-                      src={block.src}
-                      alt="Preview"
-                      className="h-40 rounded-lg object-cover"
-                    />
-                  )}
-
-                  <input
-                    type="text"
-                    placeholder="Alt text"
-                    className="w-full border rounded px-3 py-2"
-                    value={block.alt || ""}
-                    onChange={(e) => updateBlock(i, "alt", e.target.value)}
-                  />
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-6 flex gap-3">
-          <button
-            type="button"
-            onClick={() => addBlock("paragraph")}
-            className="border px-4 py-2"
-          >
-            + Paragraph
-          </button>
-          <button
-            type="button"
-            onClick={() => addBlock("heading")}
-            className="border px-4 py-2"
-          >
-            + Heading
-          </button>
-          <button
-            type="button"
-            onClick={() => addBlock("image")}
-            className="border px-4 py-2"
-          >
-            + Image
-          </button>
-        </div>
-
-        <button
-          type="button"
-          onClick={submitBlog}
-          disabled={saving}
-          className="mt-12 rounded-full bg-orange-600 px-8 py-3 text-white font-semibold disabled:opacity-60"
+        {/* COVER IMAGE */}
+        <Card
+          title="Cover image"
+          action={
+            <button
+              onClick={() => openCloudinaryWidget(setCoverImage)}
+              className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
+            >
+              Upload image
+            </button>
+          }
         >
-          {saving ? "Saving…" : "Save Blog"}
-        </button>
+          {coverImage ? (
+            <img
+              src={coverImage}
+              alt="Cover preview"
+              className="h-56 w-full rounded-xl object-cover"
+            />
+          ) : (
+            <p className="text-sm text-gray-500">
+              Recommended: landscape image, ~1600×900
+            </p>
+          )}
+        </Card>
+
+        {/* CONTENT */}
+        <Card title="Content">
+          <div className="space-y-6">
+            {content.map((block, i) => (
+              <div
+                key={i}
+                className="rounded-xl bg-gray-50 p-5 space-y-4"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs uppercase font-medium text-gray-500">
+                    {block.type}
+                  </span>
+                  <button
+                    onClick={() => removeBlock(i)}
+                    className="text-sm text-red-600 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                {block.type !== "image" && (
+                  <textarea
+                    rows={block.type === "paragraph" ? 4 : 2}
+                    className="w-full rounded-lg border px-3 py-2"
+                    value={block.text}
+                    onChange={(e) =>
+                      updateBlock(i, "text", e.target.value)
+                    }
+                  />
+                )}
+
+                {block.type === "image" && (
+                  <>
+                    <button
+                      onClick={() =>
+                        openCloudinaryWidget((url) =>
+                          updateBlock(i, "src", url)
+                        )
+                      }
+                      className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
+                    >
+                      Upload image
+                    </button>
+
+                    {block.src && (
+                      <img
+                        src={block.src}
+                        alt=""
+                        className="h-40 rounded-lg object-cover"
+                      />
+                    )}
+
+                    <input
+                      className="w-full rounded-lg border px-3 py-2"
+                      placeholder="Alt text"
+                      value={block.alt || ""}
+                      onChange={(e) =>
+                        updateBlock(i, "alt", e.target.value)
+                      }
+                    />
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button onClick={() => addBlock("paragraph")} className="rounded-lg border px-4 py-2">
+              + Paragraph
+            </button>
+            <button onClick={() => addBlock("heading")} className="rounded-lg border px-4 py-2">
+              + Heading
+            </button>
+            <button onClick={() => addBlock("image")} className="rounded-lg border px-4 py-2">
+              + Image
+            </button>
+          </div>
+        </Card>
+
+        {/* SAVE */}
+        <div className="flex justify-end">
+          <button
+            onClick={submitBlog}
+            disabled={saving}
+            className="rounded-full bg-orange-600 px-10 py-4 font-semibold text-white hover:bg-orange-700 disabled:opacity-60"
+          >
+            {saving ? "Saving…" : "Save Blog"}
+          </button>
+        </div>
       </div>
     </section>
   );
