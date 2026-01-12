@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -33,14 +34,14 @@ const slugify = (text) =>
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-");
 
-const createUniqueSlug = (title) =>
-  `${slugify(title)}-${Date.now()}`;
+const createUniqueSlug = (title) => `${slugify(title)}-${Date.now()}`;
 
-const sanitizeText = (text) =>
-  text.replace(/\s+/g, " ").trim();
+const sanitizeText = (text) => text.replace(/\s+/g, " ").trim();
 
 /* ================= PAGE ================= */
 export default function UploadBlogPage() {
+  const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [coverImage, setCoverImage] = useState("");
@@ -48,16 +49,15 @@ export default function UploadBlogPage() {
   const [status, setStatus] = useState("draft");
   const [saving, setSaving] = useState(false);
 
-  const [content, setContent] = useState([
-    { type: "paragraph", text: "" },
-  ]);
+  // NEW: store last created blog id so admin can jump to edit
+  const [lastCreatedId, setLastCreatedId] = useState(null);
+
+  const [content, setContent] = useState([{ type: "paragraph", text: "" }]);
 
   const addBlock = (type) => {
     setContent((prev) => [
       ...prev,
-      type === "image"
-        ? { type: "image", src: "", alt: "" }
-        : { type, text: "" },
+      type === "image" ? { type: "image", src: "", alt: "" } : { type, text: "" },
     ]);
   };
 
@@ -88,7 +88,7 @@ export default function UploadBlogPage() {
         alt: block.alt ? sanitizeText(block.alt) : "",
       }));
 
-      await addDoc(collection(db, "blogs"), {
+      const docRef = await addDoc(collection(db, "blogs"), {
         title: sanitizeText(title),
         slug: createUniqueSlug(title),
         excerpt: sanitizeText(excerpt),
@@ -98,10 +98,21 @@ export default function UploadBlogPage() {
         content: sanitizedContent,
         publishedAt: status === "published" ? serverTimestamp() : null,
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(), // ✅ useful for admin sorting later
       });
+
+      // store id for edit navigation
+      setLastCreatedId(docRef.id);
 
       alert("Blog saved successfully");
 
+      // Option A (recommended): redirect to dashboard automatically
+      navigate("/admin");
+
+      // If you do NOT want auto redirect and want to stay on page:
+      // comment the navigate("/admin") and keep reset below
+
+      // Reset form (optional if redirecting anyway)
       setTitle("");
       setExcerpt("");
       setCoverImage("");
@@ -119,9 +130,37 @@ export default function UploadBlogPage() {
   return (
     <section className="bg-white section-spacing">
       <div className="max-w-3xl mx-auto px-4">
-        <h1 className="text-3xl font-semibold text-gray-900">
-          Upload Blog Post
-        </h1>
+        {/* TOP BAR */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-3xl font-semibold text-gray-900">
+            Upload Blog Post
+          </h1>
+
+          <div className="flex gap-3 flex-wrap">
+            {/* Dashboard navigation */}
+            <Link
+              to="/admin"
+              className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50"
+            >
+              ← Dashboard
+            </Link>
+
+            {/* Edit last created blog */}
+            <button
+              type="button"
+              disabled={!lastCreatedId}
+              onClick={() => navigate(`/admin/blogs/${lastCreatedId}/edit`)}
+              className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={
+                lastCreatedId
+                  ? "Edit the blog you just created"
+                  : "Create a blog first to enable edit"
+              }
+            >
+              Edit Last Created
+            </button>
+          </div>
+        </div>
 
         {/* BASIC INFO */}
         <div className="mt-8 space-y-5">
@@ -187,6 +226,7 @@ export default function UploadBlogPage() {
               <div className="flex justify-between">
                 <span className="text-sm font-medium">{block.type}</span>
                 <button
+                  type="button"
                   onClick={() => removeBlock(i)}
                   className="text-sm text-red-500"
                 >
@@ -199,19 +239,16 @@ export default function UploadBlogPage() {
                   className="w-full border rounded px-3 py-2"
                   rows={block.type === "paragraph" ? 4 : 2}
                   value={block.text}
-                  onChange={(e) =>
-                    updateBlock(i, "text", e.target.value)
-                  }
+                  onChange={(e) => updateBlock(i, "text", e.target.value)}
                 />
               )}
 
               {block.type === "image" && (
                 <>
                   <button
+                    type="button"
                     onClick={() =>
-                      openCloudinaryWidget((url) =>
-                        updateBlock(i, "src", url)
-                      )
+                      openCloudinaryWidget((url) => updateBlock(i, "src", url))
                     }
                     className="border px-4 py-2 rounded"
                   >
@@ -230,10 +267,8 @@ export default function UploadBlogPage() {
                     type="text"
                     placeholder="Alt text"
                     className="w-full border rounded px-3 py-2"
-                    value={block.alt}
-                    onChange={(e) =>
-                      updateBlock(i, "alt", e.target.value)
-                    }
+                    value={block.alt || ""}
+                    onChange={(e) => updateBlock(i, "alt", e.target.value)}
                   />
                 </>
               )}
@@ -242,18 +277,31 @@ export default function UploadBlogPage() {
         </div>
 
         <div className="mt-6 flex gap-3">
-          <button onClick={() => addBlock("paragraph")} className="border px-4 py-2">
+          <button
+            type="button"
+            onClick={() => addBlock("paragraph")}
+            className="border px-4 py-2"
+          >
             + Paragraph
           </button>
-          <button onClick={() => addBlock("heading")} className="border px-4 py-2">
+          <button
+            type="button"
+            onClick={() => addBlock("heading")}
+            className="border px-4 py-2"
+          >
             + Heading
           </button>
-          <button onClick={() => addBlock("image")} className="border px-4 py-2">
+          <button
+            type="button"
+            onClick={() => addBlock("image")}
+            className="border px-4 py-2"
+          >
             + Image
           </button>
         </div>
 
         <button
+          type="button"
           onClick={submitBlog}
           disabled={saving}
           className="mt-12 rounded-full bg-orange-600 px-8 py-3 text-white font-semibold disabled:opacity-60"

@@ -17,10 +17,14 @@ const Services = lazy(() => import("./Pages/Services.jsx"));
 const BlogListPage = lazy(() => import("./Pages/BlogListPage.jsx"));
 const BlogDetailsPage = lazy(() => import("./Pages/BlogDetailsPage.jsx"));
 
-// ADMIN
-const UploadBlogPage = lazy(() => import("./admin/UploadBlogPage.jsx"));
+// AUTH
 const LoginPage = lazy(() => import("./components/Login/Login.jsx"));
+
+// ADMIN
 const AdminGuard = lazy(() => import("./utils/AdminGuard.jsx"));
+const AdminBlogDashboard = lazy(() => import("./admin/AdminBlogDashboard.jsx"));
+const UploadBlogPage = lazy(() => import("./admin/UploadBlogPage.jsx"));
+const EditBlogPage = lazy(() => import("./admin/EditBlogPage.jsx"));
 
 function App() {
   return (
@@ -28,7 +32,6 @@ function App() {
       <ScrollToTop />
       <Navbar />
 
-      {/* Page-level suspense */}
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           {/* PUBLIC */}
@@ -37,7 +40,6 @@ function App() {
             path="/mens-haircuts-beard-trims-kellyville"
             element={<Services />}
           />
-
           <Route path="/contact" element={<Contact />} />
           <Route path="/contest" element={<MonthlyDraw />} />
 
@@ -48,12 +50,30 @@ function App() {
           {/* AUTH */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* ADMIN (PROTECTED) */}
+          {/* ADMIN CMS */}
           <Route
             path="/admin"
             element={
               <AdminGuard>
+                <AdminBlogDashboard />
+              </AdminGuard>
+            }
+          />
+
+          <Route
+            path="/admin/blogs/new"
+            element={
+              <AdminGuard>
                 <UploadBlogPage />
+              </AdminGuard>
+            }
+          />
+
+          <Route
+            path="/admin/blogs/:id/edit"
+            element={
+              <AdminGuard>
+                <EditBlogPage />
               </AdminGuard>
             }
           />
