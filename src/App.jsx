@@ -41,7 +41,7 @@ function App() {
             element={<Services />}
           />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/contest" element={<MonthlyDraw />} />
+          <Route path="/win" element={<MonthlyDraw />} />
 
           {/* BLOG (PUBLIC) */}
           <Route path="/blogs" element={<BlogListPage />} />

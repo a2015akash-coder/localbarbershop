@@ -121,8 +121,7 @@ function Footer() {
             </h4>
 
             <p className="mt-4 text-sm text-gray-400 leading-relaxed">
-              Shop 12, Kellyville Plaza<br />
-              Kellyville, NSW 2155
+              90 Wrights Rd, Kellyville NSW 2155, Australia
             </p>
 
             <p className="mt-3 text-sm text-gray-400">

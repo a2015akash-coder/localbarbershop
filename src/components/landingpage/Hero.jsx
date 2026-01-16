@@ -44,7 +44,7 @@ function Hero() {
   const prev = () => setCurrent((p) => (p - 1 + total) % total);
 
   return (
-    <section className="bg-white">
+    <section className="bg-white-50">
       {/* ================= HERO ================= */}
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 pt-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
