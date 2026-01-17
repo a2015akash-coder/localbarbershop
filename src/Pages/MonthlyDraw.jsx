@@ -7,7 +7,7 @@ const MonthlyDraw = memo(function MonthlyDraw() {
       <MonthlyLuckyDrawSection />
 
       {/* ================== DRAW FORM ================== */}
-      <section className="mx-auto max-w-3xl px-6 pb-20">
+      <section className="mx-auto max-w-3xl px-4 pb-20">
         {/* Header */}
         <div className="mb-8 text-center">
           <h2 className="text-2xl font-semibold text-gray-900">

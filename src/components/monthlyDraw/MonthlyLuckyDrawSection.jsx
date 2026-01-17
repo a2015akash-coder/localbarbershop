@@ -49,7 +49,26 @@ function MonthlyLuckyDrawSection() {
   </p>
 
   {/* CTA */}
- 
+  <div className="mt-8">
+    <a
+      href="https://the-grooming-room-barbershop.square.site/win"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="
+        inline-flex items-center justify-center
+        rounded-lg
+        bg-white
+        px-10 py-4
+        text-lg font-semibold
+        text-gray-900
+        shadow-md
+        hover:bg-gray-100
+        transition
+      "
+    >
+      I want to WIN my Free Gift
+    </a>
+  </div>
 
   {/* Terms */}
   <div className="mt-6">
