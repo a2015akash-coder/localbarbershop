@@ -14,13 +14,14 @@ const Home = () => {
     <main>
 <SEO {...seoPages.home} />
       <Hero />
-      <AboutUs />
+    
       <OurWork />
       <WhyLocalsChooseUs />
       <WhyChooseUs />
       <InstagramSection />
       <Testimonials/>
       <LocationHours />
+        <AboutUs />
     </main>
   );
 };

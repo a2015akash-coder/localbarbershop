@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
 
 const LOGO_URL =
-  "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_176/v1767516621/logo_nzojy7.webp";
+  "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_300/v1768612130/IMG_4966_lxnwpl.png";
 
 /* Explicit label → route mapping (SEO-safe) */
 const NAV_ITEMS = [
@@ -18,7 +18,6 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  /* ------------------ SCROLL STATE ------------------ */
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 40);
@@ -35,27 +34,30 @@ const Navbar = () => {
         transition-colors duration-300
         ${
           scrolled
-            ? "bg-black/85 backdrop-blur-md border-b border-white/10"
+            ? "bg-black/90 backdrop-blur-md border-b border-white/10"
             : "bg-black"
         }
       `}
     >
       <nav className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
         {/* MAIN BAR */}
-        <div className="relative flex h-18 items-center w-full">
+        <div className="relative flex h-23 items-center w-full">
 
-          {/* LOGO — LEFT */}
+          {/* LOGO — LEFT (PROMINENT, ATTACHED) */}
           <Link to="/" className="flex items-center shrink-0">
-            <img
-              src={LOGO_URL}
-              alt="The Grooming Room Barbershop"
-              width="176"
-              height="44"
-              className="h-11 w-auto object-contain"
-              loading="eager"
-              decoding="async"
-            />
-          </Link>
+  <img
+    src={LOGO_URL}
+    alt="The Grooming Room Barbershop"
+    className="
+      h-20 md:h-24
+      w-auto
+      object-contain
+    "
+    loading="eager"
+    decoding="async"
+  />
+</Link>
+
 
           {/* CENTER NAV (DESKTOP) */}
           <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex">
@@ -89,7 +91,7 @@ const Navbar = () => {
               className="
                 hidden md:inline-flex
                 items-center justify-center
-                rounded-full px-7 py-3
+                rounded-full px-8 py-3.5
                 text-sm font-semibold text-white
                 bg-[#FF7A00] hover:bg-[#FF6A00]
                 transition-colors shadow-md
