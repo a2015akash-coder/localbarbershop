@@ -89,13 +89,13 @@ function LocationHours() {
 
             <div className="space-y-3 text-gray-800">
               {[
-                ["Monday", "9:00 am – 5:30 pm"],
-                ["Tuesday", "9:00 am – 5:30 pm"],
-                ["Wednesday", "9:00 am – 5:30 pm"],
-                ["Thursday", "9:00 am – 9:00 pm"],
-                ["Friday", "9:00 am – 5:30 pm"],
-                ["Saturday", "9:00 am – 5:00 pm"],
-                ["Sunday", "9:00 am - 5:00 pm"],
+                ["Monday", "9:00 am – 17:30 pm"],
+                ["Tuesday", "9:00 am – 17:30 pm"],
+                ["Wednesday", "9:00 am – 17:30 pm"],
+                ["Thursday", "9:00 am – 21:00 pm"],
+                ["Friday", "9:00 am – 17:30 pm"],
+                ["Saturday", "9:00 am – 17:00 pm"],
+                ["Sunday", "9:00 am - 16:00 pm"],
               ].map(([day, time]) => (
                 <div key={day} className="flex justify-between text-sm">
                   <span>{day}</span>

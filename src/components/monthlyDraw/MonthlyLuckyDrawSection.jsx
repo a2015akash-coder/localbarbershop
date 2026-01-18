@@ -22,14 +22,14 @@ function MonthlyLuckyDrawSection() {
                   Enter the Monthly Lucky Draw
                 </h3>
                 <p className="mt-1 text-xs text-gray-600">
-                  Secure entry • Powered by Square
+                  Secure entry • Powered by Google Forms
                 </p>
               </div>
 
               {/* Iframe */}
               <div className="relative w-full h-[520px] sm:h-[560px]">
                 <iframe
-                  src="https://the-grooming-room-barbershop.square.site/win"
+                  src="https://docs.google.com/forms/d/e/1FAIpQLSd1c3H80EL86usVkKmOCxFRyt0Xxw9vcvmfsChgjvbhVZXzyg/viewform?usp=sharing&ouid=109555669226479084952"
                   title="Monthly Lucky Draw Entry"
                   loading="lazy"
                   className="absolute inset-0 h-full w-full"

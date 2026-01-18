@@ -84,7 +84,7 @@ const ContactInfo = memo(function ContactInfo() {
           <Card icon={Clock} title="Opening Hours">
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
-                <span>Mon – Wed, Fri</span>
+                <span>Mon, Tue, Wed & Fri</span>
                 <span className="font-medium">09:00 – 17:30</span>
               </div>
               <div className="flex justify-between">
