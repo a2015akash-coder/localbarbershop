@@ -19,7 +19,7 @@ let blogCache = null;
 
 function EmptyStateCard({ isAdmin }) {
   return (
-    <div className="rounded-2xl bg-gray-50 p-10 text-center">
+    <div className=" cv-auto rounded-2xl bg-gray-50 p-10 text-center">
       <h2 className="text-xl font-semibold text-gray-900">
         No blog posts yet
       </h2>

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 function AboutUs() {
   return (
-    <section className="bg-white py-16">
+    <section className=" cv-auto bg-white py-16">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           

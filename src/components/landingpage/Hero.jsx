@@ -11,21 +11,21 @@ import {
 const images = [
   {
     desktop:
-      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1400/v1767533105/39f80663-2183-43e8-9b0d-a8a8df717517_bfnmjt.jpg",
+      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200/v1767533105/39f80663-2183-43e8-9b0d-a8a8df717517_bfnmjt.jpg",
     mobile:
-      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_700/v1767533105/39f80663-2183-43e8-9b0d-a8a8df717517_bfnmjt.jpg",
+      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_720/v1767533105/39f80663-2183-43e8-9b0d-a8a8df717517_bfnmjt.jpg",
   },
   {
     desktop:
-      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1400/v1767533862/IMG_4985_bhflvo.jpg",
+      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200/v1767533862/IMG_4985_bhflvo.jpg",
     mobile:
-      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_700/v1767533862/IMG_4985_bhflvo.jpg",
+      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_720/v1767533862/IMG_4985_bhflvo.jpg",
   },
   {
     desktop:
-      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1400/v1767533885/IMG_7763_mjbc36.jpg",
+      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200/v1767533885/IMG_7763_mjbc36.jpg",
     mobile:
-      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_700/v1767533885/IMG_7763_mjbc36.jpg",
+      "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_720/v1767533885/IMG_7763_mjbc36.jpg",
   },
 ];
 
@@ -45,18 +45,17 @@ function Hero() {
 
   return (
     <section className="bg-white">
-      {/* ================= HERO ================= */}
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 pt-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
           {/* LEFT CONTENT */}
           <div className="flex flex-col">
-            {/* Rating */}
             <div className="inline-flex w-fit items-center gap-3 rounded-full bg-gray-50 px-4 py-2">
               <img
                 src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
                 alt="Google"
-                className="h-5 w-5"
+                width="20"
+                height="20"
               />
               <div className="flex gap-[2px] text-[#FFB400]">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -74,16 +73,12 @@ function Hero() {
                 fontSize: "clamp(2rem, 5vw, 3.1rem)",
               }}
             >
-             Premium Barber Shop 
-
-              <br />
-             in Kellyville
+              Premium Barber Shop <br /> in Kellyville
             </h1>
 
             <p className="mt-4 text-gray-700 max-w-xl">
-              The Grooming Room Barber Shop provides men’s haircuts, skin fades, coloring and beard trimming services in Kellyville. 
-
-
+              The Grooming Room Barber Shop provides men’s haircuts, skin fades,
+              coloring and beard trimming services in Kellyville.
             </p>
 
             <ul className="mt-5 space-y-2 list-disc list-inside">
@@ -92,11 +87,10 @@ function Hero() {
               <li>Special deals available for Senior & Kids</li>
             </ul>
 
-            {/* CTA */}
             <div className="mt-7 flex gap-4 flex-wrap">
               <a
                 href="tel:+61123456789"
-                className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold hover:opacity-90 transition"
+                className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold"
               >
                 Call Now
               </a>
@@ -104,13 +98,12 @@ function Hero() {
                 href="https://maps.google.com"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full border px-8 py-3 font-semibold hover:bg-gray-50 transition"
+                className="rounded-full border px-8 py-3 font-semibold"
               >
                 Get Directions
               </a>
             </div>
 
-            {/* TRUST CHIPS */}
             <div className="mt-5 flex flex-wrap gap-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-gray-50 px-4 py-2 text-sm font-medium">
                 <CheckCircle size={16} className="text-green-600" />
@@ -123,57 +116,50 @@ function Hero() {
             </div>
           </div>
 
-          {/* RIGHT IMAGE CARD — MATCHES LEFT HEIGHT */}
-         {/* RIGHT IMAGE CARD — HEIGHT MATCHES LEFT */}
-{/* RIGHT IMAGE CARD */}
-<div className="relative">
-  <div
-    className="
-      relative overflow-hidden rounded-2xl shadow-xl bg-black
-      h-[260px] sm:h-[320px] lg:h-full
-    "
-  >
-    <div
-      className="absolute inset-0 flex transition-transform duration-500 ease-out"
-      style={{ transform: `translateX(-${current * 100}%)` }}
-    >
-      {images.map((img, i) => (
-        <div key={i} className="min-w-full h-full">
-          <picture>
-            <source media="(max-width:640px)" srcSet={img.mobile} />
-            <img
-              src={img.desktop}
-              alt="Barbershop"
-              className="h-full w-full object-cover"
-              draggable={false}
-            />
-          </picture>
-        </div>
-      ))}
-    </div>
+          {/* RIGHT IMAGE — LCP SAFE */}
+          <div className="relative">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-xl bg-black">
+              <div
+                className="absolute inset-0 flex transition-transform duration-500 ease-out"
+                style={{ transform: `translateX(-${current * 100}%)` }}
+              >
+                {images.map((img, i) => (
+                  <div key={i} className="min-w-full h-full">
+                    <picture>
+                      <source media="(max-width:640px)" srcSet={img.mobile} />
+                      <img
+                        src={img.desktop}
+                        alt="Barbershop"
+                        className="h-full w-full object-cover"
+                        fetchpriority={i === 0 ? "high" : "auto"}
+                        loading={i === 0 ? "eager" : "lazy"}
+                        decoding="async"
+                        draggable={false}
+                      />
+                    </picture>
+                  </div>
+                ))}
+              </div>
 
-    {/* Arrows */}
-    <button
-      onClick={prev}
-      className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow"
-    >
-      <ChevronLeft size={20} />
-    </button>
+              <button
+                onClick={prev}
+                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow"
+              >
+                <ChevronLeft size={20} />
+              </button>
 
-    <button
-      onClick={next}
-      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow"
-    >
-      <ChevronRight size={20} />
-    </button>
-  </div>
-</div>
-
-
+              <button
+                onClick={next}
+                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ================= REVIEW STRIP ================= */}
+      {/* REVIEW STRIP */}
       <div className="bg-orange-50 mt-10">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">

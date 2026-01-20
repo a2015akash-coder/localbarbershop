@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- ================== BRAND FALLBACK SEO ================== -->
+    <!-- ================== SEO ================== -->
     <title>The Grooming Room | Barber in Kellyville</title>
     <meta
       name="description"
@@ -17,21 +17,40 @@
     <link rel="icon" type="image/svg+xml" href="/barber.ico" />
 
     <!-- ================== PERFORMANCE ================== -->
+
+    <!-- Preconnect to Cloudinary -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
     <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-    <!-- Hero image preload (homepage fallback only) -->
+    <!-- Preload self-hosted fonts -->
+    <link
+      rel="preload"
+      href="/fonts/poppins-regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/poppins-semibold.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- Hero image preload (LCP) -->
     <link
       rel="preload"
       as="image"
-      href="https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1400/v1767533105/39f80663-2183-43e8-9b0d-a8a8df717517_bfnmjt.jpg"
+      href="https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200/v1767533105/39f80663-2183-43e8-9b0d-a8a8df717517_bfnmjt.jpg"
+      fetchpriority="high"
+      imagesizes="100vw"
     />
 
-    <!-- ================== THIRD-PARTY ================== -->
-    <script
-      src="https://widget.cloudinary.com/v2.0/global/all.js"
-      defer
-    ></script>
+    <!-- NOTE:
+         ❌ Cloudinary upload widget REMOVED from global head
+         Load it dynamically ONLY on admin/upload page
+    -->
   </head>
 
   <body>

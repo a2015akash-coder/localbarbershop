@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const testimonials = [
@@ -48,6 +48,7 @@ export default function Testimonials() {
   const [items, setItems] = useState(testimonials);
   const [offset, setOffset] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const trackRef = useRef(null);
 
   const slideNext = () => {
     if (isAnimating) return;
@@ -62,23 +63,26 @@ export default function Testimonials() {
   };
 
   useEffect(() => {
-    if (!isAnimating) return;
+    if (!isAnimating || !trackRef.current) return;
 
-    const timer = setTimeout(() => {
-      if (offset < 0) {
-        setItems((prev) => [...prev.slice(1), prev[0]]);
-      } else {
-        setItems((prev) => [prev[prev.length - 1], ...prev.slice(0, -1)]);
-      }
+    const handleEnd = () => {
+      setItems((prev) =>
+        offset < 0
+          ? [...prev.slice(1), prev[0]]
+          : [prev[prev.length - 1], ...prev.slice(0, -1)]
+      );
       setOffset(0);
       setIsAnimating(false);
-    }, 520); // slightly slower = visible glide
+    };
 
-    return () => clearTimeout(timer);
+    const el = trackRef.current;
+    el.addEventListener("transitionend", handleEnd, { once: true });
+
+    return () => el.removeEventListener("transitionend", handleEnd);
   }, [isAnimating, offset]);
 
   return (
-    <section className="bg-orange-50 section-spacing">
+    <section className="cv-auto bg-orange-50 section-spacing">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 
         {/* HEADER */}
@@ -107,26 +111,26 @@ export default function Testimonials() {
             {testimonials.map((t, i) => (
               <div
                 key={i}
-                className="snap-center flex-shrink-0 w-[85vw] max-w-sm rounded-3xl bg-white p-7 shadow-sm text-center"
+                className="snap-center flex-shrink-0 w-[85vw] max-w-sm"
               >
-                <div
-                  className={`mx-auto mb-5 flex h-18 w-18 items-center justify-center rounded-full text-lg font-semibold ${t.color}`}
-                >
-                  {t.initial}
-                </div>
+                <div className="rounded-3xl bg-white p-7 shadow-sm text-center">
+                  <div
+                    className={`mx-auto mb-5 flex h-18 w-18 items-center justify-center rounded-full text-lg font-semibold ${t.color}`}
+                  >
+                    {t.initial}
+                  </div>
 
-                <div className="mb-3 text-orange-500 text-lg">★★★★★</div>
+                  <div className="mb-3 text-orange-500 text-lg">★★★★★</div>
 
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  “{t.text}”
-                </p>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    “{t.text}”
+                  </p>
 
-                <div className="mt-4 font-semibold text-slate-900">
-                  {t.name}
-                </div>
+                  <div className="mt-4 font-semibold text-slate-900">
+                    {t.name}
+                  </div>
 
-                <div className="text-xs text-slate-500">
-                  {t.date}
+                  <div className="text-xs text-slate-500">{t.date}</div>
                 </div>
               </div>
             ))}
@@ -137,39 +141,39 @@ export default function Testimonials() {
         <div className="relative hidden lg:block">
 
           {/* FRAME */}
-          <div className="overflow-hidden py-6 px-2">
+          <div className="overflow-hidden py-8">
             <div
-              className="flex gap-8"
+              ref={trackRef}
+              className="flex gap-8 will-change-transform"
               style={{
                 transform: `translateX(${offset}px)`,
                 transition: isAnimating
-                  ? "transform 520ms cubic-bezier(0.4, 0.0, 0.2, 1)"
+                  ? "transform 620ms cubic-bezier(0.22, 1, 0.36, 1)"
                   : "none",
               }}
             >
               {items.slice(0, VISIBLE + 1).map((t, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0 w-[380px] rounded-3xl bg-white p-9 shadow-sm text-center"
-                >
-                  <div
-                    className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full text-xl font-semibold ${t.color}`}
-                  >
-                    {t.initial}
-                  </div>
+                <div key={i} className="flex-shrink-0 w-[380px]">
+                  <div className="rounded-3xl bg-white p-9 shadow-sm text-center">
+                    <div
+                      className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full text-xl font-semibold ${t.color}`}
+                    >
+                      {t.initial}
+                    </div>
 
-                  <div className="mb-4 text-orange-500 text-lg">★★★★★</div>
+                    <div className="mb-4 text-orange-500 text-lg">★★★★★</div>
 
-                  <p className="text-base text-slate-600 leading-relaxed">
-                    “{t.text}”
-                  </p>
+                    <p className="text-base text-slate-600 leading-relaxed">
+                      “{t.text}”
+                    </p>
 
-                  <div className="mt-6 font-semibold text-slate-900">
-                    {t.name}
-                  </div>
+                    <div className="mt-6 font-semibold text-slate-900">
+                      {t.name}
+                    </div>
 
-                  <div className="mt-1 text-sm text-slate-500">
-                    {t.date}
+                    <div className="mt-1 text-sm text-slate-500">
+                      {t.date}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -180,38 +184,31 @@ export default function Testimonials() {
           <button
             onClick={slidePrev}
             className="
-              absolute left-3 top-1/2 -translate-y-1/2
-              h-11 w-11
-              rounded-full
-              bg-white/90 backdrop-blur
-              shadow-md
-              hover:bg-orange-50
-              transition
+              absolute -left-6 top-1/2 -translate-y-1/2
+              h-12 w-12 rounded-full
+              bg-white shadow-md
+              hover:bg-orange-50 transition
               flex items-center justify-center
             "
             aria-label="Previous review"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={22} />
           </button>
 
           <button
             onClick={slideNext}
             className="
-              absolute right-3 top-1/2 -translate-y-1/2
-              h-11 w-11
-              rounded-full
-              bg-white/90 backdrop-blur
-              shadow-md
-              hover:bg-orange-50
-              transition
+              absolute -right-6 top-1/2 -translate-y-1/2
+              h-12 w-12 rounded-full
+              bg-white shadow-md
+              hover:bg-orange-50 transition
               flex items-center justify-center
             "
             aria-label="Next review"
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={22} />
           </button>
         </div>
-
       </div>
     </section>
   );
