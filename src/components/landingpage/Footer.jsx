@@ -5,7 +5,7 @@ import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
 
 
 const LOGO_URL =
-  "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_176/v1767516621/logo_nzojy7.webp";
+  "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_300/v1768612130/IMG_4966_lxnwpl.png";
 
 function Footer() {
   return (
@@ -53,7 +53,7 @@ function Footer() {
   </a>
 
   <a
-    href="https://www.facebook.com/"
+    href="https://www.facebook.com/barbershopkellyville/"
     target="_blank"
     rel="noopener noreferrer"
     aria-label="Facebook"
@@ -70,7 +70,7 @@ function Footer() {
   </a>
 
   <a
-    href="https://www.youtube.com/"
+    href="https://www.youtube.com/@groomingroombarber"
     target="_blank"
     rel="noopener noreferrer"
     aria-label="YouTube"
@@ -98,8 +98,8 @@ function Footer() {
             <ul className="mt-4 space-y-3 text-sm">
               {[
                 { label: "Home", to: "/" },
-                { label: "Services", to: "/services" },
-                { label: "Blog", to: "/blog" },
+               { label: "Services", to: "/mens-haircuts-beard-trims-kellyville" },
+                { label: "Blog", to: "/blogs" },
                 { label: "Contact", to: "/contact" },
               ].map((item) => (
                 <li key={item.label}>

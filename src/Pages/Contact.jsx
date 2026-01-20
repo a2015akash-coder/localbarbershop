@@ -7,7 +7,7 @@ const Contact = () => {
   return (
    <main>
   
-   <ContactSection/>
+  
     <ContactInfo/>
     <ContactMap/>
    </main>

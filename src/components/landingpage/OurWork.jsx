@@ -100,7 +100,7 @@ function OurWork() {
           >
             <div className="relative aspect-[4/3] overflow-hidden">
               <img
-                src="https://res.cloudinary.com/dvtbbuxon/image/upload/c_fill,g_auto:faces,w_800,h_600,f_auto,q_auto/v1767626526/25493682304_cipoxh.png"
+                src="https://res.cloudinary.com/dvtbbuxon/image/upload/v1768167322/WhatsApp_Image_2026-01-11_at_17.25.03_vi332u.jpg"
                 alt="Grey Hair Colouring Services"
                 className="
                   h-full w-full object-cover
