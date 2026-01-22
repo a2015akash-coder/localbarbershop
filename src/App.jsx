@@ -43,7 +43,7 @@ function App() {
           />
           <Route path="/contact" element={<Contact />} />
           <Route path="/win" element={<MonthlyDraw />} />
-              <Route path="/promotion" element={<Promotion />} />
+              <Route path="/monthly-draw-kellyville-barber" element={<Promotion />} />
 
           {/* BLOG (PUBLIC) */}
           <Route path="/blogs" element={<BlogListPage />} />
