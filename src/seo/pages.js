@@ -18,10 +18,10 @@ export const seoPages = {
   },
 
   promotions: {
-    slug: "/promotions",
+    slug: "/monthly-draw-kellyville-barber",
     title: "Monthly Draw | The Grooming Room Barbershop | Kellyville",
     description:
       " Monthly draw available with eligible haircut and beard trim services at The Grooming Room Barbershop in Kellyville. Entry details, dates, and terms apply.",
-    canonical: "https://thegroomingroom.com.au/promotion",
+    canonical: "https://thegroomingroom.com.au/monthly-draw-kellyville-barber",
   },
 };
