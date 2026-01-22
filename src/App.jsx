@@ -11,6 +11,7 @@ import LoadingSpinner from "./components/LoadingSpinner.jsx";
 import Home from "./Pages/Home.jsx";
 import Contact from "./Pages/Contact.jsx";
 import MonthlyDraw from "./Pages/MonthlyDraw.jsx";
+import Promotion from "./Pages/Promotion.jsx";
 
 // LAZY (secondary / heavy pages)
 const Services = lazy(() => import("./Pages/Services.jsx"));
@@ -42,6 +43,7 @@ function App() {
           />
           <Route path="/contact" element={<Contact />} />
           <Route path="/win" element={<MonthlyDraw />} />
+              <Route path="/promotion" element={<Promotion />} />
 
           {/* BLOG (PUBLIC) */}
           <Route path="/blogs" element={<BlogListPage />} />
