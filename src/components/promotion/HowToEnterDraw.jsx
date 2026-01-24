@@ -14,9 +14,9 @@ const HowToEnterDraw = memo(function HowToEnterDraw() {
 
         {/* HEADER */}
         <div className="max-w-xl mb-12">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900">
             How to Enter the Monthly Draw
-          </h1>
+          </h2>
           <p className="mt-2 text-slate-600">
             Simple steps. In-store. Automatic entry.
           </p>

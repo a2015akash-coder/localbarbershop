@@ -11,6 +11,8 @@ import {
 import { db, auth } from "../firebase";
 import { Link } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
+import { seoPages } from '../seo/pages';
+import SEO from '../components/SEO';
 
 const PAGE_SIZE = 50;
 let blogCache = null;
@@ -151,7 +153,10 @@ export default function BlogListPage() {
   if (error) return <p className="py-24 text-center text-red-600">{error}</p>;
 
   return (
+
+    
     <section className="bg-white py-20">
+          <SEO {...seoPages.blogs} />
       <div className="max-w-screen-xl mx-auto px-4">
 
         {/* ---------------- HEADER + SEARCH ---------------- */}

@@ -49,10 +49,10 @@ function InstagramSection() {
             Follow The Grooming Room on Instagram
           </h2>
 
-          <p className="mt-5 max-w-xl mx-auto text-base sm:text-lg text-gray-600 leading-relaxed">
+          <h3 className="mt-5 max-w-xl mx-auto text-base sm:text-lg text-gray-600 leading-relaxed">
             View recent haircuts, beard trims, and shop updates.
 
-          </p>
+          </h3>
         </div>
 
 

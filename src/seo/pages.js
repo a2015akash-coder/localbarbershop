@@ -4,8 +4,8 @@ export const seoPages = {
     slug: "/",
     title: "The Grooming Room Barber Shop | Kellyville Barber",
     description:
-      "The Grooming Room Barber Shop provides men’s haircuts, skin fades, coloring, and beard trimming services in Kellyville. Walk-ins are also welcome for men and children.",
-    canonical: "https://thegroomingroom.com.au/kellyville-barber",
+      "The Grooming Room Barber Shop provides men’s haircuts, skin fades, colouring, and beard trimming services in Kellyville. Walk-ins are welcome for men and children.",
+    canonical: "https://thegroomingroom.com.au/",
   },
 
   services: {
@@ -21,7 +21,26 @@ export const seoPages = {
     slug: "/monthly-draw-kellyville-barber",
     title: "Monthly Draw | The Grooming Room Barbershop | Kellyville",
     description:
-      " Monthly draw available with eligible haircut and beard trim services at The Grooming Room Barbershop in Kellyville. Entry details, dates, and terms apply.",
-    canonical: "https://thegroomingroom.com.au/monthly-draw-kellyville-barber",
+      "Monthly lucky draw available with eligible haircut and beard trim services at The Grooming Room Barbershop in Kellyville. Entry details, dates, and terms apply.",
+    canonical:
+      "https://thegroomingroom.com.au/monthly-draw-kellyville-barber",
+  },
+
+  contact: {
+    slug: "/contact",
+    title: "Contact The Grooming Room Barbershop | Kellyville",
+    description:
+      "Contact The Grooming Room Barbershop in Kellyville. Call, get directions, or visit us for professional men’s haircuts, fades, and beard trims. Walk-ins welcome.",
+    canonical: "https://thegroomingroom.com.au/contact",
+  },
+
+  blogs: {
+    slug: "/blogs",
+    title: "Barber Blog | Grooming Tips & Updates | Kellyville",
+    description:
+      "Read grooming tips, hairstyle guides, and barbershop updates from The Grooming Room Barbershop in Kellyville.",
+    canonical: "https://thegroomingroom.com.au/blogs",
   },
 };
+
+

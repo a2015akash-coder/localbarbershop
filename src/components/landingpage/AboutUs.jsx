@@ -25,11 +25,11 @@ function AboutUs() {
 
           {/* CONTENT PANEL */}
           <div className="relative bg-white rounded-3xl p-8 lg:p-10 shadow-sm">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
               About Us
-            </h3>
+            </h2>
 
-            <h2
+            <h3
               className="mt-3 font-semibold tracking-tight"
               style={{
                 fontSize: "clamp(2rem, 4vw, 2.8rem)",
@@ -40,7 +40,7 @@ function AboutUs() {
               }}
             >
               Straightforward barbering in Kellyville
-            </h2>
+            </h3>
 
             <p className="mt-5 text-base text-gray-600 leading-relaxed">
               We offer men’s haircuts, colouring, beard trims, and grooming
