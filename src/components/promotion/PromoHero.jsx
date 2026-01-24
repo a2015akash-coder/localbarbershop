@@ -83,13 +83,15 @@ const PromoHero = memo(function PromoHero() {
                 <div className="aspect-[3/4]">
                   <img
                     src="https://res.cloudinary.com/dvtbbuxon/image/upload/v1769023240/WhatsApp_Image_2026-01-22_at_00.21.42_nekhqv.jpg"
-                    alt="Monthly Lucky Draw $1,000 Coles Voucher Giveaway"
+                    alt="Monthly Lucky Draw flyer at The Grooming Room Barbershop in Kellyville offering a $1,000 giveaway with haircut, beard trim, or colouring."
+                    title="$1,000 Monthly Lucky Draw – The Grooming Room Barbershop Kellyville"
                     className="h-full w-full object-cover"
                     loading="eager"
                     fetchpriority="high"
                   />
+
                 </div>
-              </div>
+              </div>  
             </div>
           </div>
 

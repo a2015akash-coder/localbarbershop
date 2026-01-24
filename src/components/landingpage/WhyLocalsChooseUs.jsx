@@ -7,6 +7,8 @@ const FEATURES = [
       "Rated 4.4 stars on Google by 200+ local customers. Known for consistent results, professional barbering, and a friendly experience.",
     image:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1768167196/WhatsApp_Image_2026-01-11_at_17.25.04_tmugsj.jpg",
+    alt: "Customers waiting inside The Grooming Room Barbershop at Kellyville Village Shopping Centre",
+    imageTitle: "The Grooming Room Barbershop – Kellyville Village",
   },
   {
     title: "Experienced & Professional",
@@ -14,6 +16,8 @@ const FEATURES = [
       "Full service barbering in Kellyville including precision haircuts, hairline tidy ups, skin fades, beard trims, and light styling.",
     image:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1767804237/rs_w_730_h_730_cg_true_m_1_nh3xdo.webp",
+    alt: "Professional barber performing a clean fade haircut at The Grooming Room Barbershop in Kellyville",
+    imageTitle: "Clean fade haircut service – Kellyville barber",
   },
   {
     title: "Soon to Be a Man",
@@ -21,6 +25,8 @@ const FEATURES = [
       "Children’s haircuts for ages zero to twelve with simple styles, tidy finishes, optional hair art, and complimentary lollies.",
     image:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1767804241/rs_w_730_h_730_cg_true_m_uxntcz.webp",
+    alt: "Happy child after a fresh haircut at The Grooming Room Barbershop in Kellyville",
+    imageTitle: "Children’s haircut at The Grooming Room Barbershop",
   },
   {
     title: "Free Parking",
@@ -28,8 +34,11 @@ const FEATURES = [
       "Located in Kellyville Village Shopping Centre with free parking, plus Coles, Woolworths, Aldi, and nearby dining options.",
     image:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1767804242/rs_w_730_h_730_cg_true_k61xmd.webp",
+    alt: "Kellyville Village Shopping Centre with free parking near The Grooming Room Barbershop",
+    imageTitle: "Free parking at Kellyville Village Shopping Centre",
   },
 ];
+
 
 function WhyLocalsChooseUs() {
   return (
@@ -74,14 +83,17 @@ function WhyLocalsChooseUs() {
               <div className="relative aspect-[5/4] overflow-hidden">
                 <img
                   src={item.image}
-                  alt={item.title}
+                  alt={item.alt}
+                  title={item.imageTitle}
                   className="
-                    h-full w-full object-cover
-                    transition-transform duration-700 ease-out
-                    group-hover:scale-[1.06]
-                  "
+    h-full w-full object-cover
+    transition-transform duration-700 ease-out
+    group-hover:scale-[1.06]
+  "
                   loading="lazy"
+                  decoding="async"
                 />
+
               </div>
 
               {/* TEXT */}
@@ -117,8 +129,8 @@ function WhyLocalsChooseUs() {
             rel="noopener noreferrer"
             className="
               inline-flex items-center justify-center rounded-full
-              border border-gray-300 px-10 py-4 font-semibold
-              text-gray-900 hover:bg-gray-50 transition
+              px-10 py-4 font-semibold
+              bg-[#FFF3E6]  text-[#7A3E00]  hover:bg-[#FFE6CF] transition
             "
           >
             Get Directions

@@ -1,39 +1,53 @@
 import { memo } from "react";
 
-function QuoteCard() {
+const QUOTE_IMAGE_URL =
+  "https://res.cloudinary.com/dvtbbuxon/image/upload/v1767705592/back-view-barber-trimming-hair_23-2148298297_ldas6f.jpg";
+
+const QuoteCard = memo(function QuoteCard() {
   return (
-      <section className="py-10">
-      {/* WIDER CONTAINER */}
-      <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
-        <div className="relative overflow-hidden rounded-3xl">
-          
-          {/* BACKGROUND IMAGE */}
-          <img
-            src="https://res.cloudinary.com/dvtbbuxon/image/upload/v1767705592/back-view-barber-trimming-hair_23-2148298297_ldas6f.jpg"
-            alt="Professional barbering in Kellyville"
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-          />
+    <section
+      className="
+        relative w-screen left-1/2 right-1/2
+        -ml-[50vw] -mr-[50vw]
+        overflow-hidden
+      "
+    >
+      {/* Background image */}
+      <div
+        className="absolute inset-0"
+        aria-hidden="true"
+        style={{
+          backgroundImage: `url('${QUOTE_IMAGE_URL}')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
 
-          {/* OVERLAY */}
-          <div className="absolute inset-0 bg-black/55" />
+      {/* Dark overlay */}
+      <div
+        className="absolute inset-0"
+        aria-hidden="true"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0.25) 100%)",
+        }}
+      />
 
-          {/* CONTENT */}
-          <div className="relative px-6 sm:px-12 py-10 sm:py-12 max-w-3xl">
-            <p className="text-xl sm:text-2xl font-semibold text-white leading-snug">
-              “Invest in your hair. It’s the crown you never take off.”
-            </p>
+      {/* Content container (aligned with site grid) */}
+    <div className="relative max-w-screen-xl mx-auto px-4 py-8 sm:py-8">
 
-            <div className="mt-4 flex items-center gap-3 text-sm text-gray-300">
-              <span className="h-px w-8 bg-gray-400" />
-              <span>Grooming Room Barber</span>
-            </div>
-          </div>
+        <blockquote className="max-w-3xl text-white">
+          <p className="text-2xl sm:text-3xl font-semibold leading-tight">
+            “Invest in your hair. It’s the crown you never take off.”
+          </p>
 
-        </div>
+          <footer className="mt-6 text-sm font-medium text-white/80">
+            — Grooming Room Barber
+          </footer>
+        </blockquote>
       </div>
     </section>
   );
-}
+});
 
-export default memo(QuoteCard);
+export default QuoteCard;

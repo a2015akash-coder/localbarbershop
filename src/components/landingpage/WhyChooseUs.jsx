@@ -66,7 +66,8 @@ function WhyChooseUs() {
               <div className="aspect-video">
                 <img
                   src="https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200,c_limit/v1767704060/interro_veoi1z.webp"
-                  alt="Inside The Grooming Room Barbershop Kellyville"
+                  alt="Interior of The Grooming Room Barbershop in Kellyville showing barber chairs, reception counter, and waiting area"
+                  title="The Grooming Room Barbershop interior – Kellyville"
                   loading="lazy"
                   decoding="async"
                   className="h-full w-full object-cover"

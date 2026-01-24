@@ -5,28 +5,35 @@ const products = [
     title: "Deluxe Grooming Set",
     desc: "Wash, shave, and style products for regular grooming use.",
     img: "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto:good,e_sharpen:60,dpr_auto,w_600/v1767540191/rs_w_720_h_541_cg_true_oystvt.webp",
+    alt: "American Crew grooming cream and styling products displayed on shelf",
+    imgTitle: "Deluxe Grooming Set – American Crew Products",
   },
   {
     title: "Hair Styling Products",
     desc: "Hair styling wax, including Layrite Wax, for everyday hold and finish.",
     img: "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto:good,e_sharpen:60,dpr_auto,w_600/v1767540187/rs_w_720_h_541_cg_true_1_wdvier.webp",
+    alt: "Layrite Deluxe cement clay hair styling product held in hand",
+    imgTitle: "Layrite Hair Styling Products",
   },
   {
     title: "Hair & Body Products",
     desc: "Shampoos, conditioners, wax, and general grooming products.",
     img: "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto:good,e_sharpen:60,dpr_auto,w_600/v1767540183/rs_w_720_h_541_cg_true_m_doi2xa.webp",
+    alt: "American Crew shampoo and body care products displayed in store",
+    imgTitle: "Hair and Body Grooming Products",
   },
 ];
 
 
+
 const ProductsSection = memo(function ProductsSection() {
   return (
-<section className="bg-white section-spacing">
+    <section className="bg-gray-50 section-spacing">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
         <div className="max-w-2xl mb-16">
-         
+
 
           <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900">
             Products Available In-Store
@@ -34,7 +41,7 @@ const ProductsSection = memo(function ProductsSection() {
           </h2>
 
           <p className="mt-4 text-gray-600 text-base sm:text-lg">
-           The following products are available at The Grooming Room Barber Shop.
+            The following products are available at The Grooming Room Barber Shop.
 
           </p>
         </div>
@@ -49,12 +56,15 @@ const ProductsSection = memo(function ProductsSection() {
               <div className="aspect-[4/3] bg-gray-100">
                 <img
                   src={product.img}
-                  alt={product.title}
+                  alt={product.alt}
+                  title={product.imgTitle}
                   className="w-full h-full object-cover"
                   loading="lazy"
+                  decoding="async"
                   width="600"
                   height="450"
                 />
+
               </div>
 
               <div className="p-6">

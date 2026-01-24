@@ -37,12 +37,13 @@ function OurWork() {
             <div className="relative aspect-[4/3] overflow-hidden">
               <img
                 src="https://res.cloudinary.com/dvtbbuxon/image/upload/c_fill,g_auto:faces,w_800,h_600,f_auto,q_auto/v1767534115/IMG_5409_shfn4c.jpg"
-                alt="Men’s Haircuts"
+                alt="Barbers and customer posing inside The Grooming Room Barbershop in Kellyville"
                 className="
                   h-full w-full object-cover
                   transition-transform duration-500
                   group-hover:scale-[1.04]
                 "
+              title="Friendly team at The Grooming Room Barbershop – Kellyville"
                 loading="lazy"
               />
             </div>
@@ -69,12 +70,13 @@ function OurWork() {
             <div className="relative aspect-[4/3] overflow-hidden">
               <img
                 src="https://res.cloudinary.com/dvtbbuxon/image/upload/c_fill,g_auto:faces,w_800,h_600,f_auto,q_auto/v1768167106/WhatsApp_Image_2026-01-11_at_17.25.03_2_f88hyp.jpg"
-                alt="Beard Trims and Beard Shaping"
+                alt="Professional barber cutting men’s hair at The Grooming Room Barbershop in Kellyville"
                 className="
                   h-full w-full object-cover
                   transition-transform duration-500
                   group-hover:scale-[1.04]
                 "
+                title= "Men’s Beard service in progress – The Grooming Room Kellyville"
                 loading="lazy"
               />
             </div>
@@ -101,12 +103,13 @@ function OurWork() {
             <div className="relative aspect-[4/3] overflow-hidden">
               <img
                 src="https://res.cloudinary.com/dvtbbuxon/image/upload/v1768167322/WhatsApp_Image_2026-01-11_at_17.25.03_vi332u.jpg"
-                alt="Grey Hair Colouring Services"
+                alt="Clean fade haircut with coloured top finished at The Grooming Room Barbershop in Kellyville"
                 className="
                   h-full w-full object-cover
                   transition-transform duration-500
                   group-hover:scale-[1.04]
                 "
+                title="Clean fade haircut result – Kellyville barber"
                 loading="lazy"
               />
             </div>
@@ -132,9 +135,8 @@ function OurWork() {
             to="/services"
             className="
               inline-flex items-center justify-center
-              rounded-full border border-orange-300
-              px-8 py-3 font-semibold text-orange-600
-              hover:bg-orange-50 transition
+              rounded-full bg-[#FFF3E6]  text-[#7A3E00]  hover:bg-[#FFE6CF]
+              px-8 py-3 font-semibold 
             "
           >
             View All Services

@@ -14,18 +14,24 @@ const images = [
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200/v1767533105/39f80663-2183-43e8-9b0d-a8a8df717517_bfnmjt.jpg",
     mobile:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_720/v1767533105/39f80663-2183-43e8-9b0d-a8a8df717517_bfnmjt.jpg",
+    alt: "Barbers and customer posing inside The Grooming Room Barbershop in Kellyville",
+    title: "Friendly team at The Grooming Room Barbershop – Kellyville",
   },
   {
     desktop:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200/v1767533862/IMG_4985_bhflvo.jpg",
     mobile:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_720/v1767533862/IMG_4985_bhflvo.jpg",
+    alt: "Clean fade haircut with coloured top finished at The Grooming Room Barbershop in Kellyville",
+    title: "Clean fade haircut result – Kellyville barber",
   },
   {
     desktop:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200/v1767533885/IMG_7763_mjbc36.jpg",
     mobile:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_720/v1767533885/IMG_7763_mjbc36.jpg",
+    alt: "Professional barber cutting men’s hair at The Grooming Room Barbershop in Kellyville",
+    title: "Men’s haircut service in progress – The Grooming Room Kellyville"
   },
 ];
 
@@ -53,9 +59,10 @@ function Hero() {
             <div className="inline-flex w-fit items-center gap-3 rounded-full bg-gray-50 px-4 py-2">
               <img
                 src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
-                alt="Google"
+                alt="Google Icon"
                 width="20"
                 height="20"
+                title="Reviews Label Icon"
               />
               <div className="flex gap-[2px] text-[#FFB400]">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -98,7 +105,7 @@ function Hero() {
                 href="https://maps.google.com"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-full border px-8 py-3 font-semibold"
+                className="rounded-full  px-8 py-3 bg-[#FFF3E6]  text-[#7A3E00]  hover:bg-[#FFE6CF] font-semibold"
               >
                 Get Directions
               </a>
@@ -129,13 +136,14 @@ function Hero() {
                       <source media="(max-width:640px)" srcSet={img.mobile} />
                       <img
                         src={img.desktop}
-                        alt="Barbershop"
+                        alt={img.alt}
+                        title={img.title}
                         className="h-full w-full object-cover"
-                        fetchpriority={i === 0 ? "high" : "auto"}
                         loading={i === 0 ? "eager" : "lazy"}
+                        fetchpriority={i === 0 ? "high" : "auto"}
                         decoding="async"
-                        draggable={false}
                       />
+
                     </picture>
                   </div>
                 ))}
@@ -160,12 +168,12 @@ function Hero() {
       </div>
 
       {/* REVIEW STRIP */}
-      <div className="bg-orange-50 mt-10">
+      <div className=" bg-[#FFF3E6] mt-10">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {reviews.map((r, i) => (
               <div key={i} className="text-center">
-                <p className="text-sm italic text-gray-700">“{r.text}”</p>
+                <p className="text-sm italic text-[#7A3E00]">“{r.text}”</p>
                 <div className="mt-2 font-semibold">{r.name}</div>
                 <div className="mt-1 flex justify-center gap-[2px] text-[#FFB400]">
                   {Array.from({ length: 5 }).map((_, j) => (

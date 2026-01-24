@@ -6,17 +6,20 @@ function AboutUs() {
     <section className=" cv-auto bg-white py-16">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          
+
           {/* IMAGE BLOCK */}
           <div className="relative">
             <div className="absolute -inset-4 rounded-3xl bg-slate-100 hidden lg:block" />
             <div className="relative overflow-hidden rounded-3xl">
               <img
                 src="https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1767623965/IMG_2628_wzzrmi.jpg"
-                alt="Inside the barbershop in Kellyville"
+                alt="Interior view of The Grooming Room Barbershop in Kellyville"
+                title="Inside The Grooming Room Barbershop – Kellyville"
                 className="h-[320px] w-full object-cover"
                 loading="lazy"
+                decoding="async"
               />
+
             </div>
           </div>
 
@@ -53,7 +56,7 @@ function AboutUs() {
             <div className="mt-7">
               <Link
                 to="/contact"
-               className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold hover:opacity-90 transition"
+                className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold hover:opacity-90 transition"
               >
                 Get in Touch
               </Link>

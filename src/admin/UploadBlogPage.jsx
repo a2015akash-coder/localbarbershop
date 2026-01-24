@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 
-/* ================= CLOUDINARY UPLOAD (NO WIDGET) ================= */
+/* ================= CLOUDINARY UPLOAD ================= */
 
 const CLOUD_NAME = "dvtbbuxon";
 const UPLOAD_PRESET = "blog_uploads";
@@ -15,15 +15,10 @@ async function uploadToCloudinary(file) {
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
-    }
+    { method: "POST", body: formData }
   );
 
-  if (!res.ok) {
-    throw new Error("Cloudinary upload failed");
-  }
+  if (!res.ok) throw new Error("Cloudinary upload failed");
 
   const data = await res.json();
   return data.secure_url;
@@ -65,6 +60,8 @@ export default function UploadBlogPage() {
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [coverImage, setCoverImage] = useState("");
+  const [coverAlt, setCoverAlt] = useState("");
+  const [coverTitle, setCoverTitle] = useState("");
   const [category, setCategory] = useState("Hairstyle");
   const [status, setStatus] = useState("draft");
   const [saving, setSaving] = useState(false);
@@ -104,6 +101,11 @@ export default function UploadBlogPage() {
       return;
     }
 
+    if (status === "published" && !coverAlt.trim()) {
+      alert("Cover image alt text is required before publishing.");
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -111,14 +113,20 @@ export default function UploadBlogPage() {
         title: sanitizeText(title),
         slug: createUniqueSlug(title),
         excerpt: sanitizeText(excerpt),
+
         coverImage,
+        coverAlt: sanitizeText(coverAlt),
+        coverTitle: sanitizeText(coverTitle),
+
         category,
         status,
+
         content: content.map((b) => ({
           ...b,
           text: b.text ? sanitizeText(b.text) : "",
           alt: b.alt ? sanitizeText(b.alt) : "",
         })),
+
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         publishedAt: status === "published" ? serverTimestamp() : null,
@@ -237,11 +245,27 @@ export default function UploadBlogPage() {
           }
         >
           {coverImage ? (
-            <img
-              src={coverImage}
-              alt="Cover preview"
-              className="h-56 w-full rounded-xl object-cover"
-            />
+            <div className="space-y-4">
+              <img
+                src={coverImage}
+                alt={coverAlt || "Cover image preview"}
+                className="h-56 w-full rounded-xl object-cover"
+              />
+
+              <input
+                className="w-full rounded-lg border px-3 py-2"
+                placeholder="Alt text (required for accessibility & SEO)"
+                value={coverAlt}
+                onChange={(e) => setCoverAlt(e.target.value)}
+              />
+
+              <input
+                className="w-full rounded-lg border px-3 py-2"
+                placeholder="Image title (optional)"
+                value={coverTitle}
+                onChange={(e) => setCoverTitle(e.target.value)}
+              />
+            </div>
           ) : (
             <p className="text-sm text-gray-500">
               Recommended: landscape image, ~1600×900

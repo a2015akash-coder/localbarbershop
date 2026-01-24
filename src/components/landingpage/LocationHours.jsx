@@ -124,8 +124,8 @@ function LocationHours() {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center rounded-full
-                       border border-gray-300 px-10 py-4 font-semibold
-                       text-gray-900 hover:bg-gray-50 transition"
+                       px-10 py-4 font-semibold
+                      bg-[#FFF3E6]  text-[#7A3E00]  hover:bg-[#FFE6CF] transition"
           >
             Get Directions
           </a>

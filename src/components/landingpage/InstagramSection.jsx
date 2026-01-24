@@ -7,44 +7,53 @@ const INSTAGRAM_POSTS = [
     image:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_600/v1767623830/IMG_5409_ekbe6v.jpg",
     url: "https://www.instagram.com/p/DTB6HjvE47M/",
+    alt: "Men’s fade haircut at The Grooming Room Barbershop in Kellyville",
+    title: "Men’s fade haircut – Kellyville barber",
   },
   {
     image:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_600/v1767727364/Screenshot_2026-01-07_005210_pv3px4.png",
     url: "https://www.instagram.com/p/DMEIIn6zdhw/",
+    alt: "Kids haircut with hair design at The Grooming Room Barbershop in Kellyville",
+    title: "Children’s haircut with design – Kellyville",
   },
   {
     image:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_600/v1767623811/d75d709523594830b53c9e370e44421a_bqfp1k.png",
     url: "https://www.instagram.com/p/DSUIS_3E308/",
+    alt: "Classic men’s haircut at The Grooming Room Barbershop in Kellyville",
+    title: "Classic men’s haircut – Kellyville barber",
   },
   {
     image:
       "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_600/v1767623965/IMG_2628_wzzrmi.jpg",
     url: "https://www.instagram.com/reel/DR3cJdwk6bz/",
+    alt: "Entrance of The Grooming Room Barbershop at Kellyville Village Shopping Centre",
+    title: "The Grooming Room Barbershop entrance – Kellyville",
   },
 ];
 
+
 function InstagramSection() {
   return (
-   <section className="bg-white section-spacing">
+    <section className="bg-white section-spacing">
 
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
 
         {/* HEADER */}
-       {/* HEADER */}
-<div className="mb-16 text-center">
-  <h2 className="flex items-center justify-center gap-3 font-semibold tracking-tight text-gray-900"
-      style={{ fontSize: "clamp(2rem, 4vw, 2.8rem)" }}>
-    <Instagram size={36} className="text-[#E1306C]" />
-    Follow The Grooming Room on Instagram
-  </h2>
+        {/* HEADER */}
+        <div className="mb-16 text-center">
+          <h2 className="flex items-center justify-center gap-3 font-semibold tracking-tight text-gray-900"
+            style={{ fontSize: "clamp(2rem, 4vw, 2.8rem)" }}>
+            <Instagram size={36} className="text-[#E1306C]" />
+            Follow The Grooming Room on Instagram
+          </h2>
 
-  <p className="mt-5 max-w-xl mx-auto text-base sm:text-lg text-gray-600 leading-relaxed">
-    View recent haircuts, beard trims, and shop updates.
+          <p className="mt-5 max-w-xl mx-auto text-base sm:text-lg text-gray-600 leading-relaxed">
+            View recent haircuts, beard trims, and shop updates.
 
-  </p>
-</div>
+          </p>
+        </div>
 
 
         {/* GRID */}
@@ -60,11 +69,13 @@ function InstagramSection() {
             >
               <img
                 src={post.image}
-                alt="Instagram post from The Grooming Room Barbershop"
+                alt={post.alt}
+                title={post.title}
                 className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
                 loading="lazy"
                 decoding="async"
               />
+
 
               {/* OVERLAY */}
               <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition">
@@ -78,22 +89,22 @@ function InstagramSection() {
         </div>
 
         {/* CTA */}
-       {/* CTA */}
-<div className="mt-16 text-center">
-  <a
-    href="https://www.instagram.com/kellyvillebarber/"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-flex items-center gap-3 rounded-full px-10 py-4 font-semibold text-white transition-transform hover:scale-[1.03]"
-    style={{
-      background:
-        "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)",
-    }}
-  >
-    <Instagram size={20} />
-    Follow @groomingbarbershop
-  </a>
-</div>
+        {/* CTA */}
+        <div className="mt-16 text-center">
+          <a
+            href="https://www.instagram.com/kellyvillebarber/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 rounded-full px-10 py-4 font-semibold text-white transition-transform hover:scale-[1.03]"
+            style={{
+              background:
+                "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)",
+            }}
+          >
+            <Instagram size={20} />
+            Follow @groomingbarbershop
+          </a>
+        </div>
 
       </div>
     </section>

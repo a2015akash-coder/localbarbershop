@@ -8,7 +8,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 
-/* ================= CLOUDINARY (NO WIDGET) ================= */
+/* ================= CLOUDINARY ================= */
 
 const CLOUD_NAME = "dvtbbuxon";
 const UPLOAD_PRESET = "blog_uploads";
@@ -20,10 +20,7 @@ async function uploadToCloudinary(file) {
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
-    }
+    { method: "POST", body: formData }
   );
 
   if (!res.ok) throw new Error("Upload failed");
@@ -58,7 +55,11 @@ export default function EditBlogPage() {
 
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
+
   const [coverImage, setCoverImage] = useState("");
+  const [coverAlt, setCoverAlt] = useState("");
+  const [coverTitle, setCoverTitle] = useState("");
+
   const [category, setCategory] = useState("Hairstyle");
   const [status, setStatus] = useState("draft");
   const [content, setContent] = useState([{ type: "paragraph", text: "" }]);
@@ -76,11 +77,15 @@ export default function EditBlogPage() {
         }
 
         const d = snap.data();
+
         setTitle(d.title || "");
         setExcerpt(d.excerpt || "");
         setCoverImage(d.coverImage || "");
+        setCoverAlt(d.coverAlt || "");
+        setCoverTitle(d.coverTitle || "");
         setCategory(d.category || "Hairstyle");
         setStatus(d.status || "draft");
+
         setContent(
           Array.isArray(d.content)
             ? d.content
@@ -124,20 +129,31 @@ export default function EditBlogPage() {
   const save = async () => {
     if (!title || !excerpt || saving) return;
 
+    if (status === "published" && !coverAlt.trim()) {
+      alert("Cover image alt text is required before publishing.");
+      return;
+    }
+
     setSaving(true);
 
     try {
       await updateDoc(doc(db, "blogs", id), {
         title: sanitizeText(title),
         excerpt: sanitizeText(excerpt),
+
         coverImage,
+        coverAlt: sanitizeText(coverAlt),
+        coverTitle: sanitizeText(coverTitle),
+
         category,
         status,
+
         content: content.map((b) => ({
           ...b,
           text: b.text ? sanitizeText(b.text) : "",
           alt: b.alt ? sanitizeText(b.alt) : "",
         })),
+
         updatedAt: serverTimestamp(),
         publishedAt: status === "published" ? serverTimestamp() : null,
       });
@@ -219,7 +235,7 @@ export default function EditBlogPage() {
 
         {/* COVER IMAGE */}
         <Card>
-          <div className="flex flex-col gap-4">
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold">Cover Image</h3>
 
@@ -248,11 +264,27 @@ export default function EditBlogPage() {
             </div>
 
             {coverImage && (
-              <img
-                src={coverImage}
-                alt="Cover"
-                className="rounded-xl h-56 w-full object-cover"
-              />
+              <>
+                <img
+                  src={coverImage}
+                  alt={coverAlt || "Cover image preview"}
+                  className="rounded-xl h-56 w-full object-cover"
+                />
+
+                <input
+                  className="w-full rounded-lg border px-3 py-2"
+                  placeholder="Alt text (required for SEO & accessibility)"
+                  value={coverAlt}
+                  onChange={(e) => setCoverAlt(e.target.value)}
+                />
+
+                <input
+                  className="w-full rounded-lg border px-3 py-2"
+                  placeholder="Image title (optional)"
+                  value={coverTitle}
+                  onChange={(e) => setCoverTitle(e.target.value)}
+                />
+              </>
             )}
           </div>
         </Card>
@@ -276,19 +308,9 @@ export default function EditBlogPage() {
                   </button>
                 </div>
 
-                {block.type === "paragraph" && (
+                {block.type !== "image" && (
                   <textarea
-                    rows={4}
-                    className="w-full rounded-lg border px-3 py-2"
-                    value={block.text}
-                    onChange={(e) =>
-                      updateBlock(i, "text", e.target.value)
-                    }
-                  />
-                )}
-
-                {block.type === "heading" && (
-                  <input
+                    rows={block.type === "paragraph" ? 4 : 2}
                     className="w-full rounded-lg border px-3 py-2"
                     value={block.text}
                     onChange={(e) =>
@@ -298,7 +320,7 @@ export default function EditBlogPage() {
                 )}
 
                 {block.type === "image" && (
-                  <div className="space-y-3">
+                  <>
                     <label className="inline-block cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
                       Upload Image
                       <input
@@ -338,7 +360,7 @@ export default function EditBlogPage() {
                         updateBlock(i, "alt", e.target.value)
                       }
                     />
-                  </div>
+                  </>
                 )}
               </div>
             ))}
