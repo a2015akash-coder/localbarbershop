@@ -1,62 +1,62 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <!-- ================== BASICS ================== -->
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- ================== SEO ================== -->
-    <title>The Grooming Room | Barber in Kellyville</title>
-    <meta
-      name="description"
-      content="The Grooming Room is a professional barber shop in Kellyville offering quality men’s haircuts, skin fades, beard trims, and grooming services. Walk-ins welcome."
-    />
+<head>
+  <!-- ================== BASICS ================== -->
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- ================== FAVICON ================== -->
-    <link rel="icon" type="image/svg+xml" href="/barber.ico" />
+  <!-- ================== SEO ================== -->
+  <title>The Grooming Room | Barber in Kellyville</title>
+  <meta name="description"
+    content="The Grooming Room is a professional barber shop in Kellyville offering quality men’s haircuts, skin fades, beard trims, and grooming services. Walk-ins welcome." />
 
-    <!-- ================== PERFORMANCE ================== -->
+  <!-- ================== FAVICON ================== -->
+  <link rel="icon" type="image/svg+xml" href="/barber.ico" />
 
-    <!-- Preconnect to Cloudinary -->
-    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
-    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+  <!-- ================== PERFORMANCE ================== -->
 
-    <!-- Preload self-hosted fonts -->
-    <link
-      rel="preload"
-      href="/fonts/poppins-regular.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/poppins-semibold.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
+  <!-- Preconnect to Cloudinary -->
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-    <!-- Hero image preload (LCP) -->
-    <link
-      rel="preload"
-      as="image"
-      href="https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200/v1767533105/39f80663-2183-43e8-9b0d-a8a8df717517_bfnmjt.jpg"
-      fetchpriority="high"
-      imagesizes="100vw"
-    />
+  <!-- Preload self-hosted fonts -->
+  <link rel="preload" href="/fonts/poppins-regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/poppins-semibold.woff2" as="font" type="font/woff2" crossorigin />
 
-    <!-- NOTE:
-         ❌ Cloudinary upload widget REMOVED from global head
-         Load it dynamically ONLY on admin/upload page
-    -->
-  </head>
+  <!-- Hero image preload (LCP) -->
+  <link rel="preload" as="image"
+    href="https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200/v1767533105/39f80663-2183-43e8-9b0d-a8a8df717517_bfnmjt.jpg"
+    fetchpriority="high" imagesizes="100vw" />
 
-  <body>
-    <div id="root"></div>
+  <!-- Google Tag Manager -->
+  <script>(function (w, d, s, l, i) {
+      w[l] = w[l] || []; w[l].push({
+        'gtm.start':
+          new Date().getTime(), event: 'gtm.js'
+      }); var f = d.getElementsByTagName(s)[0],
+        j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+          'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-TC5XGDJG');</script>
+  <!-- End Google Tag Manager -->
+</head>
 
-    <!-- ================== APP ENTRY ================== -->
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript>
+    <iframe
+      src="https://www.googletagmanager.com/ns.html?id=GTM-TC5XGDJG"
+      height="0"
+      width="0"
+      style="display:none;visibility:hidden"
+    ></iframe>
+  </noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <div id="root"></div>
+
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
