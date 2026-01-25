@@ -7,7 +7,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import { sanitizeText } from "./utils/textHelpers";
+import { sanitizeText } from "../utils/textHelpers";
 
 
 /* ================= CLOUDINARY ================= */
