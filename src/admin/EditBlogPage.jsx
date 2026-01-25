@@ -7,6 +7,8 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { sanitizeText } from "./utils/textHelpers";
+
 
 /* ================= CLOUDINARY ================= */
 
@@ -31,7 +33,6 @@ async function uploadToCloudinary(file) {
 
 /* ================= HELPERS ================= */
 
-const sanitizeText = (text) => text.replace(/\s+/g, " ").trim();
 
 /* ================= CARD ================= */
 

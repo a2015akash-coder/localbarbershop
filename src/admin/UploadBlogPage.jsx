@@ -2,39 +2,17 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload";
+import { sanitizeText, slugify } from "./utils/text";
 
-/* ================= CLOUDINARY UPLOAD ================= */
-
-const CLOUD_NAME = "dvtbbuxon";
-const UPLOAD_PRESET = "blog_uploads";
-
-async function uploadToCloudinary(file) {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", UPLOAD_PRESET);
-
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-    { method: "POST", body: formData }
-  );
-
-  if (!res.ok) throw new Error("Cloudinary upload failed");
-
-  const data = await res.json();
-  return data.secure_url;
-}
 
 /* ================= HELPERS ================= */
 
-const slugify = (text) =>
-  text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-");
+
 
 const createUniqueSlug = (title) => `${slugify(title)}-${Date.now()}`;
-const sanitizeText = (text) => text.replace(/\s+/g, " ").trim();
+
+
 
 /* ================= UI CARD ================= */
 
@@ -59,18 +37,21 @@ export default function UploadBlogPage() {
 
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
+
   const [coverImage, setCoverImage] = useState("");
   const [coverAlt, setCoverAlt] = useState("");
   const [coverTitle, setCoverTitle] = useState("");
+
   const [category, setCategory] = useState("Hairstyle");
   const [status, setStatus] = useState("draft");
+
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [lastCreatedId, setLastCreatedId] = useState(null);
 
   const [content, setContent] = useState([{ type: "paragraph", text: "" }]);
 
-  /* ================= CONTENT BLOCK HELPERS ================= */
+  /* ================= CONTENT HELPERS ================= */
 
   const addBlock = (type) => {
     setContent((prev) => [
@@ -123,8 +104,8 @@ export default function UploadBlogPage() {
 
         content: content.map((b) => ({
           ...b,
-          text: b.text ? sanitizeText(b.text) : "",
-          alt: b.alt ? sanitizeText(b.alt) : "",
+          text: sanitizeText(b.text),
+          alt: sanitizeText(b.alt),
         })),
 
         createdAt: serverTimestamp(),
@@ -248,7 +229,7 @@ export default function UploadBlogPage() {
             <div className="space-y-4">
               <img
                 src={coverImage}
-                alt={coverAlt || "Cover image preview"}
+                alt={coverAlt || "Blog cover image preview"}
                 className="h-56 w-full rounded-xl object-cover"
               />
 
@@ -329,7 +310,7 @@ export default function UploadBlogPage() {
                     {block.src && (
                       <img
                         src={block.src}
-                        alt=""
+                        alt={block.alt || "Blog content image"}
                         className="h-40 rounded-lg object-cover"
                       />
                     )}

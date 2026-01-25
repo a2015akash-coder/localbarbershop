@@ -3,6 +3,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   limit,
   orderBy,
@@ -60,15 +61,11 @@ function StatCard({ label, value, accent }) {
 
 /* ---------------- BLOG ROW CARD ---------------- */
 
-function BlogRowCard({
-  blog,
-  onPublish,
-  onUnpublish,
-  onDelete,
-}) {
+function BlogRowCard({ blog, onPublish, onUnpublish, onDelete }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition">
       <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+
         {/* INFO */}
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-gray-900">
@@ -157,14 +154,26 @@ export default function AdminBlogDashboard() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
+  /* ---------------- QUERY BUILDER ---------------- */
+
   const buildQuery = (cursor = null) => {
     const ref = collection(db, "blogs");
     let q;
 
     if (tab === "draft") {
-      q = query(ref, where("status", "==", "draft"), orderBy("createdAt", "desc"), limit(PAGE_SIZE));
+      q = query(
+        ref,
+        where("status", "==", "draft"),
+        orderBy("createdAt", "desc"),
+        limit(PAGE_SIZE)
+      );
     } else if (tab === "published") {
-      q = query(ref, where("status", "==", "published"), orderBy("publishedAt", "desc"), limit(PAGE_SIZE));
+      q = query(
+        ref,
+        where("status", "==", "published"),
+        orderBy("publishedAt", "desc"),
+        limit(PAGE_SIZE)
+      );
     } else {
       q = query(ref, orderBy("createdAt", "desc"), limit(PAGE_SIZE));
     }
@@ -172,6 +181,8 @@ export default function AdminBlogDashboard() {
     if (cursor) q = query(q, startAfter(cursor));
     return q;
   };
+
+  /* ---------------- FETCHING ---------------- */
 
   const fetchFirstPage = async () => {
     setLoading(true);
@@ -198,6 +209,8 @@ export default function AdminBlogDashboard() {
     fetchFirstPage();
   }, [tab]);
 
+  /* ---------------- FILTERING ---------------- */
+
   const filteredBlogs = useMemo(() => {
     const s = search.toLowerCase();
     return blogs.filter((b) => {
@@ -211,11 +224,29 @@ export default function AdminBlogDashboard() {
     });
   }, [blogs, search, category]);
 
+  /* ---------------- FIXED PUBLISH LOGIC ---------------- */
+
   const publishBlog = async (id) => {
-    await updateDoc(doc(db, "blogs", id), {
+    const ref = doc(db, "blogs", id);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+    const previousStatus = data.status;
+
+    let publishedAt = data.publishedAt ?? null;
+
+    if (previousStatus !== "published") {
+      publishedAt = serverTimestamp();
+    }
+
+    await updateDoc(ref, {
       status: "published",
-      publishedAt: serverTimestamp(),
+      publishedAt,
+      updatedAt: serverTimestamp(),
     });
+
     fetchFirstPage();
   };
 
@@ -223,7 +254,9 @@ export default function AdminBlogDashboard() {
     await updateDoc(doc(db, "blogs", id), {
       status: "draft",
       publishedAt: null,
+      updatedAt: serverTimestamp(),
     });
+
     fetchFirstPage();
   };
 
@@ -233,19 +266,26 @@ export default function AdminBlogDashboard() {
     fetchFirstPage();
   };
 
+  /* ---------------- STATS ---------------- */
+
   const stats = {
     total: blogs.length,
     drafts: blogs.filter((b) => b.status === "draft").length,
     published: blogs.filter((b) => b.status === "published").length,
   };
 
+  /* ---------------- RENDER ---------------- */
+
   return (
     <section className="bg-gray-50 py-16">
       <div className="max-w-screen-xl mx-auto px-4">
+
         {/* HEADER */}
         <div className="flex justify-between items-end gap-6">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900">Blog Admin</h1>
+            <h1 className="text-3xl font-semibold text-gray-900">
+              Blog Admin
+            </h1>
             <p className="mt-1 text-sm text-gray-600">
               Manage drafts, published posts, edits and deletions.
             </p>
@@ -317,7 +357,9 @@ export default function AdminBlogDashboard() {
           {loading && <p className="py-20 text-center">Loading…</p>}
 
           {!loading && filteredBlogs.length === 0 && (
-            <p className="py-20 text-center text-gray-600">No blogs found.</p>
+            <p className="py-20 text-center text-gray-600">
+              No blogs found.
+            </p>
           )}
 
           {filteredBlogs.map((blog) => (
