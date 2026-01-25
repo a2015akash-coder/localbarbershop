@@ -3,29 +3,29 @@ import { useNavigate, Link } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 
-/* ---------------- CLOUDINARY ---------------- */
-const openCloudinaryWidget = (onUpload) => {
-  if (!window.cloudinary) {
-    alert("Cloudinary widget not loaded");
-    return;
-  }
+/* ================= CLOUDINARY UPLOAD ================= */
 
-  window.cloudinary.openUploadWidget(
-    {
-      cloudName: "dvtbbuxon",
-      uploadPreset: "blog_uploads",
-      multiple: false,
-      folder: "blog-images",
-    },
-    (_, result) => {
-      if (result?.event === "success") {
-        onUpload(result.info.secure_url);
-      }
-    }
+const CLOUD_NAME = "dvtbbuxon";
+const UPLOAD_PRESET = "blog_uploads";
+
+async function uploadToCloudinary(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+    { method: "POST", body: formData }
   );
-};
 
-/* ---------------- HELPERS ---------------- */
+  if (!res.ok) throw new Error("Cloudinary upload failed");
+
+  const data = await res.json();
+  return data.secure_url;
+}
+
+/* ================= HELPERS ================= */
+
 const slugify = (text) =>
   text
     .toLowerCase()
@@ -36,7 +36,8 @@ const slugify = (text) =>
 const createUniqueSlug = (title) => `${slugify(title)}-${Date.now()}`;
 const sanitizeText = (text) => text.replace(/\s+/g, " ").trim();
 
-/* ---------------- CARD ---------------- */
+/* ================= UI CARD ================= */
+
 function Card({ title, children, action }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
@@ -52,18 +53,24 @@ function Card({ title, children, action }) {
 }
 
 /* ================= PAGE ================= */
+
 export default function UploadBlogPage() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [coverImage, setCoverImage] = useState("");
+  const [coverAlt, setCoverAlt] = useState("");
+  const [coverTitle, setCoverTitle] = useState("");
   const [category, setCategory] = useState("Hairstyle");
   const [status, setStatus] = useState("draft");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [lastCreatedId, setLastCreatedId] = useState(null);
 
   const [content, setContent] = useState([{ type: "paragraph", text: "" }]);
+
+  /* ================= CONTENT BLOCK HELPERS ================= */
 
   const addBlock = (type) => {
     setContent((prev) => [
@@ -86,8 +93,19 @@ export default function UploadBlogPage() {
     setContent((prev) => prev.filter((_, idx) => idx !== i));
   };
 
+  /* ================= SUBMIT ================= */
+
   const submitBlog = async () => {
-    if (!title || !excerpt || saving) return alert("Missing required fields");
+    if (!title || !excerpt || saving) {
+      alert("Missing required fields");
+      return;
+    }
+
+    if (status === "published" && !coverAlt.trim()) {
+      alert("Cover image alt text is required before publishing.");
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -95,14 +113,20 @@ export default function UploadBlogPage() {
         title: sanitizeText(title),
         slug: createUniqueSlug(title),
         excerpt: sanitizeText(excerpt),
+
         coverImage,
+        coverAlt: sanitizeText(coverAlt),
+        coverTitle: sanitizeText(coverTitle),
+
         category,
         status,
+
         content: content.map((b) => ({
           ...b,
           text: b.text ? sanitizeText(b.text) : "",
           alt: b.alt ? sanitizeText(b.alt) : "",
         })),
+
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         publishedAt: status === "published" ? serverTimestamp() : null,
@@ -116,6 +140,8 @@ export default function UploadBlogPage() {
       setSaving(false);
     }
   };
+
+  /* ================= RENDER ================= */
 
   return (
     <section className="bg-gray-50 py-16">
@@ -150,7 +176,7 @@ export default function UploadBlogPage() {
           </div>
         </div>
 
-        {/* BASIC INFO */}
+        {/* POST DETAILS */}
         <Card title="Post details">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <input
@@ -194,20 +220,52 @@ export default function UploadBlogPage() {
         <Card
           title="Cover image"
           action={
-            <button
-              onClick={() => openCloudinaryWidget(setCoverImage)}
-              className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
-            >
-              Upload image
-            </button>
+            <label className="cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
+              {uploading ? "Uploading…" : "Upload image"}
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+
+                  setUploading(true);
+                  try {
+                    const url = await uploadToCloudinary(file);
+                    setCoverImage(url);
+                  } catch {
+                    alert("Upload failed");
+                  } finally {
+                    setUploading(false);
+                  }
+                }}
+              />
+            </label>
           }
         >
           {coverImage ? (
-            <img
-              src={coverImage}
-              alt="Cover preview"
-              className="h-56 w-full rounded-xl object-cover"
-            />
+            <div className="space-y-4">
+              <img
+                src={coverImage}
+                alt={coverAlt || "Cover image preview"}
+                className="h-56 w-full rounded-xl object-cover"
+              />
+
+              <input
+                className="w-full rounded-lg border px-3 py-2"
+                placeholder="Alt text (required for accessibility & SEO)"
+                value={coverAlt}
+                onChange={(e) => setCoverAlt(e.target.value)}
+              />
+
+              <input
+                className="w-full rounded-lg border px-3 py-2"
+                placeholder="Image title (optional)"
+                value={coverTitle}
+                onChange={(e) => setCoverTitle(e.target.value)}
+              />
+            </div>
           ) : (
             <p className="text-sm text-gray-500">
               Recommended: landscape image, ~1600×900
@@ -219,10 +277,7 @@ export default function UploadBlogPage() {
         <Card title="Content">
           <div className="space-y-6">
             {content.map((block, i) => (
-              <div
-                key={i}
-                className="rounded-xl bg-gray-50 p-5 space-y-4"
-              >
+              <div key={i} className="rounded-xl bg-gray-50 p-5 space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-xs uppercase font-medium text-gray-500">
                     {block.type}
@@ -248,16 +303,28 @@ export default function UploadBlogPage() {
 
                 {block.type === "image" && (
                   <>
-                    <button
-                      onClick={() =>
-                        openCloudinaryWidget((url) =>
-                          updateBlock(i, "src", url)
-                        )
-                      }
-                      className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
-                    >
+                    <label className="inline-block cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
                       Upload image
-                    </button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+
+                          setUploading(true);
+                          try {
+                            const url = await uploadToCloudinary(file);
+                            updateBlock(i, "src", url);
+                          } catch {
+                            alert("Upload failed");
+                          } finally {
+                            setUploading(false);
+                          }
+                        }}
+                      />
+                    </label>
 
                     {block.src && (
                       <img
