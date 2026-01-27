@@ -22,7 +22,7 @@ const ContactInfo = memo(function ContactInfo() {
   const trackCallClick = (location) => {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
-      event: "call_click",
+      event: "call_cta_click",
       cta_type: "phone",
       cta_location: location, // contact_page_card
       phone_number: "+61288831729",
