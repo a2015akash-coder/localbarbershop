@@ -3,29 +3,29 @@ import { useNavigate, Link } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 
-/* ================= CLOUDINARY UPLOAD ================= */
+/* ---------------- CLOUDINARY ---------------- */
+const openCloudinaryWidget = (onUpload) => {
+  if (!window.cloudinary) {
+    alert("Cloudinary widget not loaded");
+    return;
+  }
 
-const CLOUD_NAME = "dvtbbuxon";
-const UPLOAD_PRESET = "blog_uploads";
-
-async function uploadToCloudinary(file) {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", UPLOAD_PRESET);
-
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-    { method: "POST", body: formData }
+  window.cloudinary.openUploadWidget(
+    {
+      cloudName: "dvtbbuxon",
+      uploadPreset: "blog_uploads",
+      multiple: false,
+      folder: "blog-images",
+    },
+    (_, result) => {
+      if (result?.event === "success") {
+        onUpload(result.info.secure_url);
+      }
+    }
   );
+};
 
-  if (!res.ok) throw new Error("Cloudinary upload failed");
-
-  const data = await res.json();
-  return data.secure_url;
-}
-
-/* ================= HELPERS ================= */
-
+/* ---------------- HELPERS ---------------- */
 const slugify = (text) =>
   text
     .toLowerCase()
@@ -34,10 +34,12 @@ const slugify = (text) =>
     .replace(/\s+/g, "-");
 
 const createUniqueSlug = (title) => `${slugify(title)}-${Date.now()}`;
-const sanitizeText = (text) => text.replace(/\s+/g, " ").trim();
+
+
 
 /* ================= UI CARD ================= */
 
+/* ---------------- CARD ---------------- */
 function Card({ title, children, action }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
@@ -59,18 +61,16 @@ export default function UploadBlogPage() {
 
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
+
   const [coverImage, setCoverImage] = useState("");
-  const [coverAlt, setCoverAlt] = useState("");
-  const [coverTitle, setCoverTitle] = useState("");
   const [category, setCategory] = useState("Hairstyle");
   const [status, setStatus] = useState("draft");
+
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [lastCreatedId, setLastCreatedId] = useState(null);
 
   const [content, setContent] = useState([{ type: "paragraph", text: "" }]);
-
-  /* ================= CONTENT BLOCK HELPERS ================= */
 
   const addBlock = (type) => {
     setContent((prev) => [
@@ -123,8 +123,8 @@ export default function UploadBlogPage() {
 
         content: content.map((b) => ({
           ...b,
-          text: b.text ? sanitizeText(b.text) : "",
-          alt: b.alt ? sanitizeText(b.alt) : "",
+          text: sanitizeText(b.text),
+          alt: sanitizeText(b.alt),
         })),
 
         createdAt: serverTimestamp(),
@@ -245,27 +245,11 @@ export default function UploadBlogPage() {
           }
         >
           {coverImage ? (
-            <div className="space-y-4">
-              <img
-                src={coverImage}
-                alt={coverAlt || "Cover image preview"}
-                className="h-56 w-full rounded-xl object-cover"
-              />
-
-              <input
-                className="w-full rounded-lg border px-3 py-2"
-                placeholder="Alt text (required for accessibility & SEO)"
-                value={coverAlt}
-                onChange={(e) => setCoverAlt(e.target.value)}
-              />
-
-              <input
-                className="w-full rounded-lg border px-3 py-2"
-                placeholder="Image title (optional)"
-                value={coverTitle}
-                onChange={(e) => setCoverTitle(e.target.value)}
-              />
-            </div>
+            <img
+              src={coverImage}
+              alt="Cover preview"
+              className="h-56 w-full rounded-xl object-cover"
+            />
           ) : (
             <p className="text-sm text-gray-500">
               Recommended: landscape image, ~1600×900
@@ -329,7 +313,7 @@ export default function UploadBlogPage() {
                     {block.src && (
                       <img
                         src={block.src}
-                        alt=""
+                        alt={block.alt || "Blog content image"}
                         className="h-40 rounded-lg object-cover"
                       />
                     )}
