@@ -142,14 +142,25 @@ function WhyLocalsChooseUs() {
             href="https://maps.google.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="
-              inline-flex items-center justify-center rounded-full
-              px-10 py-4 font-semibold
-              bg-[#FFF3E6]  text-[#7A3E00]  hover:bg-[#FFE6CF] transition
-            "
+            onClick={() => {
+              window.dataLayer = window.dataLayer || [];
+              window.dataLayer.push({
+                event: "directions_cta_click",
+                cta_location: "homepage2_cta",
+                destination: "google_maps",
+                page_path: window.location.pathname,
+              });
+
+              console.log("[TRACK] directions_cta_click", {
+                location: "homepage2_cta",
+                destination: "google_maps",
+                page: window.location.pathname,
+              });
+            }}
           >
             Get Directions
           </a>
+
         </div>
       </div>
     </section>

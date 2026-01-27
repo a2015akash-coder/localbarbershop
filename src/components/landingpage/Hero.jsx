@@ -50,18 +50,18 @@ function Hero() {
   const next = () => setCurrent((p) => (p + 1) % total);
   const prev = () => setCurrent((p) => (p - 1 + total) % total);
 
-   const trackCallClick = (location) => {
-      if (window.dataLayer) {
-        window.dataLayer.push({
-          event: "call_cta_click",
-          cta_type: "phone",
-          cta_location: location, // hero
-          phone_number: PHONE_NUMBER,
-          page_path: window.location.pathname,
-        });
-      }
-    };
-  
+  const trackCallClick = (location) => {
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        event: "call_cta_click",
+        cta_type: "phone",
+        cta_location: location, // hero
+        phone_number: PHONE_NUMBER,
+        page_path: window.location.pathname,
+      });
+    }
+  };
+
 
   return (
     <section className="bg-white">
@@ -119,11 +119,26 @@ function Hero() {
               <a
                 href="https://maps.google.com"
                 target="_blank"
-                rel="noreferrer"
-                className="rounded-full  px-8 py-3 bg-[#FFF3E6]  text-[#7A3E00]  hover:bg-[#FFE6CF] font-semibold"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  window.dataLayer = window.dataLayer || [];
+                  window.dataLayer.push({
+                    event: "directions_cta_click",
+                    cta_location: "homepage2_cta",
+                    destination: "google_maps",
+                    page_path: window.location.pathname,
+                  });
+
+                  console.log("[TRACK] directions_cta_click", {
+                    location: "homepage2_cta",
+                    destination: "google_maps",
+                    page: window.location.pathname,
+                  });
+                }}
               >
                 Get Directions
               </a>
+
             </div>
 
             <div className="mt-5 flex flex-wrap gap-3">

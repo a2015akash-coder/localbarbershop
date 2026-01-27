@@ -78,14 +78,30 @@ const ContactInfo = memo(function ContactInfo() {
             <a
               href="mailto:groomingroombarber@gmail.com"
               className="
-    font-medium
-    text-orange-600
-    underline
-    underline-offset-4
-    break-all
-    transition
-    hover:text-orange-700
-  "
+      font-medium
+      text-orange-600
+      underline
+      underline-offset-4
+      break-all
+      transition
+      hover:text-orange-700
+    "
+              onClick={() => {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                  event: "email_cta_click",
+                  cta_type: "email",
+                  cta_location: "contact_page_card",
+                  email_address: "groomingroombarber@gmail.com",
+                  page_path: window.location.pathname,
+                });
+
+                console.log("[TRACK] email_cta_click", {
+                  location: "contact_page_card",
+                  email: "groomingroombarber@gmail.com",
+                  page: window.location.pathname,
+                });
+              }}
             >
               groomingroombarber@gmail.com
             </a>
@@ -94,6 +110,7 @@ const ContactInfo = memo(function ContactInfo() {
               For general enquiries only.
             </p>
           </Card>
+
 
           {/* Opening Hours */}
           <Card icon={Clock} title="Opening Hours">
