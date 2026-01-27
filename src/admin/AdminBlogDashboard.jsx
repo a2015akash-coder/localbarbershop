@@ -80,11 +80,10 @@ function BlogRowCard({ blog, onPublish, onUnpublish, onDelete }) {
             <span>{blog.category || "—"}</span>
 
             <span
-              className={`rounded-full px-2 py-1 text-xs font-medium ${
-                blog.status === "published"
+              className={`rounded-full px-2 py-1 text-xs font-medium ${blog.status === "published"
                   ? "bg-green-100 text-green-700"
                   : "bg-gray-100 text-gray-700"
-              }`}
+                }`}
             >
               {blog.status}
             </span>
@@ -313,11 +312,10 @@ export default function AdminBlogDashboard() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`rounded-full px-4 py-2 text-sm font-medium ${
-                tab === t
+              className={`rounded-full px-4 py-2 text-sm font-medium ${tab === t
                   ? "bg-orange-600 text-white"
                   : "bg-white shadow-sm hover:bg-gray-100"
-              }`}
+                }`}
             >
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>

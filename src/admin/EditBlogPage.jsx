@@ -7,34 +7,13 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
+
+/* ================= SHARED UTILS ================= */
+
+import { uploadToCloudinary } from "../utils/cloudinaryUpload";
 import { sanitizeText } from "../utils/textHelpers";
 
-
-/* ================= CLOUDINARY ================= */
-
-const CLOUD_NAME = "dvtbbuxon";
-const UPLOAD_PRESET = "blog_uploads";
-
-async function uploadToCloudinary(file) {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", UPLOAD_PRESET);
-
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-    { method: "POST", body: formData }
-  );
-
-  if (!res.ok) throw new Error("Upload failed");
-
-  const data = await res.json();
-  return data.secure_url;
-}
-
-/* ================= HELPERS ================= */
-
-
-/* ================= CARD ================= */
+/* ================= UI CARD ================= */
 
 function Card({ children }) {
   return (
@@ -52,8 +31,27 @@ export default function EditBlogPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
 
+  /* --- Upload state (per upload, not global) --- */
+  const [uploadingIds, setUploadingIds] = useState(new Set());
+
+  const startUpload = (key) => {
+    setUploadingIds((prev) => {
+      const next = new Set(prev);
+      next.add(key);
+      return next;
+    });
+  };
+
+  const finishUpload = (key) => {
+    setUploadingIds((prev) => {
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+  };
+
+  /* --- Blog state --- */
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
 
@@ -63,14 +61,27 @@ export default function EditBlogPage() {
 
   const [category, setCategory] = useState("Hairstyle");
   const [status, setStatus] = useState("draft");
-  const [content, setContent] = useState([{ type: "paragraph", text: "" }]);
+
+  const [content, setContent] = useState([
+    { id: crypto.randomUUID(), type: "paragraph", text: "" },
+  ]);
+
+  const [originalPublishedAt, setOriginalPublishedAt] = useState(null);
+  const [originalStatus, setOriginalStatus] = useState("draft");
 
   /* ================= LOAD BLOG ================= */
 
   useEffect(() => {
     const load = async () => {
+      if (!id) {
+        alert("Invalid blog ID");
+        navigate("/admin");
+        return;
+      }
+
       try {
         const snap = await getDoc(doc(db, "blogs", id));
+
         if (!snap.exists()) {
           alert("Blog not found");
           navigate("/admin");
@@ -87,12 +98,19 @@ export default function EditBlogPage() {
         setCategory(d.category || "Hairstyle");
         setStatus(d.status || "draft");
 
+        setOriginalPublishedAt(d.publishedAt || null);
+        setOriginalStatus(d.status || "draft");
+
         setContent(
           Array.isArray(d.content)
-            ? d.content
-            : [{ type: "paragraph", text: "" }]
+            ? d.content.map((b) => ({
+              id: b.id ?? crypto.randomUUID(),
+              ...b,
+            }))
+            : [{ id: crypto.randomUUID(), type: "paragraph", text: "" }]
         );
-      } catch {
+      } catch (err) {
+        console.error(err);
         alert("Failed to load blog");
       } finally {
         setLoading(false);
@@ -104,25 +122,25 @@ export default function EditBlogPage() {
 
   /* ================= CONTENT HELPERS ================= */
 
-  const updateBlock = (i, k, v) => {
+  const updateBlock = (i, key, value) => {
     setContent((prev) => {
       const copy = [...prev];
-      copy[i][k] = v;
+      copy[i] = { ...copy[i], [key]: value };
       return copy;
     });
   };
 
   const addBlock = (type) => {
-    setContent((p) => [
-      ...p,
+    setContent((prev) => [
+      ...prev,
       type === "image"
-        ? { type: "image", src: "", alt: "" }
-        : { type, text: "" },
+        ? { id: crypto.randomUUID(), type: "image", src: "", alt: "" }
+        : { id: crypto.randomUUID(), type, text: "" },
     ]);
   };
 
   const removeBlock = (i) => {
-    setContent((p) => p.filter((_, idx) => idx !== i));
+    setContent((prev) => prev.filter((_, idx) => idx !== i));
   };
 
   /* ================= SAVE ================= */
@@ -138,6 +156,9 @@ export default function EditBlogPage() {
     setSaving(true);
 
     try {
+      const shouldSetPublishedAt =
+        originalStatus !== "published" && status === "published";
+
       await updateDoc(doc(db, "blogs", id), {
         title: sanitizeText(title),
         excerpt: sanitizeText(excerpt),
@@ -156,11 +177,14 @@ export default function EditBlogPage() {
         })),
 
         updatedAt: serverTimestamp(),
-        publishedAt: status === "published" ? serverTimestamp() : null,
+        publishedAt: shouldSetPublishedAt
+          ? serverTimestamp()
+          : originalPublishedAt ?? null,
       });
 
       navigate("/admin");
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert("Failed to save blog");
     } finally {
       setSaving(false);
@@ -170,6 +194,8 @@ export default function EditBlogPage() {
   if (loading) {
     return <p className="py-24 text-center">Loading…</p>;
   }
+
+  /* ================= RENDER ================= */
 
   return (
     <section className="bg-gray-50 py-16">
@@ -241,7 +267,7 @@ export default function EditBlogPage() {
               <h3 className="font-semibold">Cover Image</h3>
 
               <label className="cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
-                {uploading ? "Uploading…" : "Upload Image"}
+                {uploadingIds.has("cover") ? "Uploading…" : "Upload Image"}
                 <input
                   type="file"
                   accept="image/*"
@@ -250,14 +276,15 @@ export default function EditBlogPage() {
                     const file = e.target.files[0];
                     if (!file) return;
 
-                    setUploading(true);
+                    startUpload("cover");
                     try {
                       const url = await uploadToCloudinary(file);
                       setCoverImage(url);
-                    } catch {
+                    } catch (err) {
+                      console.error(err);
                       alert("Upload failed");
                     } finally {
-                      setUploading(false);
+                      finishUpload("cover");
                     }
                   }}
                 />
@@ -296,7 +323,7 @@ export default function EditBlogPage() {
 
           <div className="space-y-6">
             {content.map((block, i) => (
-              <div key={i} className="rounded-xl bg-gray-50 p-5 space-y-4">
+              <div key={block.id} className="rounded-xl bg-gray-50 p-5 space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-xs uppercase font-medium text-gray-500">
                     {block.type}
@@ -323,7 +350,9 @@ export default function EditBlogPage() {
                 {block.type === "image" && (
                   <>
                     <label className="inline-block cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
-                      Upload Image
+                      {uploadingIds.has(block.id)
+                        ? "Uploading…"
+                        : "Upload Image"}
                       <input
                         type="file"
                         accept="image/*"
@@ -332,14 +361,15 @@ export default function EditBlogPage() {
                           const file = e.target.files[0];
                           if (!file) return;
 
-                          setUploading(true);
+                          startUpload(block.id);
                           try {
                             const url = await uploadToCloudinary(file);
                             updateBlock(i, "src", url);
-                          } catch {
+                          } catch (err) {
+                            console.error(err);
                             alert("Upload failed");
                           } finally {
-                            setUploading(false);
+                            finishUpload(block.id);
                           }
                         }}
                       />
@@ -348,7 +378,7 @@ export default function EditBlogPage() {
                     {block.src && (
                       <img
                         src={block.src}
-                        alt=""
+                        alt={block.alt || "Content image preview"}
                         className="h-40 rounded-lg object-cover"
                       />
                     )}
