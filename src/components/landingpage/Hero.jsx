@@ -119,7 +119,8 @@ function Hero() {
               <a
                 href="https://maps.google.com"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noreferrer"
+                className="rounded-full  px-8 py-3 bg-[#FFF3E6]  text-[#7A3E00]  hover:bg-[#FFE6CF] font-semibold"
                 onClick={() => {
                   window.dataLayer = window.dataLayer || [];
                   window.dataLayer.push({
@@ -138,7 +139,6 @@ function Hero() {
               >
                 Get Directions
               </a>
-
             </div>
 
             <div className="mt-5 flex flex-wrap gap-3">

@@ -1,7 +1,6 @@
 import { memo } from "react";
 import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
 
-
 const HERO_IMAGE_URL =
   "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_2400,c_limit/v1767704060/interro_veoi1z.webp";
 
@@ -104,16 +103,27 @@ const ServicesHero = memo(function ServicesHero() {
           {/* PRIMARY CTA */}
           <a
             href={PHONE_LINK}
-            className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold"
-            onClick={() => trackCallClick("homepage1_cta")}
+            className="inline-flex items-center justify-center rounded-full px-10 py-4 font-semibold text-white bg-[#FF7A00] hover:bg-[#FF6A00] transition shadow-md"
+            onClick={() => trackCallClick("servicepage_hero")}
           >
-            Call Now
+
+            Talk To Us
           </a>
+
           {/* SECONDARY CTA – SOFT FILL */}
           <a
             href="https://maps.google.com"
             target="_blank"
             rel="noopener noreferrer"
+            className="
+              inline-flex items-center justify-center
+              rounded-full px-10 py-4
+              font-semibold
+              text-[#7A3E00]
+              bg-[#FFF3E6]
+              hover:bg-[#FFE6CF]
+              transition
+            "
             onClick={() => {
               window.dataLayer = window.dataLayer || [];
               window.dataLayer.push({
@@ -132,7 +142,6 @@ const ServicesHero = memo(function ServicesHero() {
           >
             Get Directions
           </a>
-
         </div>
       </div>
     </section>

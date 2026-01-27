@@ -142,6 +142,11 @@ function WhyLocalsChooseUs() {
             href="https://maps.google.com"
             target="_blank"
             rel="noopener noreferrer"
+            className="
+              inline-flex items-center justify-center rounded-full
+              px-10 py-4 font-semibold
+              bg-[#FFF3E6]  text-[#7A3E00]  hover:bg-[#FFE6CF] transition
+            "
             onClick={() => {
               window.dataLayer = window.dataLayer || [];
               window.dataLayer.push({
@@ -160,7 +165,6 @@ function WhyLocalsChooseUs() {
           >
             Get Directions
           </a>
-
         </div>
       </div>
     </section>
