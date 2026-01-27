@@ -6,7 +6,8 @@ import {
   CheckCircle,
   Scissors,
 } from "lucide-react";
-
+import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
+Z
 /* ------------------ IMAGES ------------------ */
 const images = [
   {
@@ -48,6 +49,19 @@ function Hero() {
 
   const next = () => setCurrent((p) => (p + 1) % total);
   const prev = () => setCurrent((p) => (p - 1 + total) % total);
+
+   const trackCallClick = (location) => {
+      if (window.dataLayer) {
+        window.dataLayer.push({
+          event: "call_cta_click",
+          cta_type: "phone",
+          cta_location: location, // hero
+          phone_number: PHONE_NUMBER,
+          page_path: window.location.pathname,
+        });
+      }
+    };
+  
 
   return (
     <section className="bg-white">
@@ -96,8 +110,9 @@ function Hero() {
 
             <div className="mt-7 flex gap-4 flex-wrap">
               <a
-                href="tel:+61123456789"
+                href={PHONE_LINK}
                 className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold"
+                onClick={() => trackCallClick("homepage1_cta")}
               >
                 Call Now
               </a>

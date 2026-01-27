@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef, useState } from "react";
+import { PHONE_LINK } from "../../constants";
 
 function LocationHours() {
   const mapRef = useRef(null);
@@ -21,6 +22,18 @@ function LocationHours() {
     observer.observe(mapRef.current);
     return () => observer.disconnect();
   }, []);
+
+  const trackCallClick = (location) => {
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        event: "call_cta_click",
+        cta_type: "phone",
+        cta_location: location, // maps
+        phone_number: PHONE_NUMBER,
+        page_path: window.location.pathname,
+      });
+    }
+  };
 
   return (
     <section className="bg-gray-50 py-12">
@@ -111,10 +124,9 @@ function LocationHours() {
         {/* CTA ROW */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
-            href="tel:+61288831729"
-            className="inline-flex items-center justify-center rounded-full
-                       bg-orange-500 px-10 py-4 font-semibold text-white
-                       hover:bg-orange-600 transition"
+            href={PHONE_LINK}
+            className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold"
+            onClick={() => trackCallClick("homepage3_cta")}
           >
             Call Now
           </a>

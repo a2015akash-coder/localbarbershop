@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { PHONE_LINK } from "../../constants";
 
 const FEATURES = [
   {
@@ -41,6 +42,17 @@ const FEATURES = [
 
 
 function WhyLocalsChooseUs() {
+  const trackCallClick = (location) => {
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        event: "call_cta_click",
+        cta_type: "phone",
+        cta_location: location, // what to expect
+        phone_number: PHONE_NUMBER,
+        page_path: window.location.pathname,
+      });
+    }
+  };
   return (
     <section className="bg-white py-12">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
@@ -113,12 +125,15 @@ function WhyLocalsChooseUs() {
         {/* CTA ROW */}
         <div className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-4">
           <a
-            href="tel:+61288831729"
+            href={PHONE_LINK}
             className="
               inline-flex items-center justify-center rounded-full
               bg-orange-500 px-10 py-4 font-semibold text-white
               hover:bg-orange-600 transition
+              
             "
+            onClick={() => trackCallClick("homepage2_cta")}
+
           >
             Call Now
           </a>

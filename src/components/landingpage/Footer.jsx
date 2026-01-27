@@ -8,6 +8,17 @@ const LOGO_URL =
   "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_300/v1768612130/IMG_4966_lxnwpl.png";
 
 function Footer() {
+   const trackCallClick = (location) => {
+      if (window.dataLayer) {
+        window.dataLayer.push({
+          event: "call_cta_click",
+          cta_type: "phone",
+          cta_location: location, // footer
+          phone_number: PHONE_NUMBER,
+          page_path: window.location.pathname,
+        });
+      }
+    };
   return (
     <footer className="bg-[#111827] text-gray-300">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-16">
