@@ -1,40 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 
-/* ================= CLOUDINARY ================= */
+/* HELPERS */
+const sanitizeText = (text = "") => text.replace(/\s+/g, " ").trim();
 
-const CLOUD_NAME = "dvtbbuxon";
-const UPLOAD_PRESET = "blog_uploads";
-
-async function uploadToCloudinary(file) {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", UPLOAD_PRESET);
-
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-    { method: "POST", body: formData }
-  );
-
-  if (!res.ok) throw new Error("Upload failed");
-
-  const data = await res.json();
-  return data.secure_url;
-}
-
-/* ================= HELPERS ================= */
-
-const sanitizeText = (text) => text.replace(/\s+/g, " ").trim();
-
-/* ================= CARD ================= */
-
+/* CARD */
 function Card({ children }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
@@ -43,16 +15,29 @@ function Card({ children }) {
   );
 }
 
-/* ================= PAGE ================= */
-
 export default function EditBlogPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
 
+  /* Upload tracking */
+  const [uploadingIds, setUploadingIds] = useState(new Set());
+
+  const startUpload = (key) => {
+    setUploadingIds((prev) => new Set(prev).add(key));
+  };
+
+  const finishUpload = (key) => {
+    setUploadingIds((prev) => {
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+  };
+
+  /* Blog state */
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
 
@@ -62,14 +47,26 @@ export default function EditBlogPage() {
 
   const [category, setCategory] = useState("Hairstyle");
   const [status, setStatus] = useState("draft");
-  const [content, setContent] = useState([{ type: "paragraph", text: "" }]);
 
-  /* ================= LOAD BLOG ================= */
+  const [content, setContent] = useState([
+    { id: crypto.randomUUID(), type: "paragraph", text: "" },
+  ]);
 
+  const [originalStatus, setOriginalStatus] = useState("draft");
+  const [originalPublishedAt, setOriginalPublishedAt] = useState(null);
+
+  /* LOAD BLOG */
   useEffect(() => {
     const load = async () => {
+      if (!id) {
+        alert("Invalid blog ID");
+        navigate("/admin");
+        return;
+      }
+
       try {
         const snap = await getDoc(doc(db, "blogs", id));
+
         if (!snap.exists()) {
           alert("Blog not found");
           navigate("/admin");
@@ -86,12 +83,19 @@ export default function EditBlogPage() {
         setCategory(d.category || "Hairstyle");
         setStatus(d.status || "draft");
 
+        setOriginalStatus(d.status || "draft");
+        setOriginalPublishedAt(d.publishedAt || null);
+
         setContent(
           Array.isArray(d.content)
-            ? d.content
-            : [{ type: "paragraph", text: "" }]
+            ? d.content.map((b) => ({
+                id: b.id || crypto.randomUUID(),
+                ...b,
+              }))
+            : [{ id: crypto.randomUUID(), type: "paragraph", text: "" }]
         );
-      } catch {
+      } catch (err) {
+        console.error(err);
         alert("Failed to load blog");
       } finally {
         setLoading(false);
@@ -101,31 +105,29 @@ export default function EditBlogPage() {
     load();
   }, [id, navigate]);
 
-  /* ================= CONTENT HELPERS ================= */
-
+  /* CONTENT HELPERS */
   const updateBlock = (i, k, v) => {
     setContent((prev) => {
       const copy = [...prev];
-      copy[i][k] = v;
+      copy[i] = { ...copy[i], [k]: v };
       return copy;
     });
   };
 
   const addBlock = (type) => {
-    setContent((p) => [
-      ...p,
+    setContent((prev) => [
+      ...prev,
       type === "image"
-        ? { type: "image", src: "", alt: "" }
-        : { type, text: "" },
+        ? { id: crypto.randomUUID(), type: "image", src: "", alt: "" }
+        : { id: crypto.randomUUID(), type, text: "" },
     ]);
   };
 
   const removeBlock = (i) => {
-    setContent((p) => p.filter((_, idx) => idx !== i));
+    setContent((prev) => prev.filter((_, idx) => idx !== i));
   };
 
-  /* ================= SAVE ================= */
-
+  /* SAVE */
   const save = async () => {
     if (!title || !excerpt || saving) return;
 
@@ -137,6 +139,9 @@ export default function EditBlogPage() {
     setSaving(true);
 
     try {
+      const shouldSetPublishedAt =
+        originalStatus !== "published" && status === "published";
+
       await updateDoc(doc(db, "blogs", id), {
         title: sanitizeText(title),
         excerpt: sanitizeText(excerpt),
@@ -155,31 +160,30 @@ export default function EditBlogPage() {
         })),
 
         updatedAt: serverTimestamp(),
-        publishedAt: status === "published" ? serverTimestamp() : null,
+        publishedAt: shouldSetPublishedAt
+          ? serverTimestamp()
+          : originalPublishedAt ?? null,
       });
 
       navigate("/admin");
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert("Failed to save blog");
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return <p className="py-24 text-center">Loading…</p>;
-  }
+  if (loading) return <p className="py-24 text-center">Loading…</p>;
 
+  /* UI */
   return (
     <section className="bg-gray-50 py-16">
       <div className="max-w-screen-lg mx-auto px-4 space-y-8">
 
-        {/* HEADER */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900">
-              Edit Blog
-            </h1>
+            <h1 className="text-3xl font-semibold text-gray-900">Edit Blog</h1>
             <p className="mt-1 text-sm text-gray-600">
               Update content, metadata, and publishing status.
             </p>
@@ -219,7 +223,7 @@ export default function EditBlogPage() {
               className="md:col-span-2 rounded-xl border px-4 py-3"
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Excerpt (used in listings & SEO)"
+              placeholder="Excerpt"
             />
 
             <select
@@ -233,76 +237,20 @@ export default function EditBlogPage() {
           </div>
         </Card>
 
-        {/* COVER IMAGE */}
-        <Card>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-semibold">Cover Image</h3>
-
-              <label className="cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
-                {uploading ? "Uploading…" : "Upload Image"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={async (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-
-                    setUploading(true);
-                    try {
-                      const url = await uploadToCloudinary(file);
-                      setCoverImage(url);
-                    } catch {
-                      alert("Upload failed");
-                    } finally {
-                      setUploading(false);
-                    }
-                  }}
-                />
-              </label>
-            </div>
-
-            {coverImage && (
-              <>
-                <img
-                  src={coverImage}
-                  alt={coverAlt || "Cover image preview"}
-                  className="rounded-xl h-56 w-full object-cover"
-                />
-
-                <input
-                  className="w-full rounded-lg border px-3 py-2"
-                  placeholder="Alt text (required for SEO & accessibility)"
-                  value={coverAlt}
-                  onChange={(e) => setCoverAlt(e.target.value)}
-                />
-
-                <input
-                  className="w-full rounded-lg border px-3 py-2"
-                  placeholder="Image title (optional)"
-                  value={coverTitle}
-                  onChange={(e) => setCoverTitle(e.target.value)}
-                />
-              </>
-            )}
-          </div>
-        </Card>
-
         {/* CONTENT */}
         <Card>
           <h3 className="font-semibold mb-6">Content Blocks</h3>
 
           <div className="space-y-6">
             {content.map((block, i) => (
-              <div key={i} className="rounded-xl bg-gray-50 p-5 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs uppercase font-medium text-gray-500">
+              <div key={block.id} className="rounded-xl bg-gray-50 p-5 space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-xs uppercase text-gray-500">
                     {block.type}
                   </span>
                   <button
                     onClick={() => removeBlock(i)}
-                    className="text-sm text-red-600 hover:underline"
+                    className="text-sm text-red-600"
                   >
                     Remove
                   </button>
@@ -321,40 +269,17 @@ export default function EditBlogPage() {
 
                 {block.type === "image" && (
                   <>
-                    <label className="inline-block cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
-                      Upload Image
-                      <input
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        onChange={async (e) => {
-                          const file = e.target.files[0];
-                          if (!file) return;
-
-                          setUploading(true);
-                          try {
-                            const url = await uploadToCloudinary(file);
-                            updateBlock(i, "src", url);
-                          } catch {
-                            alert("Upload failed");
-                          } finally {
-                            setUploading(false);
-                          }
-                        }}
-                      />
-                    </label>
-
                     {block.src && (
                       <img
                         src={block.src}
-                        alt=""
+                        alt={block.alt || "Content image preview"}
                         className="h-40 rounded-lg object-cover"
                       />
                     )}
 
                     <input
-                      placeholder="Alt text"
                       className="w-full rounded-lg border px-3 py-2"
+                      placeholder="Alt text"
                       value={block.alt || ""}
                       onChange={(e) =>
                         updateBlock(i, "alt", e.target.value)
@@ -366,7 +291,7 @@ export default function EditBlogPage() {
             ))}
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6 flex gap-3">
             <button onClick={() => addBlock("paragraph")} className="rounded-lg border px-4 py-2">
               + Paragraph
             </button>
@@ -384,7 +309,7 @@ export default function EditBlogPage() {
           <button
             onClick={save}
             disabled={saving}
-            className="rounded-full bg-orange-600 px-10 py-4 text-white font-semibold hover:bg-orange-700 disabled:opacity-60"
+            className="rounded-full bg-orange-600 px-10 py-4 text-white font-semibold hover:bg-orange-700"
           >
             {saving ? "Saving…" : "Save Changes"}
           </button>
