@@ -8,17 +8,22 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 
-/* HELPERS */
-const sanitizeText = (text) => text.replace(/\s+/g, " ").trim();
+/* ================= SHARED UTILS ================= */
 
-/* CARD WRAPPER */
+import { uploadToCloudinary } from "../utils/cloudinaryUpload";
+import { sanitizeText } from "../utils/textHelpers";
+
+/* ================= UI CARD ================= */
+
 function Card({ children }) {
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition">
+    <div className="rounded-2xl bg-white p-6 shadow-sm">
       {children}
     </div>
   );
 }
+
+/* ================= PAGE ================= */
 
 export default function EditBlogPage() {
   const { id } = useParams();
@@ -27,18 +32,56 @@ export default function EditBlogPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  /* --- Upload state (per upload, not global) --- */
+  const [uploadingIds, setUploadingIds] = useState(new Set());
+
+  const startUpload = (key) => {
+    setUploadingIds((prev) => {
+      const next = new Set(prev);
+      next.add(key);
+      return next;
+    });
+  };
+
+  const finishUpload = (key) => {
+    setUploadingIds((prev) => {
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+  };
+
+  /* --- Blog state --- */
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
+
   const [coverImage, setCoverImage] = useState("");
+  const [coverAlt, setCoverAlt] = useState("");
+  const [coverTitle, setCoverTitle] = useState("");
+
   const [category, setCategory] = useState("Hairstyle");
   const [status, setStatus] = useState("draft");
-  const [content, setContent] = useState([{ type: "paragraph", text: "" }]);
 
-  /* LOAD BLOG */
+  const [content, setContent] = useState([
+    { id: crypto.randomUUID(), type: "paragraph", text: "" },
+  ]);
+
+  const [originalPublishedAt, setOriginalPublishedAt] = useState(null);
+  const [originalStatus, setOriginalStatus] = useState("draft");
+
+  /* ================= LOAD BLOG ================= */
+
   useEffect(() => {
     const load = async () => {
+      if (!id) {
+        alert("Invalid blog ID");
+        navigate("/admin");
+        return;
+      }
+
       try {
         const snap = await getDoc(doc(db, "blogs", id));
+
         if (!snap.exists()) {
           alert("Blog not found");
           navigate("/admin");
@@ -46,90 +89,113 @@ export default function EditBlogPage() {
         }
 
         const d = snap.data();
+
         setTitle(d.title || "");
         setExcerpt(d.excerpt || "");
         setCoverImage(d.coverImage || "");
+        setCoverAlt(d.coverAlt || "");
+        setCoverTitle(d.coverTitle || "");
         setCategory(d.category || "Hairstyle");
         setStatus(d.status || "draft");
-        setContent(Array.isArray(d.content) ? d.content : [{ type: "paragraph", text: "" }]);
-      } catch {
+
+        setOriginalPublishedAt(d.publishedAt || null);
+        setOriginalStatus(d.status || "draft");
+
+        setContent(
+          Array.isArray(d.content)
+            ? d.content.map((b) => ({
+              id: b.id ?? crypto.randomUUID(),
+              ...b,
+            }))
+            : [{ id: crypto.randomUUID(), type: "paragraph", text: "" }]
+        );
+      } catch (err) {
+        console.error(err);
         alert("Failed to load blog");
       } finally {
         setLoading(false);
       }
     };
+
     load();
   }, [id, navigate]);
 
-  /* CONTENT HANDLERS */
-  const updateBlock = (i, k, v) => {
+  /* ================= CONTENT HELPERS ================= */
+
+  const updateBlock = (i, key, value) => {
     setContent((prev) => {
       const copy = [...prev];
-      copy[i][k] = v;
+      copy[i] = { ...copy[i], [key]: value };
       return copy;
     });
   };
 
   const addBlock = (type) => {
-    setContent((p) => [
-      ...p,
+    setContent((prev) => [
+      ...prev,
       type === "image"
-        ? { type: "image", src: "", alt: "" }
-        : { type, text: "" },
+        ? { id: crypto.randomUUID(), type: "image", src: "", alt: "" }
+        : { id: crypto.randomUUID(), type, text: "" },
     ]);
   };
 
   const removeBlock = (i) => {
-    setContent((p) => p.filter((_, idx) => idx !== i));
+    setContent((prev) => prev.filter((_, idx) => idx !== i));
   };
 
-  /* CLOUDINARY */
-  const openCloudinaryWidget = (onUpload) => {
-    window.cloudinary.openUploadWidget(
-      {
-        cloudName: "dvtbbuxon",
-        uploadPreset: "blog_uploads",
-        multiple: false,
-        folder: "blog-images",
-      },
-      (_, result) => {
-        if (result?.event === "success") {
-          onUpload(result.info.secure_url);
-        }
-      }
-    );
-  };
+  /* ================= SAVE ================= */
 
-  /* SAVE */
   const save = async () => {
     if (!title || !excerpt || saving) return;
+
+    if (status === "published" && !coverAlt.trim()) {
+      alert("Cover image alt text is required before publishing.");
+      return;
+    }
+
     setSaving(true);
 
     try {
+      const shouldSetPublishedAt =
+        originalStatus !== "published" && status === "published";
+
       await updateDoc(doc(db, "blogs", id), {
         title: sanitizeText(title),
         excerpt: sanitizeText(excerpt),
+
         coverImage,
+        coverAlt: sanitizeText(coverAlt),
+        coverTitle: sanitizeText(coverTitle),
+
         category,
         status,
+
         content: content.map((b) => ({
           ...b,
           text: b.text ? sanitizeText(b.text) : "",
           alt: b.alt ? sanitizeText(b.alt) : "",
         })),
+
         updatedAt: serverTimestamp(),
-        publishedAt: status === "published" ? serverTimestamp() : null,
+        publishedAt: shouldSetPublishedAt
+          ? serverTimestamp()
+          : originalPublishedAt ?? null,
       });
 
       navigate("/admin");
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert("Failed to save blog");
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <p className="py-24 text-center">Loading…</p>;
+  if (loading) {
+    return <p className="py-24 text-center">Loading…</p>;
+  }
+
+  /* ================= RENDER ================= */
 
   return (
     <section className="bg-gray-50 py-16">
@@ -180,7 +246,7 @@ export default function EditBlogPage() {
               className="md:col-span-2 rounded-xl border px-4 py-3"
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Excerpt (used in listings and SEO)"
+              placeholder="Excerpt (used in listings & SEO)"
             />
 
             <select
@@ -196,23 +262,57 @@ export default function EditBlogPage() {
 
         {/* COVER IMAGE */}
         <Card>
-          <div className="flex flex-col gap-4">
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold">Cover Image</h3>
-              <button
-                onClick={() => openCloudinaryWidget(setCoverImage)}
-                className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
-              >
-                Upload Image
-              </button>
+
+              <label className="cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
+                {uploadingIds.has("cover") ? "Uploading…" : "Upload Image"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    startUpload("cover");
+                    try {
+                      const url = await uploadToCloudinary(file);
+                      setCoverImage(url);
+                    } catch (err) {
+                      console.error(err);
+                      alert("Upload failed");
+                    } finally {
+                      finishUpload("cover");
+                    }
+                  }}
+                />
+              </label>
             </div>
 
             {coverImage && (
-              <img
-                src={coverImage}
-                alt="Cover"
-                className="rounded-xl h-56 w-full object-cover"
-              />
+              <>
+                <img
+                  src={coverImage}
+                  alt={coverAlt || "Cover image preview"}
+                  className="rounded-xl h-56 w-full object-cover"
+                />
+
+                <input
+                  className="w-full rounded-lg border px-3 py-2"
+                  placeholder="Alt text (required for SEO & accessibility)"
+                  value={coverAlt}
+                  onChange={(e) => setCoverAlt(e.target.value)}
+                />
+
+                <input
+                  className="w-full rounded-lg border px-3 py-2"
+                  placeholder="Image title (optional)"
+                  value={coverTitle}
+                  onChange={(e) => setCoverTitle(e.target.value)}
+                />
+              </>
             )}
           </div>
         </Card>
@@ -223,9 +323,9 @@ export default function EditBlogPage() {
 
           <div className="space-y-6">
             {content.map((block, i) => (
-              <div key={i} className="rounded-xl bg-gray-50 p-5 space-y-4">
+              <div key={block.id} className="rounded-xl bg-gray-50 p-5 space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-medium uppercase text-gray-500">
+                  <span className="text-xs uppercase font-medium text-gray-500">
                     {block.type}
                   </span>
                   <button
@@ -236,40 +336,49 @@ export default function EditBlogPage() {
                   </button>
                 </div>
 
-                {block.type === "paragraph" && (
+                {block.type !== "image" && (
                   <textarea
-                    rows={4}
+                    rows={block.type === "paragraph" ? 4 : 2}
                     className="w-full rounded-lg border px-3 py-2"
                     value={block.text}
-                    onChange={(e) => updateBlock(i, "text", e.target.value)}
-                  />
-                )}
-
-                {block.type === "heading" && (
-                  <input
-                    className="w-full rounded-lg border px-3 py-2"
-                    value={block.text}
-                    onChange={(e) => updateBlock(i, "text", e.target.value)}
+                    onChange={(e) =>
+                      updateBlock(i, "text", e.target.value)
+                    }
                   />
                 )}
 
                 {block.type === "image" && (
-                  <div className="space-y-3">
-                    <button
-                      onClick={() =>
-                        openCloudinaryWidget((url) =>
-                          updateBlock(i, "src", url)
-                        )
-                      }
-                      className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                      Upload Image
-                    </button>
+                  <>
+                    <label className="inline-block cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
+                      {uploadingIds.has(block.id)
+                        ? "Uploading…"
+                        : "Upload Image"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+
+                          startUpload(block.id);
+                          try {
+                            const url = await uploadToCloudinary(file);
+                            updateBlock(i, "src", url);
+                          } catch (err) {
+                            console.error(err);
+                            alert("Upload failed");
+                          } finally {
+                            finishUpload(block.id);
+                          }
+                        }}
+                      />
+                    </label>
 
                     {block.src && (
                       <img
                         src={block.src}
-                        alt=""
+                        alt={block.alt || "Content image preview"}
                         className="h-40 rounded-lg object-cover"
                       />
                     )}
@@ -278,9 +387,11 @@ export default function EditBlogPage() {
                       placeholder="Alt text"
                       className="w-full rounded-lg border px-3 py-2"
                       value={block.alt || ""}
-                      onChange={(e) => updateBlock(i, "alt", e.target.value)}
+                      onChange={(e) =>
+                        updateBlock(i, "alt", e.target.value)
+                      }
                     />
-                  </div>
+                  </>
                 )}
               </div>
             ))}

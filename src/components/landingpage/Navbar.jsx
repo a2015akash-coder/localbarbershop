@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { label: "Services", to: "/mens-haircuts-beard-trims-kellyville" },
   { label: "Blogs", to: "/blogs" },
   { label: "Contact", to: "/contact" },
-  
+
 ];
 
 const Navbar = () => {
@@ -27,15 +27,27 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const trackCallClick = (location) => {
+    if (window.dataLayer) {
+      window.dataLayer.push({
+        event: "call_cta_click",
+        cta_type: "phone",
+        cta_location: location, // navbar_desktop | navbar_mobile
+        phone_number: PHONE_NUMBER,
+        page_path: window.location.pathname,
+      });
+    }
+  };
+
+
   return (
     <header
       className={`
         sticky top-0 z-50
         transition-colors duration-300
-        ${
-          scrolled
-            ? "bg-black/90 backdrop-blur-md border-b border-white/10"
-            : "bg-black"
+        ${scrolled
+          ? "bg-black/90 backdrop-blur-md border-b border-white/10"
+          : "bg-black"
         }
       `}
     >
@@ -45,18 +57,18 @@ const Navbar = () => {
 
           {/* LOGO — LEFT (PROMINENT, ATTACHED) */}
           <Link to="/" className="flex items-center shrink-0">
-  <img
-    src={LOGO_URL}
-    alt="The Grooming Room Barbershop"
-    className="
+            <img
+              src={LOGO_URL}
+              alt="The Grooming Room Barbershop"
+              className="
       h-20 md:h-24
       w-auto
       object-contain
     "
-    loading="eager"
-    decoding="async"
-  />
-</Link>
+              loading="eager"
+              decoding="async"
+            />
+          </Link>
 
 
           {/* CENTER NAV (DESKTOP) */}
@@ -88,14 +100,15 @@ const Navbar = () => {
             {/* DESKTOP CTA */}
             <a
               href={PHONE_LINK}
+              onClick={() => trackCallClick("navbar_desktop")}
               className="
-                hidden md:inline-flex
-                items-center justify-center
-                rounded-full px-8 py-3.5
-                text-sm font-semibold text-white
-                bg-[#FF7A00] hover:bg-[#FF6A00]
-                transition-colors shadow-md
-              "
+       hidden md:inline-flex
+    items-center justify-center
+     rounded-full px-8 py-3.5
+    text-sm font-semibold text-white
+    bg-[#FF7A00] hover:bg-[#FF6A00]
+    transition-colors shadow-md
+  "
             >
               {PHONE_NUMBER}
             </a>
@@ -103,15 +116,17 @@ const Navbar = () => {
             {/* MOBILE CTA */}
             <a
               href={PHONE_LINK}
+              onClick={() => trackCallClick("navbar_mobile")}
               className="
-                md:hidden
-                rounded-full px-5 py-2.5
-                text-sm font-semibold text-white
-                bg-[#FF7A00]
-              "
+    md:hidden
+    rounded-full px-5 py-2.5
+    text-sm font-semibold text-white
+    bg-[#FF7A00]
+  "
             >
               {PHONE_NUMBER}
             </a>
+
 
             {/* MOBILE MENU BUTTON */}
             <button
