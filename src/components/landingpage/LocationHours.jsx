@@ -148,7 +148,7 @@ function LocationHours() {
               });
 
               console.log("[TRACK] directions_cta_click", {
-                location: "homepage2_cta",
+                location: "homepage3_cta",
                 destination: "google_maps",
                 page: window.location.pathname,
               });
