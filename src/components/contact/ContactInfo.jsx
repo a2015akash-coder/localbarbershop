@@ -19,13 +19,25 @@ const Card = ({ icon: Icon, title, children }) => (
 );
 
 const ContactInfo = memo(function ContactInfo() {
+  const trackCallClick = (location) => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "call_click",
+      cta_type: "phone",
+      cta_location: location, // contact_page_card
+      phone_number: "+61288831729",
+      page_path: window.location.pathname,
+    });
+  };
+
+
   return (
     <section className="bg-slate-50 section-spacing">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="max-w-2xl mb-14">
-         <h2
+          <h2
             className="font-semibold tracking-tight"
             style={{
               fontSize: "clamp(2rem, 4vw, 2.8rem)",
@@ -50,13 +62,16 @@ const ContactInfo = memo(function ContactInfo() {
             <a
               href="tel:+61288831729"
               className="text-lg font-semibold text-slate-900 hover:text-orange-600 transition"
+              onClick={() => trackCallClick("contact_page_card")}
             >
               (02) 8883 1729
             </a>
+
             <p className="text-sm text-slate-500">
               Call us for quick questions or availability.
             </p>
           </Card>
+
 
           {/* Email */}
           <Card icon={Mail} title="Email">

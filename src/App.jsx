@@ -12,6 +12,7 @@ import Home from "./Pages/Home.jsx";
 import Contact from "./Pages/Contact.jsx";
 import MonthlyDraw from "./Pages/MonthlyDraw.jsx";
 import Promotion from "./Pages/Promotion.jsx";
+import PageViewTracker from "./analytics/PageViewTracker.js";
 
 // LAZY (secondary / heavy pages)
 const Services = lazy(() => import("./Pages/Services.jsx"));
@@ -30,6 +31,7 @@ const EditBlogPage = lazy(() => import("./admin/EditBlogPage.jsx"));
 function App() {
   return (
     <BrowserRouter>
+    <PageViewTracker/>
       <ScrollToTop />
       <Navbar />
 
