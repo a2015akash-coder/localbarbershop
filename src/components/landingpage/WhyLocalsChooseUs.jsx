@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { PHONE_LINK } from "../../constants";
+import { PHONE_LINK, PHONE_NUMBER } from "../../constants";
 
 const FEATURES = [
   {
