@@ -112,7 +112,7 @@ function Hero() {
               <a
                 href={PHONE_LINK}
                 className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold"
-                onClick={() => trackCallClick("homepage1_cta")}
+                onClick={() => trackCallClick("hero_section")}
               >
                 Call Now
               </a>
@@ -125,7 +125,7 @@ function Hero() {
                   window.dataLayer = window.dataLayer || [];
                   window.dataLayer.push({
                     event: "directions_cta_click",
-                    cta_location: "homepage2_cta",
+                    cta_location: "hero_section",
                     destination: "google_maps",
                     page_path: window.location.pathname,
                   });

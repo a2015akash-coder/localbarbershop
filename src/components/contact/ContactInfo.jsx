@@ -1,5 +1,7 @@
 import { memo } from "react";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
+
 
 const Card = ({ icon: Icon, title, children }) => (
   <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 flex flex-col justify-between">
@@ -60,7 +62,7 @@ const ContactInfo = memo(function ContactInfo() {
           {/* Phone */}
           <Card icon={Phone} title="Phone">
             <a
-              href="tel:+61288831729"
+               href={PHONE_LINK}
               className="text-lg font-semibold text-slate-900 hover:text-orange-600 transition"
               onClick={() => trackCallClick("contact_page_card")}
             >
@@ -96,11 +98,7 @@ const ContactInfo = memo(function ContactInfo() {
                   page_path: window.location.pathname,
                 });
 
-                console.log("[TRACK] email_cta_click", {
-                  location: "contact_page_card",
-                  email: "groomingroombarber@gmail.com",
-                  page: window.location.pathname,
-                });
+               
               }}
             >
               groomingroombarber@gmail.com

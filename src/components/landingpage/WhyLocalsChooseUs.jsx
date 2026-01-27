@@ -132,7 +132,7 @@ function WhyLocalsChooseUs() {
               hover:bg-orange-600 transition
               
             "
-            onClick={() => trackCallClick("homepage2_cta")}
+            onClick={() => trackCallClick("what_to_expect_section")}
 
           >
             Call Now
@@ -151,16 +151,12 @@ function WhyLocalsChooseUs() {
               window.dataLayer = window.dataLayer || [];
               window.dataLayer.push({
                 event: "directions_cta_click",
-                cta_location: "homepage2_cta",
+                cta_location: "what_to_expect_section",
                 destination: "google_maps",
                 page_path: window.location.pathname,
               });
 
-              console.log("[TRACK] directions_cta_click", {
-                location: "homepage2_cta",
-                destination: "google_maps",
-                page: window.location.pathname,
-              });
+             
             }}
           >
             Get Directions

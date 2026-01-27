@@ -126,7 +126,7 @@ function LocationHours() {
           <a
             href={PHONE_LINK}
             className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold"
-            onClick={() => trackCallClick("homepage3_cta")}
+            onClick={() => trackCallClick("maps_section_home")}
           >
             Call Now
           </a>
@@ -142,16 +142,12 @@ function LocationHours() {
               window.dataLayer = window.dataLayer || [];
               window.dataLayer.push({
                 event: "directions_cta_click",
-                cta_location: "homepage2_cta",
+                cta_location: "maps_section_home",
                 destination: "google_maps",
                 page_path: window.location.pathname,
               });
 
-              console.log("[TRACK] directions_cta_click", {
-                location: "homepage3_cta",
-                destination: "google_maps",
-                page: window.location.pathname,
-              });
+              
             }}
           >
             Get Directions
