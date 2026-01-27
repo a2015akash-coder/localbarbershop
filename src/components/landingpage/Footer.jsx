@@ -140,7 +140,7 @@ function Footer() {
             </p>
 
             <a
-              href="tel:+911234567890"
+              href={PHONE_LINK}
               className="
                 inline-flex mt-6
                 items-center justify-center
@@ -151,6 +151,7 @@ function Footer() {
                 transition-colors
                 shadow-md
               "
+               onClick={() => trackCallClick("footer_cta")}
             >
                {PHONE_NUMBER}
             </a>

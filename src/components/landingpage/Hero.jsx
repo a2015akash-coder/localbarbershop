@@ -7,7 +7,7 @@ import {
   Scissors,
 } from "lucide-react";
 import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
-Z
+
 /* ------------------ IMAGES ------------------ */
 const images = [
   {
