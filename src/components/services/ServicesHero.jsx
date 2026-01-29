@@ -5,6 +5,8 @@ const HERO_IMAGE_URL =
   "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_2400,c_limit/v1767704060/interro_veoi1z.webp";
 
 const ServicesHero = memo(function ServicesHero() {
+
+
   const trackCallClick = (location) => {
     if (window.dataLayer) {
       window.dataLayer.push({
@@ -16,6 +18,9 @@ const ServicesHero = memo(function ServicesHero() {
       });
     }
   };
+
+
+
   return (
     <section className="relative overflow-hidden bg-[#F8F6F2] pt-16 pb-14">
       {/* SEO IMAGE (indexable, not visible) */}

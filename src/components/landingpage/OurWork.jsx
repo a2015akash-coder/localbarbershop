@@ -31,7 +31,7 @@ function OurWork() {
 
           {/* MEN’S HAIRCUTS */}
           <Link
-            to="/services"
+            to="/mens-haircuts-beard-trims-kellyville"
             className="group rounded-2xl overflow-hidden border border-gray-200 bg-white hover:shadow-lg transition"
           >
             <div className="relative aspect-[4/3] overflow-hidden">
@@ -64,7 +64,7 @@ function OurWork() {
 
           {/* BEARD SERVICES */}
           <Link
-            to="/services"
+            to="/mens-haircuts-beard-trims-kellyville"
             className="group rounded-2xl overflow-hidden border border-gray-200 bg-white hover:shadow-lg transition"
           >
             <div className="relative aspect-[4/3] overflow-hidden">
@@ -97,7 +97,7 @@ function OurWork() {
 
           {/* GREY HAIR COLOURING */}
           <Link
-            to="/services"
+            to="/mens-haircuts-beard-trims-kellyville"
             className="group rounded-2xl overflow-hidden border border-gray-200 bg-white hover:shadow-lg transition"
           >
             <div className="relative aspect-[4/3] overflow-hidden">
@@ -132,7 +132,7 @@ function OurWork() {
         {/* CTA */}
         <div className="mt-12 text-center">
           <Link
-            to="/services"
+            to="/mens-haircuts-beard-trims-kellyville"
             className="
               inline-flex items-center justify-center
               rounded-full bg-[#FFF3E6]  text-[#7A3E00]  hover:bg-[#FFE6CF]

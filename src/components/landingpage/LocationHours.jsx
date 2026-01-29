@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef, useState } from "react";
-import { PHONE_LINK } from "../../constants";
+import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
+
 
 function LocationHours() {
   const mapRef = useRef(null);
