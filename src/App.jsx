@@ -31,58 +31,62 @@ const EditBlogPage = lazy(() => import("./admin/EditBlogPage.jsx"));
 function App() {
   return (
     <BrowserRouter>
-    <PageViewTracker/>
+      <PageViewTracker />
       <ScrollToTop />
+
       <Navbar />
 
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          {/* PUBLIC */}
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/mens-haircuts-beard-trims-kellyville"
-            element={<Services />}
-          />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/win" element={<MonthlyDraw />} />
-              <Route path="/monthly-draw-kellyville-barber" element={<Promotion />} />
+      <main id="main-content">
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            {/* PUBLIC */}
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/mens-haircuts-beard-trims-kellyville"
+              element={<Services />}
+            />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/win" element={<MonthlyDraw />} />
+            <Route
+              path="/monthly-draw-kellyville-barber"
+              element={<Promotion />}
+            />
 
-          {/* BLOG (PUBLIC) */}
-          <Route path="/blogs" element={<BlogListPage />} />
-          <Route path="/blog/:slug" element={<BlogDetailsPage />} />
+            {/* BLOG */}
+            <Route path="/blogs" element={<BlogListPage />} />
+            <Route path="/blog/:slug" element={<BlogDetailsPage />} />
 
-          {/* AUTH */}
-          <Route path="/login" element={<LoginPage />} />
+            {/* AUTH */}
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* ADMIN CMS */}
-          <Route
-            path="/admin"
-            element={
-              <AdminGuard>
-                <AdminBlogDashboard />
-              </AdminGuard>
-            }
-          />
-
-          <Route
-            path="/admin/blogs/new"
-            element={
-              <AdminGuard>
-                <UploadBlogPage />
-              </AdminGuard>
-            }
-          />
-
-          <Route
-            path="/admin/blogs/:id/edit"
-            element={
-              <AdminGuard>
-                <EditBlogPage />
-              </AdminGuard>
-            }
-          />
-        </Routes>
-      </Suspense>
+            {/* ADMIN */}
+            <Route
+              path="/admin"
+              element={
+                <AdminGuard>
+                  <AdminBlogDashboard />
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/blogs/new"
+              element={
+                <AdminGuard>
+                  <UploadBlogPage />
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/blogs/:id/edit"
+              element={
+                <AdminGuard>
+                  <EditBlogPage />
+                </AdminGuard>
+              }
+            />
+          </Routes>
+        </Suspense>
+      </main>
 
       <Footer />
     </BrowserRouter>
@@ -90,3 +94,4 @@ function App() {
 }
 
 export default memo(App);
+

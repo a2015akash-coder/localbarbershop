@@ -50,7 +50,7 @@ const ContactInfo = memo(function ContactInfo() {
           >
             Our Contact Details
           </h2>
-          <p className="mt-4 text-slate-600 text-base sm:text-lg">
+          <p className="mt-4 text-slate-700 text-base sm:text-lg">
             Everything you need to know before visiting — location, contact details,
             and opening hours.
           </p>
@@ -69,7 +69,7 @@ const ContactInfo = memo(function ContactInfo() {
               (02) 8883 1729
             </a>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-700">
               Call us for quick questions or availability.
             </p>
           </Card>

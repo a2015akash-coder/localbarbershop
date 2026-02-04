@@ -1,19 +1,16 @@
 import { memo, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { PHONE_NUMBER, PHONE_LINK } from "../../constants";
 
 const LOGO_URL =
   "https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_300/v1768612130/IMG_4966_lxnwpl.png";
 
-/* Explicit label → route mapping (SEO-safe) */
 const NAV_ITEMS = [
   { label: "Home", to: "/" },
   { label: "Services", to: "/mens-haircuts-beard-trims-kellyville" },
   { label: "Blogs", to: "/blogs" },
   { label: "Contact", to: "/contact" },
-    { label: "Promotions", to: "/monthly-draw-kellyville-barber" },
-  
-
+  { label: "Promotions", to: "/monthly-draw-kellyville-barber" }
 ];
 
 const Navbar = () => {
@@ -34,13 +31,12 @@ const Navbar = () => {
       window.dataLayer.push({
         event: "call_cta_click",
         cta_type: "phone",
-        cta_location: location, // navbar_desktop | navbar_mobile
+        cta_location: location,
         phone_number: PHONE_NUMBER,
-        page_path: window.location.pathname,
+        page_path: window.location.pathname
       });
     }
   };
-
 
   return (
     <header
@@ -53,91 +49,100 @@ const Navbar = () => {
         }
       `}
     >
+      {/* Skip link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 bg-white text-black px-4 py-2 rounded-md z-50"
+      >
+        Skip to content
+      </a>
+
       <nav className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-        {/* MAIN BAR */}
         <div className="relative flex h-23 items-center w-full">
 
-          {/* LOGO — LEFT (PROMINENT, ATTACHED) */}
+          {/* Logo */}
           <Link to="/" className="flex items-center shrink-0">
             <img
               src={LOGO_URL}
               alt="The Grooming Room Barbershop"
-              className="
-      h-20 md:h-24
-      w-auto
-      object-contain
-    "
+              className="h-20 md:h-24 w-auto object-contain"
               loading="eager"
               decoding="async"
             />
           </Link>
 
-
-          {/* CENTER NAV (DESKTOP) */}
+          {/* Desktop navigation */}
           <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex">
-            <ul className="flex items-center gap-12 text-[15px] font-medium text-gray-300">
+            <ul className="flex items-center gap-12 text-[15px] font-medium text-gray-200">
               {NAV_ITEMS.map((item) => (
                 <li key={item.label}>
-                  <Link
+                  <NavLink
                     to={item.to}
-                    className="
-                      relative transition-colors
-                      hover:text-white
-                      after:absolute after:-bottom-1 after:left-0
-                      after:h-[2px] after:w-0 after:bg-orange-500
-                      after:transition-all after:duration-300
-                      hover:after:w-full
-                    "
+                    className={({ isActive }) =>
+                      `
+                        relative transition-colors
+                        ${isActive ? "text-white" : "text-gray-200"}
+                        hover:text-white
+                        after:absolute after:-bottom-1 after:left-0
+                        after:h-[2px] after:bg-orange-500
+                        after:transition-all after:duration-300
+                        ${isActive ? "after:w-full" : "after:w-0 hover:after:w-full"}
+                      `
+                    }
+                    aria-current={({ isActive }) =>
+                      isActive ? "page" : undefined
+                    }
                   >
                     {item.label}
-                  </Link>
+                  </NavLink>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* CTA + MOBILE — RIGHT */}
+          {/* Right side actions */}
           <div className="ml-auto flex items-center gap-4">
 
-            {/* DESKTOP CTA */}
+            {/* Desktop CTA */}
             <a
               href={PHONE_LINK}
               onClick={() => trackCallClick("navbar_desktop")}
               className="
-       hidden md:inline-flex
-    items-center justify-center
-     rounded-full px-8 py-3.5
-    text-sm font-semibold text-white
-    bg-[#FF7A00] hover:bg-[#FF6A00]
-    transition-colors shadow-md
-  "
+                hidden md:inline-flex
+                items-center justify-center
+                rounded-full px-8 py-3.5
+                text-sm font-semibold text-white
+                bg-[#FF7A00] hover:bg-[#FF6A00]
+                transition-colors shadow-md
+              "
             >
               {PHONE_NUMBER}
             </a>
 
-            {/* MOBILE CTA */}
+            {/* Mobile CTA */}
             <a
               href={PHONE_LINK}
               onClick={() => trackCallClick("navbar_mobile")}
               className="
-    md:hidden
-    rounded-full px-5 py-2.5
-    text-sm font-semibold text-white
-    bg-[#FF7A00]
-  "
+                md:hidden
+                rounded-full px-5 py-2.5
+                text-sm font-semibold text-white
+                bg-[#FF7A00]
+              "
             >
               {PHONE_NUMBER}
             </a>
 
-
-            {/* MOBILE MENU BUTTON */}
+            {/* Mobile menu button */}
             <button
               onClick={() => setOpen(!open)}
-              aria-label="Toggle Menu"
+              aria-label="Toggle menu"
+              aria-expanded={open}
+              aria-controls="mobile-navigation"
               className="
                 md:hidden
                 rounded-lg p-2.5
-                text-gray-300
+                text-gray-200
                 hover:bg-white/10
                 transition
               "
@@ -163,19 +168,27 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* MOBILE MENU */}
+        {/* Mobile menu */}
         {open && (
-          <div className="md:hidden border-t border-white/10 py-6">
-            <ul className="flex flex-col gap-5 text-[15px] font-medium text-gray-300">
+          <div
+            id="mobile-navigation"
+            className="md:hidden border-t border-white/10 py-6"
+          >
+            <ul className="flex flex-col gap-5 text-[15px] font-medium text-gray-200">
               {NAV_ITEMS.map((item) => (
                 <li key={item.label}>
-                  <Link
+                  <NavLink
                     to={item.to}
                     onClick={() => setOpen(false)}
-                    className="block px-2 py-2 hover:text-white transition"
+                    className={({ isActive }) =>
+                      `${isActive ? "text-white" : "text-gray-200"} hover:text-white transition`
+                    }
+                    aria-current={({ isActive }) =>
+                      isActive ? "page" : undefined
+                    }
                   >
                     {item.label}
-                  </Link>
+                  </NavLink>
                 </li>
               ))}
             </ul>
