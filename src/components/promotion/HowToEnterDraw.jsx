@@ -81,10 +81,7 @@ const HowToEnterDraw = memo(function HowToEnterDraw() {
 
 
 
-        {/* FOOTNOTE */}
-        <p className="mt-10 max-w-3xl text-xs text-slate-500">
-          One entry per purchase. Monthly draw. Winners selected at random and contacted directly.
-        </p>
+      
 
       </div>
     </section>

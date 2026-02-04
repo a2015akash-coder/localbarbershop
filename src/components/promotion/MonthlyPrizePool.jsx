@@ -57,14 +57,7 @@ const MonthlyPrizePool = memo(function MonthlyPrizePool() {
             <strong>1st February – 28th February 2026</strong>.
           </p>
 
-          <a
-            href=""
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-block text-xs font-medium text-[#FF7A00] hover:underline"
-          >
-            View full Terms & Conditions →
-          </a>
+         
         </div>
 
       </div>

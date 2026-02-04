@@ -56,10 +56,8 @@ const PromoHero = memo(function PromoHero() {
                 </p>
               </div>
 
-              {/* Entry Note */}
-              <p className="pt-2 text-xs text-slate-500 border-t border-slate-100">
-                One entry per purchase · Multiple winners every month
-              </p>
+       
+            
             </div>
           </div>
 
