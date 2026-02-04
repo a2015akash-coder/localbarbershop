@@ -14,7 +14,7 @@ const MonthlyPrizePool = memo(function MonthlyPrizePool() {
         {/* HEADER */}
         <div className="max-w-xl mb-8">
           <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900">
-            🎁 Monthly Prize Pool:{" "}
+            Monthly Prize Pool:{" "}
             <span className="text-[#FF7A00]">$1,000</span>{" "}
             <span className="text-slate-500 font-medium">
               | 37 Winners
@@ -22,7 +22,7 @@ const MonthlyPrizePool = memo(function MonthlyPrizePool() {
           </h2>
 
           <p className="mt-2 text-slate-600 text-sm sm:text-base">
-            February Draw · Coles Shopping Vouchers
+            February Draw: Shopping Vouchers
           </p>
         </div>
 
@@ -54,9 +54,7 @@ const MonthlyPrizePool = memo(function MonthlyPrizePool() {
         <div className="mt-8 max-w-2xl">
           <p className="text-xs text-slate-500 leading-relaxed">
             T&Cs apply. Promotion period:{" "}
-            <strong>1st February – 28th February 2026</strong>. Monthly draw.
-            One entry per purchase. Winners selected at random and contacted
-            directly by The Grooming Room Barbershop.
+            <strong>1st February – 28th February 2026</strong>.
           </p>
 
           <a
