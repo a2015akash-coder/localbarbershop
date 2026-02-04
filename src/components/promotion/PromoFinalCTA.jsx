@@ -27,7 +27,7 @@ const PromoFinalCTA = memo(function PromoFinalCTA() {
             </a>
           </p>
 
-          
+
 
           <p className="flex items-center justify-center gap-2 text-slate-600">
             <MapPin size={18} className="text-orange-500" />
@@ -35,10 +35,19 @@ const PromoFinalCTA = memo(function PromoFinalCTA() {
               90 Wrights Road, Kellyville NSW 2155, Australia
             </span>
           </p>
+
+
+          <p className="flex items-center justify-center gap-2 text-slate-600">
+
+            <span>
+              Visit us for a haircut, beard trim, or grooming service. Eligible services include entry into the monthly draw.
+
+            </span>
+          </p>
         </div>
 
         {/* Primary CTA */}
-      
+
 
       </div>
     </section>

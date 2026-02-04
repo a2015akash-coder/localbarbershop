@@ -60,7 +60,7 @@ const MonthlyPrizePool = memo(function MonthlyPrizePool() {
           </p>
 
           <a
-            href="https://drive.google.com/file/d/1mpUOnORneuYYvdK37woEYJ7rR5M-dovA/view"
+            href=""
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 inline-block text-xs font-medium text-[#FF7A00] hover:underline"
