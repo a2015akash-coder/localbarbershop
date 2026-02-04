@@ -14,7 +14,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { seoPages } from '../seo/pages';
 import SEO from '../components/SEO';
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 15;
+const DEBOUNCE_DELAY = 300;
 let blogCache = null;
 
 /* ---------------- EMPTY STATE ---------------- */
@@ -60,8 +61,10 @@ export default function BlogListPage() {
   const [error, setError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
 
   const unsubscribeRef = useRef(null);
+  const debounceTimerRef = useRef(null);
 
   /* -------- ADMIN DETECTION -------- */
   useEffect(() => {
@@ -149,6 +152,9 @@ export default function BlogListPage() {
     );
   });
 
+  /* -------- DISPLAY FILTERED & PAGINATED BLOGS -------- */
+  const displayedBlogs = filteredBlogs.slice(0, displayCount);
+
   if (loading) return <p className="py-24 text-center">Loading blogs…</p>;
   if (error) return <p className="py-24 text-center text-red-600">{error}</p>;
 
@@ -180,7 +186,13 @@ export default function BlogListPage() {
     type="text"
     placeholder="Search by title, category, or keyword"
     value={search}
-    onChange={(e) => setSearch(e.target.value)}
+    onChange={(e) => {
+      setSearch(e.target.value);
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = setTimeout(() => {
+        setDisplayCount(PAGE_SIZE);
+      }, DEBOUNCE_DELAY);
+    }}
     className="
       w-full rounded-full border border-gray-300
       px-5 py-3 text-sm
@@ -222,51 +234,70 @@ export default function BlogListPage() {
         {filteredBlogs.length === 0 ? (
           <EmptyStateCard isAdmin={isAdmin} />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredBlogs.map((blog) => (
-              <Link
-                to={`/blog/${blog.slug}`}
-                key={blog.id}
-                className="group relative overflow-hidden rounded-2xl bg-gray-900 h-[360px]"
-              >
-                {/* IMAGE */}
-                {blog.coverImage && (
-                  <img
-                    src={blog.coverImage}
-                    alt={blog.title}
-                    className="
-                      absolute inset-0 h-full w-full object-cover
-                      transition-transform duration-500
-                      group-hover:scale-105
-                    "
-                    loading="lazy"
-                  />
-                )}
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedBlogs.map((blog, index) => (
+                <Link
+                  to={`/blog/${blog.slug}`}
+                  key={blog.id}
+                  className="group relative overflow-hidden rounded-2xl bg-gray-900 h-[360px]"
+                >
+                  {/* IMAGE */}
+                  {blog.coverImage && (
+                    <img
+                      src={blog.coverImage}
+                      alt={blog.title}
+                      className="
+                        absolute inset-0 h-full w-full object-cover
+                        transition-transform duration-500
+                        group-hover:scale-105
+                      "
+                      loading={index < 6 ? "eager" : "lazy"}
+                    />
+                  )}
 
-                {/* OVERLAY */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  {/* OVERLAY */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-                {/* CONTENT */}
-                <div className="absolute bottom-0 p-5 text-white">
-                  <span className="inline-block mb-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900">
-                    {blog.category}
-                  </span>
+                  {/* CONTENT */}
+                  <div className="absolute bottom-0 p-5 text-white">
+                    <span className="inline-block mb-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900">
+                      {blog.category}
+                    </span>
 
-                  <h2 className="text-lg font-semibold leading-snug">
-                    {blog.title}
-                  </h2>
+                    <h2 className="text-lg font-semibold leading-snug">
+                      {blog.title}
+                    </h2>
 
-                  <p className="mt-2 text-sm text-white/90 line-clamp-2">
-                    {blog.excerpt}
-                  </p>
+                    <p className="mt-2 text-sm text-white/90 line-clamp-2">
+                      {blog.excerpt}
+                    </p>
 
-                  <span className="mt-3 inline-block text-sm font-medium text-orange-400">
-                    Read more →
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
+                    <span className="mt-3 inline-block text-sm font-medium text-orange-400">
+                      Read more →
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* LOAD MORE BUTTON */}
+            {displayCount < filteredBlogs.length && (
+              <div className="mt-12 text-center">
+                <button
+                  onClick={() => setDisplayCount(prev => prev + PAGE_SIZE)}
+                  className="
+                    rounded-full border border-gray-300
+                    px-8 py-3 text-sm font-medium
+                    hover:bg-gray-100
+                    transition-colors
+                  "
+                >
+                  Load More ({filteredBlogs.length - displayCount} remaining)
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
