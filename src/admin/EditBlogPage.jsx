@@ -1,320 +1,380 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  Form,
+  Input,
+  Select,
+  Button,
+  Card,
+  Upload,
+  Divider,
+  Space,
+  Row,
+  Col,
+  Progress,
+  message,
+} from "antd";
+import {
+  UploadOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../firebase";
+import RichTextEditor from "../components/RichTextEditor";
 
-/* HELPERS */
-const sanitizeText = (text = "") => text.replace(/\s+/g, " ").trim();
+/* ================= CLOUDINARY ================= */
 
-/* CARD */
-function Card({ children }) {
-  return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      {children}
-    </div>
-  );
-}
+const uploadToCloudinary = (file, onProgress) =>
+  new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("upload_preset", "blog_uploads");
+    formData.append("folder", "blog-images");
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      const res = JSON.parse(xhr.responseText);
+      resolve(res.secure_url);
+    };
+
+    xhr.onerror = reject;
+
+    xhr.open(
+      "POST",
+      "https://api.cloudinary.com/v1_1/dvtbbuxon/image/upload"
+    );
+    xhr.send(formData);
+  });
+
+/* ================= PAGE ================= */
 
 export default function EditBlogPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [form] = Form.useForm();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  /* Upload tracking */
-  const [uploadingIds, setUploadingIds] = useState(new Set());
-
-  const startUpload = (key) => {
-    setUploadingIds((prev) => new Set(prev).add(key));
-  };
-
-  const finishUpload = (key) => {
-    setUploadingIds((prev) => {
-      const next = new Set(prev);
-      next.delete(key);
-      return next;
-    });
-  };
-
-  /* Blog state */
-  const [title, setTitle] = useState("");
-  const [excerpt, setExcerpt] = useState("");
-
-  const [coverImage, setCoverImage] = useState("");
-  const [coverAlt, setCoverAlt] = useState("");
-  const [coverTitle, setCoverTitle] = useState("");
-
-  const [category, setCategory] = useState("Hairstyle");
-  const [status, setStatus] = useState("draft");
-
-  const [content, setContent] = useState([
-    { id: crypto.randomUUID(), type: "paragraph", text: "" },
-  ]);
+  const [blocks, setBlocks] = useState([]);
+  const [coverPreview, setCoverPreview] = useState("");
+  const [coverProgress, setCoverProgress] = useState(0);
 
   const [originalStatus, setOriginalStatus] = useState("draft");
   const [originalPublishedAt, setOriginalPublishedAt] = useState(null);
 
-  /* LOAD BLOG */
+  /* ================= LOAD BLOG ================= */
+
   useEffect(() => {
     const load = async () => {
-      if (!id) {
-        alert("Invalid blog ID");
+      const snap = await getDoc(doc(db, "blogs", id));
+
+      if (!snap.exists()) {
+        message.error("Blog not found");
         navigate("/admin");
         return;
       }
 
-      try {
-        const snap = await getDoc(doc(db, "blogs", id));
+      const d = snap.data();
 
-        if (!snap.exists()) {
-          alert("Blog not found");
-          navigate("/admin");
-          return;
-        }
+      form.setFieldsValue({
+        title: d.title || "",
+        excerpt: d.excerpt || "",
+        category: d.category || "Hairstyle",
+        status: d.status || "draft",
+        coverImage: d.coverImage || "",
+      });
 
-        const d = snap.data();
-
-        setTitle(d.title || "");
-        setExcerpt(d.excerpt || "");
-        setCoverImage(d.coverImage || "");
-        setCoverAlt(d.coverAlt || "");
-        setCoverTitle(d.coverTitle || "");
-        setCategory(d.category || "Hairstyle");
-        setStatus(d.status || "draft");
-
-        setOriginalStatus(d.status || "draft");
-        setOriginalPublishedAt(d.publishedAt || null);
-
-        setContent(
-          Array.isArray(d.content)
-            ? d.content.map((b) => ({
-                id: b.id || crypto.randomUUID(),
-                ...b,
-              }))
-            : [{ id: crypto.randomUUID(), type: "paragraph", text: "" }]
-        );
-      } catch (err) {
-        console.error(err);
-        alert("Failed to load blog");
-      } finally {
-        setLoading(false);
-      }
+      setCoverPreview(d.coverImage || "");
+      setOriginalStatus(d.status || "draft");
+      setOriginalPublishedAt(d.publishedAt || null);
+      setBlocks(Array.isArray(d.content) ? d.content : []);
+      setLoading(false);
     };
 
     load();
-  }, [id, navigate]);
+  }, [id, navigate, form]);
 
-  /* CONTENT HELPERS */
-  const updateBlock = (i, k, v) => {
-    setContent((prev) => {
+  /* ================= BLOCK HELPERS ================= */
+
+  const addBlock = (type) => {
+    setBlocks((prev) => [
+      ...prev,
+      type === "heading"
+        ? { type: "heading", text: "" }
+        : type === "image"
+        ? { type: "image", src: "", alt: "" }
+        : { type: "richtext", html: "" },
+    ]);
+  };
+
+  const updateBlock = (i, key, value) => {
+    setBlocks((prev) => {
       const copy = [...prev];
-      copy[i] = { ...copy[i], [k]: v };
+      copy[i] = { ...copy[i], [key]: value };
       return copy;
     });
   };
 
-  const addBlock = (type) => {
-    setContent((prev) => [
-      ...prev,
-      type === "image"
-        ? { id: crypto.randomUUID(), type: "image", src: "", alt: "" }
-        : { id: crypto.randomUUID(), type, text: "" },
-    ]);
-  };
-
-  const removeBlock = (i) => {
-    setContent((prev) => prev.filter((_, idx) => idx !== i));
-  };
-
-  /* SAVE */
-  const save = async () => {
-    if (!title || !excerpt || saving) return;
-
-    if (status === "published" && !coverAlt.trim()) {
-      alert("Cover image alt text is required before publishing.");
-      return;
+  const normalizeContent = (blocks = []) =>
+  blocks.map((b) => {
+    if (b.type === "paragraph") {
+      return {
+        type: "richtext",
+        html: `<p>${b.text || ""}</p>`,
+      };
     }
+    return b;
+  });
 
-    setSaving(true);
 
+  const removeBlock = (i) =>
+    setBlocks((prev) => prev.filter((_, idx) => idx !== i));
+
+  /* ================= SAVE ================= */
+
+  const save = async () => {
     try {
-      const shouldSetPublishedAt =
-        originalStatus !== "published" && status === "published";
+      const values = await form.validateFields();
+      setSaving(true);
 
-      await updateDoc(doc(db, "blogs", id), {
-        title: sanitizeText(title),
-        excerpt: sanitizeText(excerpt),
+      const isPublishing =
+        originalStatus !== "published" &&
+        values.status === "published";
+await updateDoc(doc(db, "blogs", id), {
+  title: values.title.trim(),
+  excerpt: values.excerpt?.trim() || "",
+  coverImage: values.coverImage ?? coverPreview, // ← FIX 2
+  category: values.category,
+  status: values.status,
+  content: normalizeContent(blocks), // ← FIX 1
+  updatedAt: serverTimestamp(),
+  publishedAt: isPublishing
+    ? serverTimestamp()
+    : originalPublishedAt ?? null,
+});
 
-        coverImage,
-        coverAlt: sanitizeText(coverAlt),
-        coverTitle: sanitizeText(coverTitle),
 
-        category,
-        status,
-
-        content: content.map((b) => ({
-          ...b,
-          text: b.text ? sanitizeText(b.text) : "",
-          alt: b.alt ? sanitizeText(b.alt) : "",
-        })),
-
-        updatedAt: serverTimestamp(),
-        publishedAt: shouldSetPublishedAt
-          ? serverTimestamp()
-          : originalPublishedAt ?? null,
-      });
-
+      message.success("Blog updated");
       navigate("/admin");
     } catch (err) {
       console.error(err);
-      alert("Failed to save blog");
+      message.error("Failed to save blog");
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <p className="py-24 text-center">Loading…</p>;
+  if (loading) {
+    return (
+      <p style={{ padding: 48, textAlign: "center" }}>
+        Loading…
+      </p>
+    );
+  }
 
-  /* UI */
+  /* ================= RENDER ================= */
+
   return (
-    <section className="bg-gray-50 py-16">
-      <div className="max-w-screen-lg mx-auto px-4 space-y-8">
+    <div style={{ padding: 32 }}>
+      <Card title="Edit Blog" style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <Form layout="vertical" form={form}>
 
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-semibold text-gray-900">Edit Blog</h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Update content, metadata, and publishing status.
-            </p>
-          </div>
+          {/* META */}
+          <Row gutter={24}>
+            <Col span={16}>
+              <Form.Item
+                label="Title"
+                name="title"
+                rules={[{ required: true }]}
+              >
+                <Input size="large" />
+              </Form.Item>
 
-          <Link
-            to="/admin"
-            className="rounded-xl border px-5 py-3 text-sm hover:bg-gray-100"
-          >
-            ← Back
-          </Link>
-        </div>
+              <Form.Item label="Excerpt" name="excerpt">
+                <Input.TextArea rows={3} />
+              </Form.Item>
+            </Col>
 
-        {/* META */}
-        <Card>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input
-              className="rounded-xl border px-4 py-3"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Blog title"
-            />
+            <Col span={8}>
+              <Form.Item label="Category" name="category">
+                <Select size="large">
+                  <Select.Option value="Hairstyle">Hairstyle</Select.Option>
+                  <Select.Option value="Beard">Beard</Select.Option>
+                  <Select.Option value="Grooming">Grooming</Select.Option>
+                </Select>
+              </Form.Item>
 
-            <select
-              className="rounded-xl border px-4 py-3"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              <Form.Item label="Status" name="status">
+                <Select size="large">
+                  <Select.Option value="draft">Draft</Select.Option>
+                  <Select.Option value="published">Published</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Divider />
+
+          {/* COVER IMAGE */}
+          <Form.Item label="Cover Image">
+            <Upload
+              showUploadList={false}
+              customRequest={async ({ file, onSuccess }) => {
+                setCoverProgress(0);
+                const url = await uploadToCloudinary(file, setCoverProgress);
+                form.setFieldValue("coverImage", url);
+                setCoverPreview(url);
+                setCoverProgress(100);
+                onSuccess();
+              }}
             >
-              <option>Hairstyle</option>
-              <option>Beard</option>
-              <option>Facility</option>
-              <option>Grooming</option>
-            </select>
+              <Button icon={<UploadOutlined />}>Change Cover</Button>
+            </Upload>
 
-            <textarea
-              rows={3}
-              className="md:col-span-2 rounded-xl border px-4 py-3"
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Excerpt"
-            />
+            {coverProgress > 0 && coverProgress < 100 && (
+              <Progress percent={coverProgress} size="small" />
+            )}
 
-            <select
-              className="rounded-xl border px-4 py-3"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
+            {coverPreview && (
+              <img
+                src={coverPreview}
+                alt="Cover"
+                style={{
+                  marginTop: 12,
+                  width: "100%",
+                  maxHeight: 240,
+                  objectFit: "cover",
+                  borderRadius: 8,
+                }}
+              />
+            )}
+          </Form.Item>
+
+          <Divider />
+
+          {/* CONTENT */}
+          <h3>Content</h3>
+
+          {blocks.map((block, i) => (
+            <Card
+              key={i}
+              size="small"
+              style={{ marginBottom: 16 }}
+              extra={
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => removeBlock(i)}
+                />
+              }
             >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-          </div>
-        </Card>
+              <div className="text-xs uppercase text-gray-400 mb-2">
+                {block.type}
+              </div>
 
-        {/* CONTENT */}
-        <Card>
-          <h3 className="font-semibold mb-6">Content Blocks</h3>
+              {block.type === "heading" && (
+                <Input
+                  placeholder="Heading"
+                  value={block.text}
+                  onChange={(e) =>
+                    updateBlock(i, "text", e.target.value)
+                  }
+                />
+              )}
 
-          <div className="space-y-6">
-            {content.map((block, i) => (
-              <div key={block.id} className="rounded-xl bg-gray-50 p-5 space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-xs uppercase text-gray-500">
-                    {block.type}
-                  </span>
-                  <button
-                    onClick={() => removeBlock(i)}
-                    className="text-sm text-red-600"
+              {block.type === "richtext" && (
+                <RichTextEditor
+                  value={block.html}
+                  onChange={(html) =>
+                    updateBlock(i, "html", html)
+                  }
+                />
+              )}
+
+              {block.type === "image" && (
+                <>
+                  <Upload
+                    showUploadList={false}
+                    customRequest={async ({ file, onSuccess }) => {
+                      const url = await uploadToCloudinary(file);
+                      updateBlock(i, "src", url);
+                      onSuccess();
+                    }}
                   >
-                    Remove
-                  </button>
-                </div>
+                    <Button icon={<UploadOutlined />}>
+                      Upload Image
+                    </Button>
+                  </Upload>
 
-                {block.type !== "image" && (
-                  <textarea
-                    rows={block.type === "paragraph" ? 4 : 2}
-                    className="w-full rounded-lg border px-3 py-2"
-                    value={block.text}
+                  {block.src && (
+                    <img
+                      src={block.src}
+                      alt=""
+                      style={{
+                        marginTop: 8,
+                        width: "100%",
+                        maxHeight: 200,
+                        objectFit: "cover",
+                        borderRadius: 6,
+                      }}
+                    />
+                  )}
+
+                  <Input
+                    style={{ marginTop: 8 }}
+                    placeholder="Alt text (optional)"
+                    value={block.alt}
                     onChange={(e) =>
-                      updateBlock(i, "text", e.target.value)
+                      updateBlock(i, "alt", e.target.value)
                     }
                   />
-                )}
+                </>
+              )}
+            </Card>
+          ))}
 
-                {block.type === "image" && (
-                  <>
-                    {block.src && (
-                      <img
-                        src={block.src}
-                        alt={block.alt || "Content image preview"}
-                        className="h-40 rounded-lg object-cover"
-                      />
-                    )}
+          <Space>
+            <Button icon={<PlusOutlined />} onClick={() => addBlock("heading")}>
+              Heading
+            </Button>
+            <Button icon={<PlusOutlined />} onClick={() => addBlock("richtext")}>
+              Content
+            </Button>
+            <Button icon={<PlusOutlined />} onClick={() => addBlock("image")}>
+              Image
+            </Button>
+          </Space>
 
-                    <input
-                      className="w-full rounded-lg border px-3 py-2"
-                      placeholder="Alt text"
-                      value={block.alt || ""}
-                      onChange={(e) =>
-                        updateBlock(i, "alt", e.target.value)
-                      }
-                    />
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
+          <Divider />
 
-          <div className="mt-6 flex gap-3">
-            <button onClick={() => addBlock("paragraph")} className="rounded-lg border px-4 py-2">
-              + Paragraph
-            </button>
-            <button onClick={() => addBlock("heading")} className="rounded-lg border px-4 py-2">
-              + Heading
-            </button>
-            <button onClick={() => addBlock("image")} className="rounded-lg border px-4 py-2">
-              + Image
-            </button>
-          </div>
-        </Card>
-
-        {/* SAVE */}
-        <div className="flex justify-end">
-          <button
-            onClick={save}
-            disabled={saving}
-            className="rounded-full bg-orange-600 px-10 py-4 text-white font-semibold hover:bg-orange-700"
-          >
-            {saving ? "Saving…" : "Save Changes"}
-          </button>
-        </div>
-      </div>
-    </section>
+          <Space>
+            <Button
+              type="primary"
+              loading={saving}
+              onClick={save}
+            >
+              Save Changes
+            </Button>
+            <Button onClick={() => navigate("/admin")}>
+              Cancel
+            </Button>
+          </Space>
+        </Form>
+      </Card>
+    </div>
   );
 }

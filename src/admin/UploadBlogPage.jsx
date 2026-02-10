@@ -1,359 +1,286 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { Link, useNavigate } from "react-router-dom";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { Button, Upload, Progress, message, Divider } from "antd";
+import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import { db } from "../firebase";
+import RichTextEditor from "../components/RichTextEditor";
 
-/* ---------------- CLOUDINARY ---------------- */
-const openCloudinaryWidget = (onUpload) => {
-  if (!window.cloudinary) {
-    alert("Cloudinary widget not loaded");
-    return;
-  }
+/* ================= CLOUDINARY ================= */
 
-  window.cloudinary.openUploadWidget(
-    {
-      cloudName: "dvtbbuxon",
-      uploadPreset: "blog_uploads",
-      multiple: false,
-      folder: "blog-images",
-    },
-    (_, result) => {
-      if (result?.event === "success") {
-        onUpload(result.info.secure_url);
+const uploadToCloudinary = (file, onProgress) =>
+  new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("upload_preset", "blog_uploads");
+    formData.append("folder", "blog-images");
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
       }
-    }
-  );
-};
+    };
 
-/* ---------------- HELPERS ---------------- */
-const slugify = (text) =>
+    xhr.onload = () => {
+      const res = JSON.parse(xhr.responseText);
+      resolve(res.secure_url);
+    };
+
+    xhr.onerror = reject;
+
+    xhr.open(
+      "POST",
+      "https://api.cloudinary.com/v1_1/dvtbbuxon/image/upload"
+    );
+    xhr.send(formData);
+  });
+
+/* ================= HELPERS ================= */
+
+const slugify = (text = "") =>
   text
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-");
 
-const createUniqueSlug = (title) => `${slugify(title)}-${Date.now()}`;
-
-
-
-/* ================= UI CARD ================= */
-
-/* ---------------- CARD ---------------- */
-function Card({ title, children, action }) {
-  return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      {(title || action) && (
-        <div className="mb-5 flex items-center justify-between">
-          {title && <h3 className="font-semibold text-gray-900">{title}</h3>}
-          {action}
-        </div>
-      )}
-      {children}
-    </div>
-  );
-}
-
 /* ================= PAGE ================= */
 
 export default function UploadBlogPage() {
   const navigate = useNavigate();
 
+  /* -------- Meta -------- */
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
-
-  const [coverImage, setCoverImage] = useState("");
   const [category, setCategory] = useState("Hairstyle");
-  const [status, setStatus] = useState("draft");
 
+  /* -------- Cover -------- */
+  const [coverImage, setCoverImage] = useState("");
+  const [coverProgress, setCoverProgress] = useState(0);
+
+  /* -------- Content -------- */
+  const [blocks, setBlocks] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [lastCreatedId, setLastCreatedId] = useState(null);
 
-  const [content, setContent] = useState([{ type: "paragraph", text: "" }]);
+  /* ================= BLOCK HELPERS ================= */
 
   const addBlock = (type) => {
-    setContent((prev) => [
+    setBlocks((prev) => [
       ...prev,
-      type === "image"
+      type === "heading"
+        ? { type: "heading", text: "" }
+        : type === "image"
         ? { type: "image", src: "", alt: "" }
-        : { type, text: "" },
+        : { type: "richtext", html: "" },
     ]);
   };
 
   const updateBlock = (i, key, value) => {
-    setContent((prev) => {
+    setBlocks((prev) => {
       const copy = [...prev];
-      copy[i][key] = value;
+      copy[i] = { ...copy[i], [key]: value };
       return copy;
     });
   };
 
-  const removeBlock = (i) => {
-    setContent((prev) => prev.filter((_, idx) => idx !== i));
-  };
+  const removeBlock = (i) =>
+    setBlocks((prev) => prev.filter((_, idx) => idx !== i));
 
-  /* ================= SUBMIT ================= */
+  /* ================= SAVE HANDLER ================= */
 
-  const submitBlog = async () => {
-    if (!title || !excerpt || saving) {
-      alert("Missing required fields");
+  const saveBlog = async (publish = false) => {
+    if (!title || !excerpt) {
+      message.error("Title and excerpt are required");
       return;
     }
 
-    if (status === "published" && !coverAlt.trim()) {
-      alert("Cover image alt text is required before publishing.");
+    if (publish && !coverImage) {
+      message.error("Cover image is required to publish");
       return;
     }
 
     setSaving(true);
 
     try {
-      const docRef = await addDoc(collection(db, "blogs"), {
-        title: sanitizeText(title),
-        slug: createUniqueSlug(title),
-        excerpt: sanitizeText(excerpt),
-
-        coverImage,
-        coverAlt: sanitizeText(coverAlt),
-        coverTitle: sanitizeText(coverTitle),
-
+      await addDoc(collection(db, "blogs"), {
+        title,
+        slug: `${slugify(title)}-${Date.now()}`,
+        excerpt,
         category,
-        status,
-
-        content: content.map((b) => ({
-          ...b,
-          text: sanitizeText(b.text),
-          alt: sanitizeText(b.alt),
-        })),
-
+        status: publish ? "published" : "draft",
+        coverImage,
+        content: blocks,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        publishedAt: status === "published" ? serverTimestamp() : null,
+        publishedAt: publish ? serverTimestamp() : null,
       });
 
-      setLastCreatedId(docRef.id);
+      message.success(publish ? "Blog published" : "Draft saved");
       navigate("/admin");
-    } catch {
-      alert("Failed to save blog");
+    } catch (err) {
+      console.error(err);
+      message.error("Failed to save blog");
     } finally {
       setSaving(false);
     }
   };
 
-  /* ================= RENDER ================= */
+  /* ================= UI ================= */
 
   return (
-    <section className="bg-gray-50 py-16">
-      <div className="mx-auto max-w-screen-lg px-4 space-y-8">
+    <section className="bg-gray-50 py-12">
+      <div className="mx-auto max-w-4xl px-4 space-y-8">
 
-        {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-semibold text-gray-900">
-              Upload Blog Post
-            </h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Create and publish a new article.
-            </p>
-          </div>
+        {/* Breadcrumb */}
+        <nav className="text-sm text-gray-500">
+          <Link to="/admin" className="hover:underline">Admin</Link> / New Blog
+        </nav>
 
-          <div className="flex gap-3">
-            <Link
-              to="/admin"
-              className="rounded-xl border px-4 py-2 text-sm hover:bg-gray-100"
-            >
-              ← Dashboard
-            </Link>
-
-            <button
-              disabled={!lastCreatedId}
-              onClick={() => navigate(`/admin/blogs/${lastCreatedId}/edit`)}
-              className="rounded-xl border px-4 py-2 text-sm hover:bg-gray-100 disabled:opacity-50"
-            >
-              Edit Last Created
-            </button>
-          </div>
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-semibold">Upload Blog</h1>
+          <Button onClick={() => navigate(-1)}>Back</Button>
         </div>
 
-        {/* POST DETAILS */}
-        <Card title="Post details">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <input
-              className="rounded-xl border px-4 py-3"
-              placeholder="Blog title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+        {/* Meta */}
+        <div className="bg-white rounded-xl p-6 space-y-4">
+          <input
+            className="w-full rounded border px-4 py-3"
+            placeholder="Blog title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
 
-            <select
-              className="rounded-xl border px-4 py-3"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option>Hairstyle</option>
-              <option>Beard</option>
-              <option>Facility</option>
-              <option>Grooming</option>
-            </select>
+          <textarea
+            rows={3}
+            className="w-full rounded border px-4 py-3"
+            placeholder="Excerpt"
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+          />
+        </div>
 
-            <textarea
-              rows={3}
-              className="md:col-span-2 rounded-xl border px-4 py-3"
-              placeholder="Short excerpt (used in listings & SEO)"
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-            />
+        {/* Cover Image */}
+        <div className="bg-white rounded-xl p-6">
+          <p className="font-medium mb-3">Cover image</p>
 
-            <select
-              className="rounded-xl border px-4 py-3"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-          </div>
-        </Card>
+          <Upload
+            showUploadList={false}
+            customRequest={async ({ file, onSuccess }) => {
+              setCoverProgress(0);
+              const url = await uploadToCloudinary(file, setCoverProgress);
+              setCoverImage(url);
+              setCoverProgress(100);
+              onSuccess();
+            }}
+          >
+            <Button icon={<UploadOutlined />}>Upload cover</Button>
+          </Upload>
 
-        {/* COVER IMAGE */}
-        <Card
-          title="Cover image"
-          action={
-            <label className="cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
-              {uploading ? "Uploading…" : "Upload image"}
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={async (e) => {
-                  const file = e.target.files[0];
-                  if (!file) return;
+          {coverProgress > 0 && coverProgress < 100 && (
+            <Progress percent={coverProgress} className="mt-3" />
+          )}
 
-                  setUploading(true);
-                  try {
-                    const url = await uploadToCloudinary(file);
-                    setCoverImage(url);
-                  } catch {
-                    alert("Upload failed");
-                  } finally {
-                    setUploading(false);
-                  }
-                }}
-              />
-            </label>
-          }
-        >
-          {coverImage ? (
+          {coverImage && (
             <img
               src={coverImage}
+              className="mt-4 rounded-lg h-56 w-full object-cover"
               alt="Cover preview"
-              className="h-56 w-full rounded-xl object-cover"
             />
-          ) : (
-            <p className="text-sm text-gray-500">
-              Recommended: landscape image, ~1600×900
-            </p>
           )}
-        </Card>
+        </div>
 
-        {/* CONTENT */}
-        <Card title="Content">
-          <div className="space-y-6">
-            {content.map((block, i) => (
-              <div key={i} className="rounded-xl bg-gray-50 p-5 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs uppercase font-medium text-gray-500">
-                    {block.type}
-                  </span>
-                  <button
-                    onClick={() => removeBlock(i)}
-                    className="text-sm text-red-600 hover:underline"
-                  >
-                    Remove
-                  </button>
-                </div>
+        {/* Content Blocks */}
+        <Divider orientation="left">Content</Divider>
 
-                {block.type !== "image" && (
-                  <textarea
-                    rows={block.type === "paragraph" ? 4 : 2}
-                    className="w-full rounded-lg border px-3 py-2"
-                    value={block.text}
-                    onChange={(e) =>
-                      updateBlock(i, "text", e.target.value)
-                    }
+        {blocks.map((b, i) => (
+          <div key={i} className="bg-white rounded-xl p-6 space-y-4 border">
+            <div className="flex justify-between items-center">
+              <span className="text-xs uppercase tracking-wide text-gray-400">
+                {b.type}
+              </span>
+              <Button
+                danger
+                type="text"
+                icon={<DeleteOutlined />}
+                onClick={() => removeBlock(i)}
+              />
+            </div>
+
+            {b.type === "heading" && (
+              <input
+                className="w-full rounded border px-3 py-2"
+                placeholder="Heading"
+                value={b.text}
+                onChange={(e) => updateBlock(i, "text", e.target.value)}
+              />
+            )}
+
+            {b.type === "richtext" && (
+              <RichTextEditor
+                value={b.html}
+                onChange={(html) => updateBlock(i, "html", html)}
+              />
+            )}
+
+            {b.type === "image" && (
+              <>
+                <Upload
+                  showUploadList={false}
+                  customRequest={async ({ file, onSuccess }) => {
+                    const url = await uploadToCloudinary(file);
+                    updateBlock(i, "src", url);
+                    onSuccess();
+                  }}
+                >
+                  <Button icon={<UploadOutlined />}>Upload image</Button>
+                </Upload>
+
+                {b.src && (
+                  <img
+                    src={b.src}
+                    className="mt-3 rounded-lg h-48 w-full object-cover"
+                    alt=""
                   />
                 )}
 
-                {block.type === "image" && (
-                  <>
-                    <label className="inline-block cursor-pointer rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
-                      Upload image
-                      <input
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        onChange={async (e) => {
-                          const file = e.target.files[0];
-                          if (!file) return;
-
-                          setUploading(true);
-                          try {
-                            const url = await uploadToCloudinary(file);
-                            updateBlock(i, "src", url);
-                          } catch {
-                            alert("Upload failed");
-                          } finally {
-                            setUploading(false);
-                          }
-                        }}
-                      />
-                    </label>
-
-                    {block.src && (
-                      <img
-                        src={block.src}
-                        alt={block.alt || "Blog content image"}
-                        className="h-40 rounded-lg object-cover"
-                      />
-                    )}
-
-                    <input
-                      className="w-full rounded-lg border px-3 py-2"
-                      placeholder="Alt text"
-                      value={block.alt || ""}
-                      onChange={(e) =>
-                        updateBlock(i, "alt", e.target.value)
-                      }
-                    />
-                  </>
-                )}
-              </div>
-            ))}
+                <input
+                  className="w-full rounded border px-3 py-2"
+                  placeholder="Alt text (optional)"
+                  value={b.alt}
+                  onChange={(e) => updateBlock(i, "alt", e.target.value)}
+                />
+              </>
+            )}
           </div>
+        ))}
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button onClick={() => addBlock("paragraph")} className="rounded-lg border px-4 py-2">
-              + Paragraph
-            </button>
-            <button onClick={() => addBlock("heading")} className="rounded-lg border px-4 py-2">
-              + Heading
-            </button>
-            <button onClick={() => addBlock("image")} className="rounded-lg border px-4 py-2">
-              + Image
-            </button>
-          </div>
-        </Card>
+        {/* Add Buttons */}
+        <div className="flex gap-3">
+          <Button onClick={() => addBlock("heading")}>+ Heading</Button>
+          <Button onClick={() => addBlock("richtext")}>+ Content</Button>
+          <Button onClick={() => addBlock("image")}>+ Image</Button>
+        </div>
 
-        {/* SAVE */}
-        <div className="flex justify-end">
-          <button
-            onClick={submitBlog}
-            disabled={saving}
-            className="rounded-full bg-orange-600 px-10 py-4 font-semibold text-white hover:bg-orange-700 disabled:opacity-60"
+        {/* Actions */}
+        <div className="flex justify-end gap-3 pt-6">
+          <Button
+            loading={saving}
+            onClick={() => saveBlog(false)}
           >
-            {saving ? "Saving…" : "Save Blog"}
-          </button>
+            Save Draft
+          </Button>
+
+          <Button
+            type="primary"
+            size="large"
+            loading={saving}
+            onClick={() => saveBlog(true)}
+          >
+            Publish
+          </Button>
         </div>
       </div>
     </section>

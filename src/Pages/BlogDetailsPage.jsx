@@ -4,7 +4,6 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 import SEO from "../components/SEO";
 
-
 export default function BlogDetailsPage() {
   const { slug } = useParams();
   const [blog, setBlog] = useState(null);
@@ -50,67 +49,49 @@ export default function BlogDetailsPage() {
     return <p className="text-center py-24">Loading…</p>;
   }
 
-  if (!Array.isArray(blog.content)) {
-    return <p className="text-center py-24">Invalid blog content.</p>;
-  }
+  return (
+    <>
+      <SEO
+        title={blog.title}
+        description={blog.excerpt}
+        canonical={`https://thegroomingroom.com.au/blogs/${blog.slug}`}
+        robots="index, follow, max-image-preview:large"
+      />
 
-  const canonicalUrl = `https://thegroomingroom.com.au/blogs/${blog.slug}`;
+      <section className="bg-[#fafafa] py-16 sm:py-20">
+        <div className="mx-auto max-w-[760px] px-4">
 
-return (
-  <>
-    {/* ================= SEO ================= */}
-    <SEO
-      title={blog.title}
-      description={blog.excerpt}
-      canonical={`https://thegroomingroom.com.au/blogs/${blog.slug}`}
-      robots="index, follow, max-image-preview:large"
-    />
+          <Link
+            to="/blogs"
+            className="inline-block mb-6 text-sm font-medium text-orange-600 hover:underline"
+          >
+            ← All posts
+          </Link>
 
-    <section className="bg-[#fafafa] py-16 sm:py-20">
-      <div className="mx-auto max-w-[760px] px-4">
+          <div className="text-xs uppercase tracking-wide text-gray-500">
+            {blog.category}
+          </div>
 
-        {/* Back link */}
-        <Link
-          to="/blogs"
-          className="inline-block mb-6 text-sm font-medium text-orange-600 hover:underline"
-        >
-          ← All posts
-        </Link>
+          <h1 className="mt-3 text-3xl sm:text-4xl font-semibold text-gray-900 leading-tight">
+            {blog.title}
+          </h1>
 
-        {/* Category */}
-        <div className="text-xs uppercase tracking-wide text-gray-500">
-          {blog.category}
-        </div>
+          <div className="mt-3 text-sm text-gray-500">
+            {blog.publishedAt?.toDate().toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </div>
 
-        {/* Title (ONLY H1 ON PAGE) */}
-        <h1 className="mt-3 text-3xl sm:text-4xl font-semibold text-gray-900 leading-tight">
-          {blog.title}
-        </h1>
-
-        {/* Meta */}
-        <div className="mt-3 text-sm text-gray-500">
-          {blog.publishedAt?.toDate().toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </div>
-
-        {/* Divider */}
-        <div className="mt-6 h-px w-20 bg-gray-300" />
-
-        {/* Article */}
-        <article className="mt-10 space-y-8 text-[17px] leading-[1.75] text-gray-800">
+          <div className="mt-6 h-px w-20 bg-gray-300" />
 
           {/* COVER IMAGE */}
           {blog.coverImage && (
-            <div className="my-8 rounded-2xl border border-gray-200 bg-white p-4">
+            <div className="my-12 rounded-2xl border border-gray-200 bg-white p-4">
               <img
                 src={blog.coverImage}
                 alt={blog.coverAlt || blog.title}
-                title={blog.coverTitle || blog.title}
-                width="760"
-                height="360"
                 className="w-full rounded-xl object-cover"
                 loading="eager"
                 fetchpriority="high"
@@ -118,70 +99,76 @@ return (
             </div>
           )}
 
-          {/* Content blocks */}
-          {blog.content.map((block, i) => {
-            if (block.type === "heading") {
-              return (
-                <h2
-                  key={i}
-                  className="mt-10 text-2xl font-semibold text-gray-900 leading-snug"
-                >
-                  {block.text}
-                </h2>
-              );
-            }
+          {/* CONTENT */}
 
-            if (block.type === "paragraph") {
-              return <p key={i}>{block.text}</p>;
-            }
+<article className="
+  prose 
+  prose-gray 
+  max-w-none
 
-            if (block.type === "image") {
-              return (
-                <div
-                  key={i}
-                  className="my-10 rounded-2xl border border-gray-200 bg-white p-4"
-                >
-                  <img
-                    src={block.src}
-                    alt={block.alt || ""}
-                    width="760"
-                    height="360"
-                    className="w-full rounded-xl object-cover"
-                    loading="lazy"
-                  />
+  prose-h2:mt-12
+  prose-h2:mb-4
 
-                  {block.alt && (
-                    <p className="mt-2 text-sm text-gray-500">
-                      {block.alt}
-                    </p>
-                  )}
-                </div>
-              );
-            }
+  prose-p:my-5
 
-            return null;
-          })}
+  prose-ul:my-6
+  prose-ul:pl-6
 
-        </article>
+  prose-li:my-2
 
-        {/* Footer CTA */}
-        <div className="mt-16 rounded-xl bg-white border border-gray-200 p-6 text-left">
-          <p className="text-gray-700">
-            Ready for a fresh haircut or beard trim?
-          </p>
+  prose-figure:my-10
+  prose-img:rounded-xl
 
-          <Link
-            to="/mens-haircuts-beard-trims-kellyville"
-            className="mt-3 inline-flex items-center text-orange-600 font-semibold hover:underline"
-          >
-            View our services →
-          </Link>
+  prose-a:text-orange-600
+  prose-a:underline
+">
+  {Array.isArray(blog.content) &&
+    blog.content.map((block, i) => {
+      if (block.type === "heading") {
+        return <h2 key={i}>{block.text}</h2>;
+      }
+
+      if (block.type === "richtext") {
+        return (
+          <div
+            key={i}
+            dangerouslySetInnerHTML={{ __html: block.html }}
+          />
+        );
+      }
+
+   if (block.type === "image") {
+  return (
+    <figure
+      key={i}
+      className="my-12 rounded-2xl border border-gray-200 bg-white p-4"
+    >
+      <img
+        src={block.src}
+        alt={block.alt || ""}
+        className="w-full rounded-xl object-cover"
+        loading="lazy"
+      />
+
+      {block.alt && (
+        <figcaption className="mt-3 text-sm text-gray-500 text-center">
+          {block.alt}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
+
+      return null;
+    })}
+</article>
+
+
+
+
         </div>
-
-      </div>
-    </section>
-  </>
-);
-
-
+      </section>
+    </>
+  );
 }
