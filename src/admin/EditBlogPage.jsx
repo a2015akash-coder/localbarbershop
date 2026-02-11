@@ -28,6 +28,15 @@ import {
 import { db } from "../firebase";
 import RichTextEditor from "../components/RichTextEditor";
 
+/* ================= HELPERS ================= */
+
+const slugify = (text = "") =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-");
+
 /* ================= CLOUDINARY ================= */
 
 const uploadToCloudinary = (file, onProgress) =>
@@ -96,6 +105,9 @@ export default function EditBlogPage() {
         category: d.category || "Hairstyle",
         status: d.status || "draft",
         coverImage: d.coverImage || "",
+        slug: d.slug || slugify(d.title || ""),
+        metaTitle: d.metaTitle || d.title || "",
+        metaDescription: d.metaDescription || d.excerpt || "",
       });
 
       setCoverPreview(d.coverImage || "");
@@ -129,20 +141,19 @@ export default function EditBlogPage() {
     });
   };
 
-  const normalizeContent = (blocks = []) =>
-  blocks.map((b) => {
-    if (b.type === "paragraph") {
-      return {
-        type: "richtext",
-        html: `<p>${b.text || ""}</p>`,
-      };
-    }
-    return b;
-  });
-
-
   const removeBlock = (i) =>
     setBlocks((prev) => prev.filter((_, idx) => idx !== i));
+
+  const normalizeContent = (blocks = []) =>
+    blocks.map((b) => {
+      if (b.type === "paragraph") {
+        return {
+          type: "richtext",
+          html: `<p>${b.text || ""}</p>`,
+        };
+      }
+      return b;
+    });
 
   /* ================= SAVE ================= */
 
@@ -154,19 +165,23 @@ export default function EditBlogPage() {
       const isPublishing =
         originalStatus !== "published" &&
         values.status === "published";
-await updateDoc(doc(db, "blogs", id), {
-  title: values.title.trim(),
-  excerpt: values.excerpt?.trim() || "",
-  coverImage: values.coverImage ?? coverPreview, // ← FIX 2
-  category: values.category,
-  status: values.status,
-  content: normalizeContent(blocks), // ← FIX 1
-  updatedAt: serverTimestamp(),
-  publishedAt: isPublishing
-    ? serverTimestamp()
-    : originalPublishedAt ?? null,
-});
 
+      await updateDoc(doc(db, "blogs", id), {
+        title: values.title.trim(),
+        excerpt: values.excerpt?.trim() || "",
+        slug: slugify(values.slug),
+        metaTitle: values.metaTitle?.trim() || values.title,
+        metaDescription:
+          values.metaDescription?.trim() || values.excerpt || "",
+        coverImage: values.coverImage ?? coverPreview,
+        category: values.category,
+        status: values.status,
+        content: normalizeContent(blocks),
+        updatedAt: serverTimestamp(),
+        publishedAt: isPublishing
+          ? serverTimestamp()
+          : originalPublishedAt ?? null,
+      });
 
       message.success("Blog updated");
       navigate("/admin");
@@ -179,11 +194,7 @@ await updateDoc(doc(db, "blogs", id), {
   };
 
   if (loading) {
-    return (
-      <p style={{ padding: 48, textAlign: "center" }}>
-        Loading…
-      </p>
-    );
+    return <p style={{ padding: 48, textAlign: "center" }}>Loading…</p>;
   }
 
   /* ================= RENDER ================= */
@@ -193,14 +204,10 @@ await updateDoc(doc(db, "blogs", id), {
       <Card title="Edit Blog" style={{ maxWidth: 1200, margin: "0 auto" }}>
         <Form layout="vertical" form={form}>
 
-          {/* META */}
+          {/* BASIC META */}
           <Row gutter={24}>
             <Col span={16}>
-              <Form.Item
-                label="Title"
-                name="title"
-                rules={[{ required: true }]}
-              >
+              <Form.Item label="Title (H1)" name="title" rules={[{ required: true }]}>
                 <Input size="large" />
               </Form.Item>
 
@@ -226,6 +233,29 @@ await updateDoc(doc(db, "blogs", id), {
               </Form.Item>
             </Col>
           </Row>
+
+          <Divider />
+
+          {/* SEO */}
+          <h3>SEO Settings</h3>
+
+          <Row gutter={24}>
+            <Col span={12}>
+              <Form.Item label="Slug" name="slug">
+                <Input />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item label="Meta Title" name="metaTitle">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item label="Meta Description" name="metaDescription">
+            <Input.TextArea rows={2} />
+          </Form.Item>
 
           <Divider />
 
@@ -266,7 +296,7 @@ await updateDoc(doc(db, "blogs", id), {
 
           <Divider />
 
-          {/* CONTENT */}
+          {/* CONTENT BLOCKS */}
           <h3>Content</h3>
 
           {blocks.map((block, i) => (
@@ -282,7 +312,7 @@ await updateDoc(doc(db, "blogs", id), {
                 />
               }
             >
-              <div className="text-xs uppercase text-gray-400 mb-2">
+              <div style={{ fontSize: 12, textTransform: "uppercase", marginBottom: 8 }}>
                 {block.type}
               </div>
 
@@ -290,18 +320,14 @@ await updateDoc(doc(db, "blogs", id), {
                 <Input
                   placeholder="Heading"
                   value={block.text}
-                  onChange={(e) =>
-                    updateBlock(i, "text", e.target.value)
-                  }
+                  onChange={(e) => updateBlock(i, "text", e.target.value)}
                 />
               )}
 
               {block.type === "richtext" && (
                 <RichTextEditor
                   value={block.html}
-                  onChange={(html) =>
-                    updateBlock(i, "html", html)
-                  }
+                  onChange={(html) => updateBlock(i, "html", html)}
                 />
               )}
 
@@ -315,9 +341,7 @@ await updateDoc(doc(db, "blogs", id), {
                       onSuccess();
                     }}
                   >
-                    <Button icon={<UploadOutlined />}>
-                      Upload Image
-                    </Button>
+                    <Button icon={<UploadOutlined />}>Upload Image</Button>
                   </Upload>
 
                   {block.src && (
@@ -336,7 +360,7 @@ await updateDoc(doc(db, "blogs", id), {
 
                   <Input
                     style={{ marginTop: 8 }}
-                    placeholder="Alt text (optional)"
+                    placeholder="Alt text"
                     value={block.alt}
                     onChange={(e) =>
                       updateBlock(i, "alt", e.target.value)
@@ -362,17 +386,14 @@ await updateDoc(doc(db, "blogs", id), {
           <Divider />
 
           <Space>
-            <Button
-              type="primary"
-              loading={saving}
-              onClick={save}
-            >
+            <Button type="primary" loading={saving} onClick={save}>
               Save Changes
             </Button>
             <Button onClick={() => navigate("/admin")}>
               Cancel
             </Button>
           </Space>
+
         </Form>
       </Card>
     </div>

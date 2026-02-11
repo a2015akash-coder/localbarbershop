@@ -51,10 +51,15 @@ const slugify = (text = "") =>
 export default function UploadBlogPage() {
   const navigate = useNavigate();
 
-  /* -------- Meta -------- */
+  /* -------- Display Content -------- */
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [category, setCategory] = useState("Hairstyle");
+
+  /* -------- SEO -------- */
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [slug, setSlug] = useState("");
 
   /* -------- Cover -------- */
   const [coverImage, setCoverImage] = useState("");
@@ -106,12 +111,19 @@ export default function UploadBlogPage() {
     try {
       await addDoc(collection(db, "blogs"), {
         title,
-        slug: `${slugify(title)}-${Date.now()}`,
         excerpt,
         category,
+
+        slug: slug || slugify(title),
+
+        metaTitle: metaTitle || title,
+        metaDescription: metaDescription || excerpt,
+
         status: publish ? "published" : "draft",
+
         coverImage,
         content: blocks,
+
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         publishedAt: publish ? serverTimestamp() : null,
@@ -144,11 +156,12 @@ export default function UploadBlogPage() {
           <Button onClick={() => navigate(-1)}>Back</Button>
         </div>
 
-        {/* Meta */}
+        {/* META SECTION */}
         <div className="bg-white rounded-xl p-6 space-y-4">
+
           <input
             className="w-full rounded border px-4 py-3"
-            placeholder="Blog title"
+            placeholder="Blog title (H1)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -160,9 +173,35 @@ export default function UploadBlogPage() {
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
           />
+
+          <Divider />
+
+          <p className="font-medium text-gray-700">SEO Settings</p>
+
+          <input
+            className="w-full rounded border px-4 py-3"
+            placeholder="Meta title (60 characters ideal)"
+            value={metaTitle}
+            onChange={(e) => setMetaTitle(e.target.value)}
+          />
+
+          <textarea
+            rows={2}
+            className="w-full rounded border px-4 py-3"
+            placeholder="Meta description (150–160 characters ideal)"
+            value={metaDescription}
+            onChange={(e) => setMetaDescription(e.target.value)}
+          />
+
+          <input
+            className="w-full rounded border px-4 py-3"
+            placeholder="Custom slug (e.g. best-skin-fade-kellyville)"
+            value={slug}
+            onChange={(e) => setSlug(slugify(e.target.value))}
+          />
         </div>
 
-        {/* Cover Image */}
+        {/* COVER IMAGE */}
         <div className="bg-white rounded-xl p-6">
           <p className="font-medium mb-3">Cover image</p>
 
@@ -192,11 +231,12 @@ export default function UploadBlogPage() {
           )}
         </div>
 
-        {/* Content Blocks */}
+        {/* CONTENT BLOCKS */}
         <Divider orientation="left">Content</Divider>
 
         {blocks.map((b, i) => (
           <div key={i} className="bg-white rounded-xl p-6 space-y-4 border">
+
             <div className="flex justify-between items-center">
               <span className="text-xs uppercase tracking-wide text-gray-400">
                 {b.type}
@@ -266,10 +306,7 @@ export default function UploadBlogPage() {
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-6">
-          <Button
-            loading={saving}
-            onClick={() => saveBlog(false)}
-          >
+          <Button loading={saving} onClick={() => saveBlog(false)}>
             Save Draft
           </Button>
 
@@ -282,6 +319,7 @@ export default function UploadBlogPage() {
             Publish
           </Button>
         </div>
+
       </div>
     </section>
   );

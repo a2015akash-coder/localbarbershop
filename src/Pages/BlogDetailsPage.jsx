@@ -52,8 +52,8 @@ export default function BlogDetailsPage() {
   return (
     <>
       <SEO
-        title={blog.title}
-        description={blog.excerpt}
+        title={blog.metaTitle || blog.title}
+        description={blog.metaDescription || blog.excerpt}
         canonical={`https://thegroomingroom.com.au/blogs/${blog.slug}`}
         robots="index, follow, max-image-preview:large"
       />
@@ -86,42 +86,25 @@ export default function BlogDetailsPage() {
 
           <div className="mt-6 h-px w-20 bg-gray-300" />
 
-          {/* COVER IMAGE */}
-          {blog.coverImage && (
-            <div className="my-12 rounded-2xl border border-gray-200 bg-white p-4">
-              <img
-                src={blog.coverImage}
-                alt={blog.coverAlt || blog.title}
-                className="w-full rounded-xl object-cover"
-                loading="eager"
-                fetchpriority="high"
-              />
-            </div>
-          )}
+<article
+  className="
+    prose
+    prose-gray
+    max-w-none
+    mt-8
 
-          {/* CONTENT */}
+    prose-h2:text-[#F4511E]
+    prose-h2:font-semibold
+    prose-h2:mt-12
+    prose-h2:mb-4
 
-<article className="
-  prose 
-  prose-gray 
-  max-w-none
-
-  prose-h2:mt-12
-  prose-h2:mb-4
-
-  prose-p:my-5
-
-  prose-ul:my-6
-  prose-ul:pl-6
-
-  prose-li:my-2
-
-  prose-figure:my-10
-  prose-img:rounded-xl
-
-  prose-a:text-orange-600
-  prose-a:underline
-">
+    prose-a:text-blue-600
+    prose-a:font-medium
+    prose-a:no-underline
+    hover:prose-a:underline
+    prose-a:transition-colors
+  "
+>
   {Array.isArray(blog.content) &&
     blog.content.map((block, i) => {
       if (block.type === "heading") {
@@ -137,34 +120,9 @@ export default function BlogDetailsPage() {
         );
       }
 
-   if (block.type === "image") {
-  return (
-    <figure
-      key={i}
-      className="my-12 rounded-2xl border border-gray-200 bg-white p-4"
-    >
-      <img
-        src={block.src}
-        alt={block.alt || ""}
-        className="w-full rounded-xl object-cover"
-        loading="lazy"
-      />
-
-      {block.alt && (
-        <figcaption className="mt-3 text-sm text-gray-500 text-center">
-          {block.alt}
-        </figcaption>
-      )}
-    </figure>
-  );
-}
-
-
       return null;
     })}
 </article>
-
-
 
 
         </div>
