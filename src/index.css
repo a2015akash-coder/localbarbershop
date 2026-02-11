@@ -56,7 +56,7 @@
   }
 
   .prose h2 {
-    @apply text-2xl font-semibold mt-10 mb-4 text-[#F4511E];
+    @apply text-2xl font-semibold mt-10 mb-4 text-[#f4871e];
   }
 
   .prose h3 {
@@ -72,7 +72,7 @@
   }
 
   .prose a {
-    @apply text-blue-600 font-medium no-underline transition-colors;
+    @apply text-blue-300 font-medium no-underline transition-colors;
   }
 
   .prose a:hover {

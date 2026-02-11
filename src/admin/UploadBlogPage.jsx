@@ -46,6 +46,12 @@ const slugify = (text = "") =>
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-");
 
+const getCounterColor = (length, limit) => {
+  if (length > limit) return "text-red-600";
+  if (length > limit * 0.9) return "text-orange-500";
+  return "text-gray-400";
+};
+
 /* ================= PAGE ================= */
 
 export default function UploadBlogPage() {
@@ -93,7 +99,7 @@ export default function UploadBlogPage() {
   const removeBlock = (i) =>
     setBlocks((prev) => prev.filter((_, idx) => idx !== i));
 
-  /* ================= SAVE HANDLER ================= */
+  /* ================= SAVE ================= */
 
   const saveBlog = async (publish = false) => {
     if (!title || !excerpt) {
@@ -115,7 +121,6 @@ export default function UploadBlogPage() {
         category,
 
         slug: slug || slugify(title),
-
         metaTitle: metaTitle || title,
         metaDescription: metaDescription || excerpt,
 
@@ -145,19 +150,17 @@ export default function UploadBlogPage() {
     <section className="bg-gray-50 py-12">
       <div className="mx-auto max-w-4xl px-4 space-y-8">
 
-        {/* Breadcrumb */}
         <nav className="text-sm text-gray-500">
           <Link to="/admin" className="hover:underline">Admin</Link> / New Blog
         </nav>
 
-        {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-semibold">Upload Blog</h1>
           <Button onClick={() => navigate(-1)}>Back</Button>
         </div>
 
         {/* META SECTION */}
-        <div className="bg-white rounded-xl p-6 space-y-4">
+        <div className="bg-white rounded-xl p-6 space-y-6">
 
           <input
             className="w-full rounded border px-4 py-3"
@@ -178,27 +181,45 @@ export default function UploadBlogPage() {
 
           <p className="font-medium text-gray-700">SEO Settings</p>
 
-          <input
-            className="w-full rounded border px-4 py-3"
-            placeholder="Meta title (60 characters ideal)"
-            value={metaTitle}
-            onChange={(e) => setMetaTitle(e.target.value)}
-          />
+          {/* Meta Title */}
+          <div>
+            <input
+              className="w-full rounded border px-4 py-3"
+              placeholder="Meta title (60 characters ideal)"
+              value={metaTitle}
+              onChange={(e) => setMetaTitle(e.target.value)}
+            />
+            <div className={`text-xs mt-1 text-right ${getCounterColor(metaTitle.length, 60)}`}>
+              {metaTitle.length}/60 characters
+            </div>
+          </div>
 
-          <textarea
-            rows={2}
-            className="w-full rounded border px-4 py-3"
-            placeholder="Meta description (150–160 characters ideal)"
-            value={metaDescription}
-            onChange={(e) => setMetaDescription(e.target.value)}
-          />
+          {/* Meta Description */}
+          <div>
+            <textarea
+              rows={2}
+              className="w-full rounded border px-4 py-3"
+              placeholder="Meta description (150–160 characters ideal)"
+              value={metaDescription}
+              onChange={(e) => setMetaDescription(e.target.value)}
+            />
+            <div className={`text-xs mt-1 text-right ${getCounterColor(metaDescription.length, 160)}`}>
+              {metaDescription.length}/160 characters
+            </div>
+          </div>
 
-          <input
-            className="w-full rounded border px-4 py-3"
-            placeholder="Custom slug (e.g. best-skin-fade-kellyville)"
-            value={slug}
-            onChange={(e) => setSlug(slugify(e.target.value))}
-          />
+          {/* Slug */}
+          <div>
+            <input
+              className="w-full rounded border px-4 py-3"
+              placeholder="Custom slug (e.g. best-skin-fade-kellyville)"
+              value={slug}
+              onChange={(e) => setSlug(slugify(e.target.value))}
+            />
+            <div className={`text-xs mt-1 text-right ${getCounterColor(slug.length, 75)}`}>
+              {slug.length}/75 characters
+            </div>
+          </div>
         </div>
 
         {/* COVER IMAGE */}
@@ -297,14 +318,12 @@ export default function UploadBlogPage() {
           </div>
         ))}
 
-        {/* Add Buttons */}
         <div className="flex gap-3">
           <Button onClick={() => addBlock("heading")}>+ Heading</Button>
           <Button onClick={() => addBlock("richtext")}>+ Content</Button>
           <Button onClick={() => addBlock("image")}>+ Image</Button>
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3 pt-6">
           <Button loading={saving} onClick={() => saveBlog(false)}>
             Save Draft

@@ -37,6 +37,12 @@ const slugify = (text = "") =>
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-");
 
+const getCounterColor = (length, limit) => {
+  if (length > limit) return "#dc2626"; // red
+  if (length > limit * 0.9) return "#f97316"; // orange
+  return "#9ca3af"; // gray
+};
+
 /* ================= CLOUDINARY ================= */
 
 const uploadToCloudinary = (file, onProgress) =>
@@ -75,6 +81,11 @@ export default function EditBlogPage() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
+  const watchedMetaTitle = Form.useWatch("metaTitle", form) || "";
+  const watchedMetaDescription =
+    Form.useWatch("metaDescription", form) || "";
+  const watchedSlug = Form.useWatch("slug", form) || "";
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -83,7 +94,8 @@ export default function EditBlogPage() {
   const [coverProgress, setCoverProgress] = useState(0);
 
   const [originalStatus, setOriginalStatus] = useState("draft");
-  const [originalPublishedAt, setOriginalPublishedAt] = useState(null);
+  const [originalPublishedAt, setOriginalPublishedAt] =
+    useState(null);
 
   /* ================= LOAD BLOG ================= */
 
@@ -170,10 +182,14 @@ export default function EditBlogPage() {
         title: values.title.trim(),
         excerpt: values.excerpt?.trim() || "",
         slug: slugify(values.slug),
-        metaTitle: values.metaTitle?.trim() || values.title,
+        metaTitle:
+          values.metaTitle?.trim() || values.title,
         metaDescription:
-          values.metaDescription?.trim() || values.excerpt || "",
-        coverImage: values.coverImage ?? coverPreview,
+          values.metaDescription?.trim() ||
+          values.excerpt ||
+          "",
+        coverImage:
+          values.coverImage ?? coverPreview,
         category: values.category,
         status: values.status,
         content: normalizeContent(blocks),
@@ -194,20 +210,31 @@ export default function EditBlogPage() {
   };
 
   if (loading) {
-    return <p style={{ padding: 48, textAlign: "center" }}>Loading…</p>;
+    return (
+      <p style={{ padding: 48, textAlign: "center" }}>
+        Loading…
+      </p>
+    );
   }
 
   /* ================= RENDER ================= */
 
   return (
     <div style={{ padding: 32 }}>
-      <Card title="Edit Blog" style={{ maxWidth: 1200, margin: "0 auto" }}>
+      <Card
+        title="Edit Blog"
+        style={{ maxWidth: 1200, margin: "0 auto" }}
+      >
         <Form layout="vertical" form={form}>
 
           {/* BASIC META */}
           <Row gutter={24}>
             <Col span={16}>
-              <Form.Item label="Title (H1)" name="title" rules={[{ required: true }]}>
+              <Form.Item
+                label="Title (H1)"
+                name="title"
+                rules={[{ required: true }]}
+              >
                 <Input size="large" />
               </Form.Item>
 
@@ -219,16 +246,26 @@ export default function EditBlogPage() {
             <Col span={8}>
               <Form.Item label="Category" name="category">
                 <Select size="large">
-                  <Select.Option value="Hairstyle">Hairstyle</Select.Option>
-                  <Select.Option value="Beard">Beard</Select.Option>
-                  <Select.Option value="Grooming">Grooming</Select.Option>
+                  <Select.Option value="Hairstyle">
+                    Hairstyle
+                  </Select.Option>
+                  <Select.Option value="Beard">
+                    Beard
+                  </Select.Option>
+                  <Select.Option value="Grooming">
+                    Grooming
+                  </Select.Option>
                 </Select>
               </Form.Item>
 
               <Form.Item label="Status" name="status">
                 <Select size="large">
-                  <Select.Option value="draft">Draft</Select.Option>
-                  <Select.Option value="published">Published</Select.Option>
+                  <Select.Option value="draft">
+                    Draft
+                  </Select.Option>
+                  <Select.Option value="published">
+                    Published
+                  </Select.Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -244,18 +281,62 @@ export default function EditBlogPage() {
               <Form.Item label="Slug" name="slug">
                 <Input />
               </Form.Item>
+              <div
+                style={{
+                  textAlign: "right",
+                  fontSize: 12,
+                  color: getCounterColor(
+                    watchedSlug.length,
+                    75
+                  ),
+                }}
+              >
+                {watchedSlug.length}/75 characters
+              </div>
             </Col>
 
             <Col span={12}>
-              <Form.Item label="Meta Title" name="metaTitle">
+              <Form.Item
+                label="Meta Title"
+                name="metaTitle"
+              >
                 <Input />
               </Form.Item>
+              <div
+                style={{
+                  textAlign: "right",
+                  fontSize: 12,
+                  color: getCounterColor(
+                    watchedMetaTitle.length,
+                    60
+                  ),
+                }}
+              >
+                {watchedMetaTitle.length}/60 characters
+              </div>
             </Col>
           </Row>
 
-          <Form.Item label="Meta Description" name="metaDescription">
+          <Form.Item
+            label="Meta Description"
+            name="metaDescription"
+          >
             <Input.TextArea rows={2} />
           </Form.Item>
+
+          <div
+            style={{
+              textAlign: "right",
+              fontSize: 12,
+              marginTop: -8,
+              color: getCounterColor(
+                watchedMetaDescription.length,
+                160
+              ),
+            }}
+          >
+            {watchedMetaDescription.length}/160 characters
+          </div>
 
           <Divider />
 
@@ -263,21 +344,34 @@ export default function EditBlogPage() {
           <Form.Item label="Cover Image">
             <Upload
               showUploadList={false}
-              customRequest={async ({ file, onSuccess }) => {
+              customRequest={async ({
+                file,
+                onSuccess,
+              }) => {
                 setCoverProgress(0);
-                const url = await uploadToCloudinary(file, setCoverProgress);
+                const url =
+                  await uploadToCloudinary(
+                    file,
+                    setCoverProgress
+                  );
                 form.setFieldValue("coverImage", url);
                 setCoverPreview(url);
                 setCoverProgress(100);
                 onSuccess();
               }}
             >
-              <Button icon={<UploadOutlined />}>Change Cover</Button>
+              <Button icon={<UploadOutlined />}>
+                Change Cover
+              </Button>
             </Upload>
 
-            {coverProgress > 0 && coverProgress < 100 && (
-              <Progress percent={coverProgress} size="small" />
-            )}
+            {coverProgress > 0 &&
+              coverProgress < 100 && (
+                <Progress
+                  percent={coverProgress}
+                  size="small"
+                />
+              )}
 
             {coverPreview && (
               <img
@@ -308,11 +402,19 @@ export default function EditBlogPage() {
                 <Button
                   danger
                   icon={<DeleteOutlined />}
-                  onClick={() => removeBlock(i)}
+                  onClick={() =>
+                    removeBlock(i)
+                  }
                 />
               }
             >
-              <div style={{ fontSize: 12, textTransform: "uppercase", marginBottom: 8 }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  textTransform: "uppercase",
+                  marginBottom: 8,
+                }}
+              >
                 {block.type}
               </div>
 
@@ -320,14 +422,22 @@ export default function EditBlogPage() {
                 <Input
                   placeholder="Heading"
                   value={block.text}
-                  onChange={(e) => updateBlock(i, "text", e.target.value)}
+                  onChange={(e) =>
+                    updateBlock(
+                      i,
+                      "text",
+                      e.target.value
+                    )
+                  }
                 />
               )}
 
               {block.type === "richtext" && (
                 <RichTextEditor
                   value={block.html}
-                  onChange={(html) => updateBlock(i, "html", html)}
+                  onChange={(html) =>
+                    updateBlock(i, "html", html)
+                  }
                 />
               )}
 
@@ -335,13 +445,25 @@ export default function EditBlogPage() {
                 <>
                   <Upload
                     showUploadList={false}
-                    customRequest={async ({ file, onSuccess }) => {
-                      const url = await uploadToCloudinary(file);
-                      updateBlock(i, "src", url);
+                    customRequest={async ({
+                      file,
+                      onSuccess,
+                    }) => {
+                      const url =
+                        await uploadToCloudinary(file);
+                      updateBlock(
+                        i,
+                        "src",
+                        url
+                      );
                       onSuccess();
                     }}
                   >
-                    <Button icon={<UploadOutlined />}>Upload Image</Button>
+                    <Button
+                      icon={<UploadOutlined />}
+                    >
+                      Upload Image
+                    </Button>
                   </Upload>
 
                   {block.src && (
@@ -363,7 +485,11 @@ export default function EditBlogPage() {
                     placeholder="Alt text"
                     value={block.alt}
                     onChange={(e) =>
-                      updateBlock(i, "alt", e.target.value)
+                      updateBlock(
+                        i,
+                        "alt",
+                        e.target.value
+                      )
                     }
                   />
                 </>
@@ -372,13 +498,28 @@ export default function EditBlogPage() {
           ))}
 
           <Space>
-            <Button icon={<PlusOutlined />} onClick={() => addBlock("heading")}>
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() =>
+                addBlock("heading")
+              }
+            >
               Heading
             </Button>
-            <Button icon={<PlusOutlined />} onClick={() => addBlock("richtext")}>
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() =>
+                addBlock("richtext")
+              }
+            >
               Content
             </Button>
-            <Button icon={<PlusOutlined />} onClick={() => addBlock("image")}>
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() =>
+                addBlock("image")
+              }
+            >
               Image
             </Button>
           </Space>
@@ -386,14 +527,21 @@ export default function EditBlogPage() {
           <Divider />
 
           <Space>
-            <Button type="primary" loading={saving} onClick={save}>
+            <Button
+              type="primary"
+              loading={saving}
+              onClick={save}
+            >
               Save Changes
             </Button>
-            <Button onClick={() => navigate("/admin")}>
+            <Button
+              onClick={() =>
+                navigate("/admin")
+              }
+            >
               Cancel
             </Button>
           </Space>
-
         </Form>
       </Card>
     </div>

@@ -120,9 +120,23 @@ export default function BlogDetailsPage() {
         );
       }
 
+     if (block.type === "image") {
+  return (
+    <figure key={i}>
+      <img
+        src={block.src}
+        alt={block.alt || ""}
+        loading="lazy"
+        className="rounded-xl"
+      />
+    </figure>
+  );
+}
+
       return null;
     })}
 </article>
+
 
 
         </div>
