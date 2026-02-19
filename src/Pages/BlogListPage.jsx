@@ -22,11 +22,7 @@ let blogCache = null;
 
 function optimizeImage(url) {
   if (!url || !url.includes("cloudinary")) return url;
-
-  return url.replace(
-    "/upload/",
-    "/upload/f_auto,q_auto,w_800/"
-  );
+  return url.replace("/upload/", "/upload/f_auto,q_auto,w_800/");
 }
 
 /* ---------------- EMPTY STATE ---------------- */
@@ -37,11 +33,9 @@ function EmptyStateCard({ isAdmin }) {
       <h2 className="text-xl font-semibold text-gray-900">
         No blog posts yet
       </h2>
-
-      <p className="mt-3 text-gray-600 max-w-xl mx-auto">
-        Fresh grooming tips and style guides are coming soon.
+      <p className="mt-3 text-gray-600">
+        Fresh updates and practical insights are coming soon.
       </p>
-
       <div className="mt-6 flex justify-center gap-3 flex-wrap">
         <Link
           to="/"
@@ -49,7 +43,6 @@ function EmptyStateCard({ isAdmin }) {
         >
           Back to Home
         </Link>
-
         {isAdmin && (
           <Link
             to="/admin/blogs/new"
@@ -88,7 +81,6 @@ export default function BlogListPage() {
       const token = await user.getIdTokenResult();
       setIsAdmin(token.claims.admin === true);
     });
-
     return () => unsub();
   }, []);
 
@@ -112,19 +104,16 @@ export default function BlogListPage() {
     const fetchPublic = async () => {
       try {
         setLoading(true);
-
         if (blogCache) {
           setBlogs(blogCache);
           setLoading(false);
           return;
         }
-
         const snapshot = await getDocs(q);
         const data = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-
         blogCache = data;
         setBlogs(data);
       } catch {
@@ -141,7 +130,6 @@ export default function BlogListPage() {
           id: doc.id,
           ...doc.data(),
         }));
-
         blogCache = data;
         setBlogs(data);
         setLoading(false);
@@ -157,11 +145,10 @@ export default function BlogListPage() {
     return cleanup;
   }, [isAdmin]);
 
-  /* -------- SEARCH FILTER (MEMOIZED) -------- */
+  /* -------- SEARCH FILTER -------- */
 
   const filteredBlogs = useMemo(() => {
     const q = search.toLowerCase();
-
     return blogs.filter((blog) =>
       blog.title?.toLowerCase().includes(q) ||
       blog.excerpt?.toLowerCase().includes(q) ||
@@ -175,27 +162,27 @@ export default function BlogListPage() {
   if (error) return <p className="py-24 text-center text-red-600">{error}</p>;
 
   return (
-    <section className="bg-white py-20">
+    <section className="bg-gray-50 py-20">
       <SEO {...seoPages.blogs} />
 
       <div className="max-w-screen-xl mx-auto px-4">
-        {/* ---------------- HEADER ---------------- */}
 
-        <div className="max-w-3xl mx-auto text-center mb-14">
-          <span className="inline-block mb-4 rounded-full bg-gray-100 px-4 py-1 text-sm font-medium text-gray-700">
+        {/* HEADER */}
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <span className="inline-block mb-4 rounded-full bg-gray-200 px-4 py-1 text-sm font-medium text-gray-700">
             Blog
           </span>
 
           <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900">
-            Discover our latest news
+            Discover our latest insights
           </h1>
 
           <p className="mt-4 text-gray-600">
-            Grooming tips, barber insights, and practical advice.
+            Practical advice, expert tips, and updates.
           </p>
 
-          {/* SEARCH */}
-          <div className="mt-8 max-w-xl mx-auto">
+          {/* SEARCH + BUTTONS */}
+          <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-xl mx-auto">
             <input
               type="text"
               placeholder="Search by title, category, or keyword"
@@ -207,60 +194,79 @@ export default function BlogListPage() {
                   setDisplayCount(PAGE_SIZE);
                 }, DEBOUNCE_DELAY);
               }}
-              className="w-full rounded-full border border-gray-300 px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full rounded-full border border-gray-300 px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-600"
             />
+
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="rounded-full border border-gray-300 px-5 py-3 text-sm font-medium hover:bg-gray-100"
+              >
+                Categories
+              </button>
+
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className="rounded-full bg-orange-600 px-5 py-3 text-sm font-semibold text-white hover:bg-orange-700"
+                >
+                  Admin
+                </Link>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* ---------------- BLOG GRID ---------------- */}
-
+        {/* BLOG GRID */}
         {filteredBlogs.length === 0 ? (
           <EmptyStateCard isAdmin={isAdmin} />
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {displayedBlogs.map((blog, index) => (
                 <Link
                   to={`/blog/${blog.slug}`}
                   key={blog.id}
-                  className="group relative overflow-hidden rounded-2xl bg-gray-900 aspect-[4/5]"
+                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:-translate-y-1"
                 >
-                  {/* IMAGE */}
-                  {blog.coverImage && (
-                    <img
-                      src={optimizeImage(blog.coverImage)}
-                      alt={blog.title}
-                      loading={index < 6 ? "eager" : "lazy"}
-                      decoding="async"
-                      className="
-                        absolute inset-0 h-full w-full object-cover
-                        transition-transform duration-500
-                        group-hover:scale-105
-                        will-change-transform
-                      "
-                    />
-                  )}
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    {blog.coverImage && (
+                      <img
+                        src={optimizeImage(blog.coverImage)}
+                        alt={blog.title}
+                        loading={index < 6 ? "eager" : "lazy"}
+                        decoding="async"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    )}
 
-                  {/* OVERLAY */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    {blog.category && (
+                      <span className="absolute top-4 left-4 bg-orange-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                        {blog.category}
+                      </span>
+                    )}
+                  </div>
 
-                  {/* CONTENT */}
-                  <div className="absolute bottom-0 p-5 text-white">
-                    <span className="inline-block mb-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900">
-                      {blog.category}
-                    </span>
-
-                    <h2 className="text-lg font-semibold leading-snug">
+                  <div className="p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 leading-snug group-hover:text-orange-600 transition-colors duration-200">
                       {blog.title}
                     </h2>
 
-                    <p className="mt-2 text-sm text-white/90 line-clamp-2">
+                    {blog.publishedAt && (
+                      <p className="mt-3 text-sm text-gray-500">
+                        {new Date(
+                          blog.publishedAt.seconds * 1000
+                        ).toLocaleDateString("en-AU", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </p>
+                    )}
+
+                    <p className="mt-4 text-gray-600 text-sm leading-relaxed line-clamp-3">
                       {blog.excerpt}
                     </p>
-
-                    <span className="mt-3 inline-block text-sm font-medium text-orange-400">
-                      Read more →
-                    </span>
                   </div>
                 </Link>
               ))}
@@ -268,7 +274,7 @@ export default function BlogListPage() {
 
             {/* LOAD MORE */}
             {displayCount < filteredBlogs.length && (
-              <div className="mt-12 text-center">
+              <div className="mt-14 text-center">
                 <button
                   onClick={() =>
                     setDisplayCount((prev) => prev + PAGE_SIZE)
@@ -283,6 +289,46 @@ export default function BlogListPage() {
           </>
         )}
       </div>
+
+      {/* SIDEBAR OVERLAY */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* SIDEBAR */}
+      <aside
+        className={`fixed top-0 right-0 z-50 h-full w-[300px] bg-white p-6 transform transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex justify-between items-center mb-8">
+          <h3 className="text-xl font-semibold">Categories</h3>
+          <button onClick={() => setSidebarOpen(false)}>✕</button>
+        </div>
+
+        <ul className="space-y-4">
+          {[
+            "All Posts",
+            "Tree Removal",
+            "Stump Grinding",
+            "Cost Guide",
+          ].map((cat) => (
+            <li
+              key={cat}
+              onClick={() => {
+                setSearch(cat === "All Posts" ? "" : cat);
+                setSidebarOpen(false);
+              }}
+              className="cursor-pointer hover:text-orange-600"
+            >
+              {cat}
+            </li>
+          ))}
+        </ul>
+      </aside>
     </section>
   );
 }
