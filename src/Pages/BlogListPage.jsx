@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import {
   collection,
   getDocs,
@@ -11,18 +11,29 @@ import {
 import { db, auth } from "../firebase";
 import { Link } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
-import { seoPages } from '../seo/pages';
-import SEO from '../components/SEO';
+import { seoPages } from "../seo/pages";
+import SEO from "../components/SEO";
 
 const PAGE_SIZE = 15;
 const DEBOUNCE_DELAY = 300;
 let blogCache = null;
 
+/* ---------------- IMAGE OPTIMIZER ---------------- */
+
+function optimizeImage(url) {
+  if (!url || !url.includes("cloudinary")) return url;
+
+  return url.replace(
+    "/upload/",
+    "/upload/f_auto,q_auto,w_800/"
+  );
+}
+
 /* ---------------- EMPTY STATE ---------------- */
 
 function EmptyStateCard({ isAdmin }) {
   return (
-    <div className=" cv-auto rounded-2xl bg-gray-50 p-10 text-center">
+    <div className="rounded-2xl bg-gray-50 p-10 text-center">
       <h2 className="text-xl font-semibold text-gray-900">
         No blog posts yet
       </h2>
@@ -67,6 +78,7 @@ export default function BlogListPage() {
   const debounceTimerRef = useRef(null);
 
   /* -------- ADMIN DETECTION -------- */
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -81,6 +93,7 @@ export default function BlogListPage() {
   }, []);
 
   /* -------- FETCH BLOGS -------- */
+
   useEffect(() => {
     const q = query(
       collection(db, "blogs"),
@@ -99,6 +112,7 @@ export default function BlogListPage() {
     const fetchPublic = async () => {
       try {
         setLoading(true);
+
         if (blogCache) {
           setBlogs(blogCache);
           setLoading(false);
@@ -127,6 +141,7 @@ export default function BlogListPage() {
           id: doc.id,
           ...doc.data(),
         }));
+
         blogCache = data;
         setBlogs(data);
         setLoading(false);
@@ -142,30 +157,30 @@ export default function BlogListPage() {
     return cleanup;
   }, [isAdmin]);
 
-  /* -------- SEARCH FILTER -------- */
-  const filteredBlogs = blogs.filter((blog) => {
+  /* -------- SEARCH FILTER (MEMOIZED) -------- */
+
+  const filteredBlogs = useMemo(() => {
     const q = search.toLowerCase();
-    return (
+
+    return blogs.filter((blog) =>
       blog.title?.toLowerCase().includes(q) ||
       blog.excerpt?.toLowerCase().includes(q) ||
       blog.category?.toLowerCase().includes(q)
     );
-  });
+  }, [blogs, search]);
 
-  /* -------- DISPLAY FILTERED & PAGINATED BLOGS -------- */
   const displayedBlogs = filteredBlogs.slice(0, displayCount);
 
   if (loading) return <p className="py-24 text-center">Loading blogs…</p>;
   if (error) return <p className="py-24 text-center text-red-600">{error}</p>;
 
   return (
-
-    
     <section className="bg-white py-20">
-          <SEO {...seoPages.blogs} />
-      <div className="max-w-screen-xl mx-auto px-4">
+      <SEO {...seoPages.blogs} />
 
-        {/* ---------------- HEADER + SEARCH ---------------- */}
+      <div className="max-w-screen-xl mx-auto px-4">
+        {/* ---------------- HEADER ---------------- */}
+
         <div className="max-w-3xl mx-auto text-center mb-14">
           <span className="inline-block mb-4 rounded-full bg-gray-100 px-4 py-1 text-sm font-medium text-gray-700">
             Blog
@@ -176,61 +191,29 @@ export default function BlogListPage() {
           </h1>
 
           <p className="mt-4 text-gray-600">
-            Grooming tips, barber insights, and practical advice to help you
-            look sharp and confident.
+            Grooming tips, barber insights, and practical advice.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-xl mx-auto">
-  {/* SEARCH */}
-  <input
-    type="text"
-    placeholder="Search by title, category, or keyword"
-    value={search}
-    onChange={(e) => {
-      setSearch(e.target.value);
-      clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = setTimeout(() => {
-        setDisplayCount(PAGE_SIZE);
-      }, DEBOUNCE_DELAY);
-    }}
-    className="
-      w-full rounded-full border border-gray-300
-      px-5 py-3 text-sm
-      focus:outline-none focus:ring-2 focus:ring-orange-500
-    "
-  />
-
-  {/* ACTION BUTTONS */}
-  <div className="flex gap-2 justify-center">
-    <button
-      onClick={() => setSidebarOpen(true)}
-      className="
-        rounded-full border border-gray-300
-        px-5 py-3 text-sm font-medium
-        hover:bg-gray-100
-      "
-    >
-      Categories
-    </button>
-
-    {isAdmin && (
-      <Link
-        to="/admin"
-        className="
-          rounded-full bg-orange-600
-          px-5 py-3 text-sm font-semibold
-          text-white hover:bg-orange-700
-        "
-      >
-        Admin
-      </Link>
-    )}
-  </div>
-</div>
-
+          {/* SEARCH */}
+          <div className="mt-8 max-w-xl mx-auto">
+            <input
+              type="text"
+              placeholder="Search by title, category, or keyword"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                clearTimeout(debounceTimerRef.current);
+                debounceTimerRef.current = setTimeout(() => {
+                  setDisplayCount(PAGE_SIZE);
+                }, DEBOUNCE_DELAY);
+              }}
+              className="w-full rounded-full border border-gray-300 px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
         </div>
 
         {/* ---------------- BLOG GRID ---------------- */}
+
         {filteredBlogs.length === 0 ? (
           <EmptyStateCard isAdmin={isAdmin} />
         ) : (
@@ -240,19 +223,21 @@ export default function BlogListPage() {
                 <Link
                   to={`/blog/${blog.slug}`}
                   key={blog.id}
-                  className="group relative overflow-hidden rounded-2xl bg-gray-900 h-[360px]"
+                  className="group relative overflow-hidden rounded-2xl bg-gray-900 aspect-[4/5]"
                 >
                   {/* IMAGE */}
                   {blog.coverImage && (
                     <img
-                      src={blog.coverImage}
+                      src={optimizeImage(blog.coverImage)}
                       alt={blog.title}
+                      loading={index < 6 ? "eager" : "lazy"}
+                      decoding="async"
                       className="
                         absolute inset-0 h-full w-full object-cover
                         transition-transform duration-500
                         group-hover:scale-105
+                        will-change-transform
                       "
-                      loading={index < 6 ? "eager" : "lazy"}
                     />
                   )}
 
@@ -281,71 +266,23 @@ export default function BlogListPage() {
               ))}
             </div>
 
-            {/* LOAD MORE BUTTON */}
+            {/* LOAD MORE */}
             {displayCount < filteredBlogs.length && (
               <div className="mt-12 text-center">
                 <button
-                  onClick={() => setDisplayCount(prev => prev + PAGE_SIZE)}
-                  className="
-                    rounded-full border border-gray-300
-                    px-8 py-3 text-sm font-medium
-                    hover:bg-gray-100
-                    transition-colors
-                  "
+                  onClick={() =>
+                    setDisplayCount((prev) => prev + PAGE_SIZE)
+                  }
+                  className="rounded-full border border-gray-300 px-8 py-3 text-sm font-medium hover:bg-gray-100 transition-colors"
                 >
-                  Load More ({filteredBlogs.length - displayCount} remaining)
+                  Load More (
+                  {filteredBlogs.length - displayCount} remaining)
                 </button>
               </div>
             )}
           </>
         )}
       </div>
-
-      {/* ---------------- OVERLAY ---------------- */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* ---------------- SIDEBAR ---------------- */}
-      <aside
-        className={`
-          fixed top-0 right-0 z-50 h-full w-[300px]
-          bg-white p-6
-          transform transition-transform duration-300
-          ${sidebarOpen ? "translate-x-0" : "translate-x-full"}
-        `}
-      >
-        <div className="flex justify-between items-center mb-8">
-          <h3 className="text-xl font-semibold">Categories</h3>
-          <button onClick={() => setSidebarOpen(false)}>✕</button>
-        </div>
-
-        <ul className="space-y-4">
-          {[
-            "All Posts",
-            "Beard Trim",
-            "Facility",
-            "Hairstyle",
-            "Holiday",
-            "Shave",
-            "Skin Fade",
-          ].map((cat) => (
-            <li
-              key={cat}
-              onClick={() => {
-                setSearch(cat === "All Posts" ? "" : cat);
-                setSidebarOpen(false);
-              }}
-              className="cursor-pointer hover:text-orange-600"
-            >
-              {cat}
-            </li>
-          ))}
-        </ul>
-      </aside>
     </section>
   );
 }
