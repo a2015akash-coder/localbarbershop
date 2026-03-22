@@ -1,5 +1,12 @@
 import { memo, lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 
 import Navbar from "./components/landingpage/Navbar.jsx";
 import Footer from "./components/landingpage/Footer.jsx";
@@ -28,6 +35,18 @@ const AdminBlogDashboard = lazy(() => import("./admin/AdminBlogDashboard.jsx"));
 const UploadBlogPage = lazy(() => import("./admin/UploadBlogPage.jsx"));
 const EditBlogPage = lazy(() => import("./admin/EditBlogPage.jsx"));
 
+function LegacyBlogRedirect() {
+  const { slug = "" } = useParams();
+  const location = useLocation();
+
+  return (
+    <Navigate
+      replace
+      to={`/blogs/${slug}${location.search}${location.hash}`}
+    />
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -54,7 +73,8 @@ function App() {
 
             {/* BLOG */}
             <Route path="/blogs" element={<BlogListPage />} />
-            <Route path="/blog/:slug" element={<BlogDetailsPage />} />
+            <Route path="/blogs/:slug" element={<BlogDetailsPage />} />
+            <Route path="/blog/:slug" element={<LegacyBlogRedirect />} />
 
             {/* AUTH */}
             <Route path="/login" element={<LoginPage />} />

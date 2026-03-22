@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { Link } from "react-router-dom";
+import { BLOG_DETAIL_BASE_PATH } from "../utils/blogLinkUtils";
 
 const PAGE_SIZE = 8;
 
@@ -127,8 +128,9 @@ function BlogRowCard({ blog, onPublish, onUnpublish, onDelete }) {
 
           {blog.status === "published" && (
             <Link
-              to={`/blog/${blog.slug}`}
+              to={`${BLOG_DETAIL_BASE_PATH}/${blog.slug}`}
               target="_blank"
+              rel="noreferrer"
               className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
             >
               View

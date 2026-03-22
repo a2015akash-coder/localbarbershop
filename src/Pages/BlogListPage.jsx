@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { seoPages } from "../seo/pages";
 import SEO from "../components/SEO";
+import { BLOG_DETAIL_BASE_PATH } from "../utils/blogLinkUtils";
 
 const PAGE_SIZE = 15;
 const DEBOUNCE_DELAY = 300;
@@ -225,7 +226,7 @@ export default function BlogListPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {displayedBlogs.map((blog, index) => (
                 <Link
-                  to={`/blog/${blog.slug}`}
+                  to={`${BLOG_DETAIL_BASE_PATH}/${blog.slug}`}
                   key={blog.id}
                   className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:-translate-y-1"
                 >

@@ -5,6 +5,7 @@ import { Button, Upload, Progress, message, Divider } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import { db } from "../firebase";
 import RichTextEditor from "../components/RichTextEditor";
+import { normalizeBlogContentBlocks } from "../utils/blogLinkUtils";
 
 /* ================= CLOUDINARY ================= */
 
@@ -127,7 +128,7 @@ export default function UploadBlogPage() {
         status: publish ? "published" : "draft",
 
         coverImage,
-        content: blocks,
+        content: normalizeBlogContentBlocks(blocks),
 
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),

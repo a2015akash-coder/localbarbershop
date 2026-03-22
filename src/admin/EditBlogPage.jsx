@@ -27,6 +27,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import RichTextEditor from "../components/RichTextEditor";
+import { normalizeBlogContentBlocks } from "../utils/blogLinkUtils";
 
 /* ================= HELPERS ================= */
 
@@ -125,7 +126,9 @@ export default function EditBlogPage() {
       setCoverPreview(d.coverImage || "");
       setOriginalStatus(d.status || "draft");
       setOriginalPublishedAt(d.publishedAt || null);
-      setBlocks(Array.isArray(d.content) ? d.content : []);
+      setBlocks(
+        normalizeBlogContentBlocks(Array.isArray(d.content) ? d.content : [])
+      );
       setLoading(false);
     };
 
@@ -156,17 +159,6 @@ export default function EditBlogPage() {
   const removeBlock = (i) =>
     setBlocks((prev) => prev.filter((_, idx) => idx !== i));
 
-  const normalizeContent = (blocks = []) =>
-    blocks.map((b) => {
-      if (b.type === "paragraph") {
-        return {
-          type: "richtext",
-          html: `<p>${b.text || ""}</p>`,
-        };
-      }
-      return b;
-    });
-
   /* ================= SAVE ================= */
 
   const save = async () => {
@@ -192,7 +184,7 @@ export default function EditBlogPage() {
           values.coverImage ?? coverPreview,
         category: values.category,
         status: values.status,
-        content: normalizeContent(blocks),
+        content: normalizeBlogContentBlocks(blocks),
         updatedAt: serverTimestamp(),
         publishedAt: isPublishing
           ? serverTimestamp()
