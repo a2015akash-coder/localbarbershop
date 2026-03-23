@@ -1,7 +1,7 @@
-const SITE_ORIGIN = "https://thegroomingroom.com.au";
+const SITE_ORIGIN = "https://kellyvillebarber.com.au";
 const SITE_HOSTS = new Set([
-  "thegroomingroom.com.au",
-  "www.thegroomingroom.com.au",
+  "kellyvillebarber.com.au",
+  "www.kellyvillebarber.com.au",
 ]);
 
 export const BLOG_LIST_PATH = "/blogs";
@@ -12,10 +12,7 @@ const EXTERNAL_REL = "nofollow noopener noreferrer";
 const UNSAFE_PROTOCOL_PATTERN = /^\s*(javascript|data|vbscript):/i;
 
 function createHtmlDocument(html) {
-  if (typeof DOMParser === "undefined") {
-    return null;
-  }
-
+  if (typeof DOMParser === "undefined") return null;
   return new DOMParser().parseFromString(html, "text/html");
 }
 
@@ -74,13 +71,14 @@ function normalizeAnchor(anchor) {
   }
 
   let url;
-
   try {
     url = new URL(href, SITE_ORIGIN);
   } catch {
     stripUnsafeLink(anchor);
     return;
   }
+
+  const hostname = url.hostname.toLowerCase();
 
   if (url.protocol === "mailto:" || url.protocol === "tel:") {
     anchor.setAttribute("href", href);
@@ -93,7 +91,7 @@ function normalizeAnchor(anchor) {
     return;
   }
 
-  if (SITE_HOSTS.has(url.hostname)) {
+  if (SITE_HOSTS.has(hostname)) {
     anchor.setAttribute("href", normalizeInternalHref(url));
     clearSeoLinkAttributes(anchor);
     return;
@@ -105,15 +103,10 @@ function normalizeAnchor(anchor) {
 }
 
 export function normalizeBlogHtml(html = "") {
-  if (!html) {
-    return "";
-  }
+  if (!html) return "";
 
   const doc = createHtmlDocument(html);
-
-  if (!doc) {
-    return html;
-  }
+  if (!doc) return html;
 
   doc.querySelectorAll("a").forEach(normalizeAnchor);
   return doc.body.innerHTML;
