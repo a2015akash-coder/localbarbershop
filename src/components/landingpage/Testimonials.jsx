@@ -1,86 +1,117 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  MapPinned,
+  Star,
+} from "lucide-react";
 
 const CARD_WIDTH = 380;
-const GAP = 32;
+const GAP = 24;
 const SLIDE_DISTANCE = CARD_WIDTH + GAP;
 const VISIBLE = 3;
 
-function getAvatarColors(name = "") {
-  const palettes = [
-    "bg-pink-100 text-pink-700",
-    "bg-orange-100 text-orange-700",
-    "bg-yellow-100 text-yellow-700",
-    "bg-blue-100 text-blue-700",
-    "bg-green-100 text-green-700",
-    "bg-purple-100 text-purple-700",
-  ];
-
-  let hash = 0;
-  for (let i = 0; i < name.length; i += 1) {
-    hash = (hash + name.charCodeAt(i)) % palettes.length;
-  }
-
-  return palettes[hash];
+function getInitial(name = "") {
+  return name.trim().charAt(0).toUpperCase() || "G";
 }
 
 function renderStars(rating = 0) {
   const rounded = Math.max(0, Math.min(5, Math.round(rating)));
-  return "★".repeat(rounded) + "☆".repeat(5 - rounded);
+  return Array.from({ length: 5 }, (_, index) => index < rounded);
+}
+
+function cn(...classes) {
+  return classes.filter(Boolean).join(" ");
 }
 
 function ReviewCard({ review, mobile = false }) {
-  const avatarClass = getAvatarColors(review.authorName);
-  const avatarSize = mobile ? "h-18 w-18 text-lg" : "h-20 w-20 text-xl";
-  const bodyText = mobile
-    ? "text-sm text-slate-600 leading-relaxed"
-    : "text-base text-slate-600 leading-relaxed";
+  const stars = renderStars(review.rating);
 
   return (
-    <div
-      className={`rounded-3xl bg-white ${
-        mobile ? "p-7" : "p-9"
-      } shadow-sm text-center`}
-    >
-      {review.authorPhoto ? (
-        <img
-          src={review.authorPhoto}
-          alt={review.authorName}
-          className={`mx-auto mb-5 ${avatarSize} rounded-full object-cover`}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <div
-          className={`mx-auto mb-5 flex ${avatarSize} items-center justify-center rounded-full font-semibold ${avatarClass}`}
-        >
-          {review.initial}
-        </div>
+    <article
+      className={cn(
+        "group h-full rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all",
+        "hover:-translate-y-0.5 hover:shadow-md",
+        mobile ? "p-5" : "p-6"
       )}
+    >
+      <div className="flex items-start gap-4">
+        {review.authorPhoto ? (
+          <img
+            src={review.authorPhoto}
+            alt={review.authorName}
+            className="h-11 w-11 rounded-full object-cover ring-1 ring-slate-200"
+            loading="lazy"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700 ring-1 ring-slate-200">
+            {review.initial || getInitial(review.authorName)}
+          </div>
+        )}
 
-      <div className="mb-3 text-orange-500 text-lg tracking-wide">
-        {renderStars(review.rating)}
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-semibold text-slate-900">
+            {review.authorName}
+          </div>
+          <div className="mt-0.5 text-xs text-slate-500">
+            {review.relativePublishTimeDescription || "Google review"}
+          </div>
+        </div>
       </div>
 
-      <p className={bodyText}>“{review.text}”</p>
-
-      <div className="mt-4 font-semibold text-slate-900">{review.authorName}</div>
-
-      <div className="mt-1 text-xs text-slate-500">
-        {review.relativePublishTimeDescription || "Google review"}
+      <div className="mt-4 flex items-center gap-2">
+        <div className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+          {stars.map((filled, index) => (
+            <Star
+              key={index}
+              size={12}
+              className={filled ? "fill-current" : ""}
+            />
+          ))}
+          <span className="ml-1">{review.rating.toFixed(1)}</span>
+        </div>
       </div>
 
-      {review.authorUri ? (
-        <a
-          href={review.authorUri}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-3 inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700"
-        >
-          View profile <ExternalLink size={12} />
-        </a>
-      ) : null}
-    </div>
+      <p className="mt-4 line-clamp-6 text-sm leading-6 text-slate-600">
+        {review.text}
+      </p>
+
+      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+        <div className="text-xs text-slate-400">From Google Reviews</div>
+
+        {review.authorUri ? (
+          <a
+            href={review.authorUri}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 transition hover:text-slate-900"
+          >
+            Profile <ExternalLink size={12} />
+          </a>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function CarouselButton({ direction, onClick, label }) {
+  const Icon = direction === "left" ? ChevronLeft : ChevronRight;
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "inline-flex h-10 w-10 items-center justify-center rounded-full",
+        "border border-slate-200 bg-white text-slate-700 shadow-sm",
+        "transition hover:bg-slate-50 hover:text-slate-900"
+      )}
+      aria-label={label}
+      type="button"
+    >
+      <Icon size={18} />
+    </button>
   );
 }
 
@@ -122,8 +153,9 @@ export default function Testimonials() {
             businessName: data.businessName || "",
             rating: Number(data.rating || 0),
             userRatingCount: Number(data.userRatingCount || 0),
-           googleMapsUri: data.googleMapsUri || "",
+            googleMapsUri: data.googleMapsUri || "",
           });
+
           setReviews(incomingReviews);
           setItems(incomingReviews);
         }
@@ -186,85 +218,77 @@ export default function Testimonials() {
     return items.slice(0, VISIBLE + 1);
   }, [items]);
 
-  if (!loading && !error && reviews.length === 0) {
-    return (
-      <section className="cv-auto bg-orange-50 section-spacing">
-        <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 max-w-2xl">
-            <h2
-              className="font-semibold tracking-tight"
-              style={{
-                fontSize: "clamp(1.9rem, 3.5vw, 2.6rem)",
-                backgroundImage:
-                  "linear-gradient(90deg, #0f172a 0%, #a88c3a 60%, #e6c35c 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              What Our Clients Say
+  return (
+    <section className="bg-slate-50/60 py-16 sm:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 flex flex-col gap-6 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
+              <MapPinned size={14} />
+              Verified Google Reviews
+            </div>
+
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+              What clients say about {summary.businessName || "our shop"}
             </h2>
 
-            <p className="mt-3 text-base text-slate-600">
-              Google reviews are temporarily unavailable.
-            </p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section className="cv-auto bg-orange-50 section-spacing">
-      <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 max-w-2xl">
-          <h2
-            className="font-semibold tracking-tight"
-            style={{
-              fontSize: "clamp(1.9rem, 3.5vw, 2.6rem)",
-              backgroundImage:
-                "linear-gradient(90deg, #0f172a 0%, #a88c3a 60%, #e6c35c 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            What Our Clients Say
-          </h2>
-
-          {loading ? (
-            <p className="mt-3 text-base text-slate-600">
-              Loading Google reviews...
-            </p>
-          ) : error ? (
-            <p className="mt-3 text-base text-red-600">{error}</p>
-          ) : (
-            <div className="mt-3 space-y-2">
-              <p className="text-base text-slate-600">
-                Rated {summary.rating.toFixed(1)}★ on Google by{" "}
-                {summary.userRatingCount}+ locals for consistent results.
+            {loading ? (
+              <p className="mt-3 text-sm text-slate-600">
+                Loading Google reviews...
               </p>
+            ) : error ? (
+              <p className="mt-3 text-sm text-red-600">{error}</p>
+            ) : (
+              <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                  <Star size={14} className="fill-current text-amber-500" />
+                  <span className="font-medium text-slate-900">
+                    {summary.rating.toFixed(1)}
+                  </span>
+                </div>
 
-              {summary.googleMapsUri  ? (
-                <a
-                  href={summary.googleMapsUri}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-900"
-                >
-                  View all reviews on Google <ExternalLink size={14} />
-                </a>
-              ) : null}
+                <div className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                  {summary.userRatingCount} Google reviews
+                </div>
+
+                {summary.googleMapsUri ? (
+                  <a
+                    href={summary.googleMapsUri}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
+                  >
+                    View on Google <ExternalLink size={14} />
+                  </a>
+                ) : null}
+              </div>
+            )}
+          </div>
+
+          {!loading && !error && canCarousel ? (
+            <div className="hidden items-center gap-2 lg:flex">
+              <CarouselButton
+                direction="left"
+                onClick={slidePrev}
+                label="Previous review"
+              />
+              <CarouselButton
+                direction="right"
+                onClick={slideNext}
+                label="Next review"
+              />
             </div>
-          )}
+          ) : null}
         </div>
 
         {!loading && !error && reviews.length > 0 ? (
           <>
-            <div className="lg:hidden -mx-4 px-4 overflow-x-auto snap-x snap-mandatory">
-              <div className="flex gap-4 pb-6">
+            <div className="lg:hidden -mx-4 overflow-x-auto px-4">
+              <div className="flex gap-4 pb-2">
                 {reviews.map((review, index) => (
                   <div
                     key={`${review.authorName}-${index}`}
-                    className="snap-center flex-shrink-0 w-[85vw] max-w-sm"
+                    className="w-[86vw] max-w-sm flex-shrink-0"
                   >
                     <ReviewCard review={review} mobile />
                   </div>
@@ -273,50 +297,32 @@ export default function Testimonials() {
             </div>
 
             <div className="relative hidden lg:block">
-              <div className="overflow-hidden py-8">
+              <div className="overflow-hidden">
                 <div
                   ref={trackRef}
-                  className="flex gap-8 will-change-transform"
+                  className="flex gap-6 will-change-transform"
                   style={{
                     transform: `translateX(${offset}px)`,
                     transition: isAnimating
-                      ? "transform 620ms cubic-bezier(0.22, 1, 0.36, 1)"
+                      ? "transform 520ms cubic-bezier(0.22, 1, 0.36, 1)"
                       : "none",
                   }}
                 >
                   {desktopItems.map((review, index) => (
                     <div
                       key={`${review.authorName}-${review.publishTime}-${index}`}
-                      className="flex-shrink-0 w-[380px]"
+                      className="w-[380px] flex-shrink-0"
                     >
                       <ReviewCard review={review} />
                     </div>
                   ))}
                 </div>
               </div>
-
-              {canCarousel ? (
-                <>
-                  <button
-                    onClick={slidePrev}
-                    className="absolute -left-6 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white shadow-md hover:bg-orange-50 transition flex items-center justify-center"
-                    aria-label="Previous review"
-                  >
-                    <ChevronLeft size={22} />
-                  </button>
-
-                  <button
-                    onClick={slideNext}
-                    className="absolute -right-6 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white shadow-md hover:bg-orange-50 transition flex items-center justify-center"
-                    aria-label="Next review"
-                  >
-                    <ChevronRight size={22} />
-                  </button>
-                </>
-              ) : null}
             </div>
 
-            <p className="mt-4 text-xs text-slate-500">Reviews from Google.</p>
+            <p className="mt-6 text-xs text-slate-500">
+              Review content is sourced from Google.
+            </p>
           </>
         ) : null}
       </div>
