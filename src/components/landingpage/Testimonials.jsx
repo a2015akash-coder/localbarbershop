@@ -90,7 +90,7 @@ export default function Testimonials() {
     businessName: "",
     rating: 0,
     userRatingCount: 0,
-    reviewsUri: "",
+    googleMapsUri: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -108,7 +108,7 @@ export default function Testimonials() {
         setLoading(true);
         setError("");
 
-        const response = await fetch("/api/google-reviews");
+        const response = await fetch("/api/reviews");
         const data = await response.json();
 
         if (!response.ok) {
@@ -122,7 +122,7 @@ export default function Testimonials() {
             businessName: data.businessName || "",
             rating: Number(data.rating || 0),
             userRatingCount: Number(data.userRatingCount || 0),
-            reviewsUri: data.reviewsUri || "",
+           googleMapsUri: data.googleMapsUri || "",
           });
           setReviews(incomingReviews);
           setItems(incomingReviews);
@@ -243,9 +243,9 @@ export default function Testimonials() {
                 {summary.userRatingCount}+ locals for consistent results.
               </p>
 
-              {summary.reviewsUri ? (
+              {summary.googleMapsUri  ? (
                 <a
-                  href={summary.reviewsUri}
+                  href={summary.googleMapsUri}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-900"
