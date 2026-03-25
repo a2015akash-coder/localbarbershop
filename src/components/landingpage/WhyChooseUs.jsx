@@ -1,5 +1,7 @@
 import { memo } from "react";
-import { Scissors, Star, ShieldCheck, MapPin } from "lucide-react";
+import { MapPin, Scissors, ShieldCheck, Star } from "lucide-react";
+import { Card } from "../ui/card";
+import SectionHeading from "../ui/section-heading";
 
 const REASONS = [
   {
@@ -18,7 +20,7 @@ const REASONS = [
     Icon: ShieldCheck,
     color: "bg-orange-50 text-orange-600",
     title: "Community Pricing",
-    text: "Special pricing is available for kids, seniors, and new customers",
+    text: "Special pricing is available for kids, seniors, and new customers.",
   },
   {
     Icon: MapPin,
@@ -32,75 +34,57 @@ function WhyChooseUs() {
   return (
     <section className="cv-auto bg-gray-50 section-spacing">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-stretch">
-
-          {/* LEFT COLUMN — GROUPED */}
-          <div className="rounded-3xl border border-gray-200 bg-white p-8 flex flex-col gap-10">
-
-            {/* TEXT BLOCK */}
-            <div>
-             
-              <h2
-                id="why-choose-us"
-                className="mt-6 font-semibold leading-tight tracking-tight"
-                style={{
-                   fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)",
-                  backgroundImage: "linear-gradient(90deg, #0f172a, #E6C35C)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Why Visit The Grooming Room Barber Shop
-              </h2>
-
-              <p className="mt-5 max-w-lg text-base sm:text-lg text-gray-600 leading-relaxed">
-                We focus on the basics done right — quality haircuts,
-                friendly service, and a clean, relaxed space that keeps
-                locals coming back.
-              </p>
+        <div className="grid grid-cols-1 items-stretch gap-16 lg:grid-cols-2 lg:gap-20">
+          <Card className="flex flex-col gap-10 p-8 lg:p-10">
+            <div id="why-choose-us">
+              <SectionHeading
+                eyebrow="Why Choose Us"
+                title="Why visit The Grooming Room Barber Shop"
+                description="We focus on the basics done right - quality haircuts, friendly service, and a clean, relaxed space that keeps locals coming back."
+                className="max-w-lg"
+                titleClassName="text-[clamp(1.85rem,3.2vw,2.6rem)]"
+              />
             </div>
 
-            {/* IMAGE BLOCK — CENTERED */}
-            <div className="overflow-hidden rounded-2xl bg-gray-100">
+            <div className="overflow-hidden rounded-[24px] bg-gray-100">
               <div className="aspect-video">
                 <img
                   src="https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_1200,c_limit/v1767704060/interro_veoi1z.webp"
                   alt="Interior of The Grooming Room Barbershop in Kellyville showing barber chairs, reception counter, and waiting area"
-                  title="The Grooming Room Barbershop interior – Kellyville"
+                  title="The Grooming Room Barbershop interior - Kellyville"
                   loading="lazy"
                   decoding="async"
                   className="h-full w-full object-cover"
                 />
               </div>
             </div>
+          </Card>
 
-          </div>
-
-          {/* RIGHT COLUMN — SINGLE CARD */}
-          <div className="rounded-3xl border border-gray-200 bg-white p-8 flex flex-col justify-center">
-            <div className="space-y-10">
+          <Card className="flex flex-col justify-center p-8 lg:p-10">
+            <div className="space-y-5">
               {REASONS.map(({ Icon, color, title, text }) => (
-                <div key={title} className="flex gap-6">
+                <div
+                  key={title}
+                  className="flex gap-5 rounded-[24px] bg-[var(--muted)]/60 p-5"
+                >
                   <div
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${color}`}
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${color}`}
                   >
                     <Icon size={20} />
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-slate-900">
                       {title}
                     </h3>
-                    <p className="mt-2 text-base text-gray-600 leading-relaxed">
+                    <p className="mt-2 text-base leading-relaxed text-slate-600">
                       {text}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-
+          </Card>
         </div>
       </div>
     </section>

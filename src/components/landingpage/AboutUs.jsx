@@ -1,68 +1,54 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
+import { buttonVariants } from "../ui/button";
+import { Card } from "../ui/card";
+import SectionHeading from "../ui/section-heading";
 
 function AboutUs() {
   return (
-    <section className=" cv-auto bg-white py-16">
+    <section className="cv-auto bg-white py-16">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-
-          {/* IMAGE BLOCK */}
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div className="relative">
-            <div className="absolute -inset-4 rounded-3xl bg-slate-100 hidden lg:block" />
-            <div className="relative overflow-hidden rounded-3xl">
+            <div className="absolute -inset-4 hidden rounded-3xl bg-[var(--muted)] lg:block" />
+            <div className="relative overflow-hidden rounded-[28px] border border-[var(--border)] bg-white/80 p-3 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.45)]">
               <img
                 src="https://res.cloudinary.com/dvtbbuxon/image/upload/f_auto,q_auto,w_900/v1767623965/IMG_2628_wzzrmi.jpg"
                 alt="Interior view of The Grooming Room Barbershop in Kellyville"
-                title="Inside The Grooming Room Barbershop – Kellyville"
-                className="h-[320px] w-full object-cover"
+                title="Inside The Grooming Room Barbershop - Kellyville"
+                className="h-[320px] w-full rounded-[22px] object-cover"
                 loading="lazy"
                 decoding="async"
               />
-
             </div>
           </div>
 
-          {/* CONTENT PANEL */}
-          <div className="relative bg-white rounded-3xl p-8 lg:p-10 shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
-              About Us
-            </h2>
+          <Card className="p-8 lg:p-10">
+            <SectionHeading
+              eyebrow="About Us"
+              title="Straightforward barbering in Kellyville"
+              titleClassName="text-[clamp(2rem,4vw,2.8rem)]"
+            />
 
-            <h3
-              className="mt-3 font-semibold tracking-tight"
-              style={{
-                fontSize: "clamp(2rem, 4vw, 2.8rem)",
-                backgroundImage:
-                  "linear-gradient(90deg, #0f172a 0%, #a88c3a 60%, #e6c35c 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Straightforward barbering in Kellyville
-            </h3>
-
-            <p className="mt-5 text-base text-gray-600 leading-relaxed">
-              We offer men’s haircuts, colouring, beard trims, and grooming
+            <p className="mt-4 text-base leading-7 text-slate-600">
+              We offer men's haircuts, colouring, beard trims, and grooming
               services for everyday wear.
             </p>
 
-            <p className="mt-4 text-base text-gray-600 leading-relaxed">
+            <p className="mt-4 text-base leading-7 text-slate-600">
               Our barbers focus on clean cuts, tidy finishes, and consistent
               results.
             </p>
 
-            {/* CTA */}
             <div className="mt-7">
               <Link
                 to="/contact"
-                className="rounded-full bg-[#FF7A00] px-8 py-3 text-white font-semibold hover:opacity-90 transition"
+                className={buttonVariants({ variant: "accent", size: "lg" })}
               >
                 Get in Touch
               </Link>
             </div>
-          </div>
-
+          </Card>
         </div>
       </div>
     </section>

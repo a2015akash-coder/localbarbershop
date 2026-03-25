@@ -6,6 +6,10 @@ import {
   MapPinned,
   Star,
 } from "lucide-react";
+import { cn } from "../../lib/utils";
+import { badgeVariants } from "../ui/badge";
+import { buttonVariants } from "../ui/button";
+import { Card } from "../ui/card";
 
 const CARD_WIDTH = 380;
 const GAP = 24;
@@ -21,18 +25,13 @@ function renderStars(rating = 0) {
   return Array.from({ length: 5 }, (_, index) => index < rounded);
 }
 
-function cn(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
-
 function ReviewCard({ review, mobile = false }) {
   const stars = renderStars(review.rating);
 
   return (
-    <article
+    <Card
       className={cn(
-        "group h-full rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all",
-        "hover:-translate-y-0.5 hover:shadow-md",
+        "group h-full rounded-[26px] bg-white/92 transition-all hover:-translate-y-0.5 hover:shadow-[0_24px_70px_-36px_rgba(15,23,42,0.5)]",
         mobile ? "p-5" : "p-6"
       )}
     >
@@ -92,7 +91,7 @@ function ReviewCard({ review, mobile = false }) {
           </a>
         ) : null}
       </div>
-    </article>
+    </Card>
   );
 }
 
@@ -102,11 +101,11 @@ function CarouselButton({ direction, onClick, label }) {
   return (
     <button
       onClick={onClick}
-      className={cn(
-        "inline-flex h-10 w-10 items-center justify-center rounded-full",
-        "border border-slate-200 bg-white text-slate-700 shadow-sm",
-        "transition hover:bg-slate-50 hover:text-slate-900"
-      )}
+      className={buttonVariants({
+        variant: "secondary",
+        size: "icon",
+        className: "text-slate-700 hover:text-slate-900",
+      })}
       aria-label={label}
       type="button"
     >
@@ -159,9 +158,9 @@ export default function Testimonials() {
           setReviews(incomingReviews);
           setItems(incomingReviews);
         }
-      } catch (err) {
+      } catch (errorValue) {
         if (!ignore) {
-          setError(err.message || "Failed to load Google reviews");
+          setError(errorValue.message || "Failed to load Google reviews");
         }
       } finally {
         if (!ignore) {
@@ -192,23 +191,23 @@ export default function Testimonials() {
   };
 
   useEffect(() => {
-    if (!isAnimating || !trackRef.current || !canCarousel) return;
+    if (!isAnimating || !trackRef.current || !canCarousel) return undefined;
 
     const handleEnd = () => {
-      setItems((prev) =>
+      setItems((previous) =>
         offset < 0
-          ? [...prev.slice(1), prev[0]]
-          : [prev[prev.length - 1], ...prev.slice(0, -1)]
+          ? [...previous.slice(1), previous[0]]
+          : [previous[previous.length - 1], ...previous.slice(0, -1)]
       );
       setOffset(0);
       setIsAnimating(false);
     };
 
-    const el = trackRef.current;
-    el.addEventListener("transitionend", handleEnd, { once: true });
+    const element = trackRef.current;
+    element.addEventListener("transitionend", handleEnd, { once: true });
 
     return () => {
-      el.removeEventListener("transitionend", handleEnd);
+      element.removeEventListener("transitionend", handleEnd);
     };
   }, [isAnimating, offset, canCarousel]);
 
@@ -223,7 +222,7 @@ export default function Testimonials() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 flex flex-col gap-6 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
+            <div className={badgeVariants({ className: "tracking-[0.16em]" })}>
               <MapPinned size={14} />
               Verified Google Reviews
             </div>
@@ -283,7 +282,7 @@ export default function Testimonials() {
 
         {!loading && !error && reviews.length > 0 ? (
           <>
-            <div className="lg:hidden -mx-4 overflow-x-auto px-4">
+            <div className="-mx-4 overflow-x-auto px-4 lg:hidden">
               <div className="flex gap-4 pb-2">
                 {reviews.map((review, index) => (
                   <div
