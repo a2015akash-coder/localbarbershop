@@ -7,6 +7,7 @@ export default function SEO({
   keywords,
   canonical,
   robots = "index, follow, max-image-preview:large",
+  jsonLd,
 }) {
   return (
     <Helmet>
@@ -22,6 +23,11 @@ export default function SEO({
 
       {/* Robots Control */}
       <meta name="robots" content={robots} />
+
+      {/* Structured Data */}
+      {jsonLd && (
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      )}
     </Helmet>
   );
 }

@@ -10,10 +10,11 @@ import AboutUs from '../components/landingpage/AboutUs';
 import Testimonials from '../components/landingpage/Testimonials';
 import { seoPages } from '../seo/pages';
 import SEO from '../components/SEO';
+import { getLocalBusinessJsonLd } from '../seo/jsonLd';
 const Home = () => {
   return (
     <main>
-<SEO {...seoPages.home} />
+<SEO {...seoPages.home} jsonLd={getLocalBusinessJsonLd()} />
       <Hero />
     
       <OurWork />

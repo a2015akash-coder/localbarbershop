@@ -9,12 +9,13 @@ import ServicesHero from "../components/services/ServicesHero.jsx";
 
 import SEO from "../components/SEO";
 import { seoPages } from "../seo/pages";
+import { getServiceJsonLd } from "../seo/jsonLd";
 
 const Services = () => {
   return (
     <main>
       {/* Page-level SEO */}
-      <SEO {...seoPages.services} />
+      <SEO {...seoPages.services} jsonLd={getServiceJsonLd()} />
 
       {/* Page content */}
       <ServicesHero />

@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 import SEO from "../components/SEO";
+import { getBlogPostJsonLd } from "../seo/jsonLd";
 import {
   BLOG_DETAIL_BASE_PATH,
   BLOG_LIST_PATH,
@@ -61,6 +62,7 @@ export default function BlogDetailsPage() {
         description={blog.metaDescription || blog.excerpt}
         canonical={`https://thegroomingroom.com.au${BLOG_DETAIL_BASE_PATH}/${blog.slug}`}
         robots="index, follow, max-image-preview:large"
+        jsonLd={getBlogPostJsonLd(blog)}
       />
 
       <section className="bg-[#fafafa] py-16 sm:py-20">
