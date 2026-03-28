@@ -3,12 +3,12 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAcbyXUonl5oy9q6Vi2hi8i7eOdjWx165U",
-  authDomain: "thegroomingroom-ee47a.firebaseapp.com",
-  projectId: "thegroomingroom-ee47a",
-  storageBucket: "thegroomingroom-ee47a.firebasestorage.app",
-  messagingSenderId: "72313877032",
-  appId: "1:72313877032:web:516c49fb9632d0524abb1d"
+   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);

@@ -8,23 +8,11 @@ import {
   useParams,
 } from "react-router-dom";
 
-import Navbar from "./components/landingpage/Navbar.jsx";
-import Footer from "./components/landingpage/Footer.jsx";
-import ScrollToTop from "./utils/ScrollToTop.jsx";
+
 
 import LoadingSpinner from "./components/LoadingSpinner.jsx";
 
-// EAGER (core landing experience)
-import Home from "./Pages/Home.jsx";
-import Contact from "./Pages/Contact.jsx";
-import MonthlyDraw from "./Pages/MonthlyDraw.jsx";
-import Promotion from "./Pages/Promotion.jsx";
-import PageViewTracker from "./analytics/PageViewTracker.js";
 
-// LAZY (secondary / heavy pages)
-const Services = lazy(() => import("./Pages/Services.jsx"));
-const BlogListPage = lazy(() => import("./Pages/BlogListPage.jsx"));
-const BlogDetailsPage = lazy(() => import("./Pages/BlogDetailsPage.jsx"));
 
 // AUTH
 const LoginPage = lazy(() => import("./components/Login/Login.jsx"));
@@ -50,38 +38,20 @@ function LegacyBlogRedirect() {
 function App() {
   return (
     <BrowserRouter>
-      <PageViewTracker />
-      <ScrollToTop />
+      
 
-      <Navbar />
-
+      
       <main id="main-content">
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             {/* PUBLIC */}
-            <Route path="/" element={<Home />} />
-            <Route
-              path="/mens-haircuts-beard-trims-kellyville"
-              element={<Services />}
-            />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/win" element={<MonthlyDraw />} />
-            <Route
-              path="/monthly-draw-kellyville-barber"
-              element={<Promotion />}
-            />
-
-            {/* BLOG */}
-            <Route path="/blogs" element={<BlogListPage />} />
-            <Route path="/blogs/:slug" element={<BlogDetailsPage />} />
-            <Route path="/blog/:slug" element={<LegacyBlogRedirect />} />
-
+           
             {/* AUTH */}
             <Route path="/login" element={<LoginPage />} />
 
             {/* ADMIN */}
             <Route
-              path="/admin"
+              path="/"
               element={
                 <AdminGuard>
                   <AdminBlogDashboard />
@@ -108,7 +78,7 @@ function App() {
         </Suspense>
       </main>
 
-      <Footer />
+      
     </BrowserRouter>
   );
 }
