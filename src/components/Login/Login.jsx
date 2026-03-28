@@ -9,7 +9,7 @@ export default function LoginPage() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      navigate("/admin");
+      navigate("/");
     } catch (err) {
       console.error(err);
       alert("Login failed");
