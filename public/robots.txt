@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /login
-
-Sitemap: https://thegroomingroom.com.au/sitemap.xml
-Sitemap: https://thegroomingroom.com.au/api/sitemap-blogs
