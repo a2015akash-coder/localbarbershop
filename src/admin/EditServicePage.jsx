@@ -2,23 +2,21 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { Progress, Upload, message } from "antd";
-import { ArrowLeft, FileImage, Heading1, ImagePlus, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, FileImage, Plus, Save, Sparkles, Trash2 } from "lucide-react";
 import { db } from "../firebase";
 import LoadingSpinner from "../components/LoadingSpinner.jsx";
-import RichTextEditor from "../components/RichTextEditor";
-import { normalizeBlogContentBlocks } from "../utils/blogLinkUtils";
 import { AdminDashboardShell } from "./AdminDashboardShell";
 import {
   accentButtonClassName,
   dangerButtonClassName,
   inputClassName,
-  primaryButtonClassName,
   secondaryButtonClassName,
   selectClassName,
   textareaClassName,
 } from "./AdminFormClasses";
 import {
   CharacterCount,
+  EmptyDashedState,
   Field,
   FormCard,
 } from "./AdminFormPrimitives";
@@ -31,7 +29,7 @@ const uploadToCloudinary = (file, onProgress) =>
 
     formData.append("file", file);
     formData.append("upload_preset", "blog_uploads");
-    formData.append("folder", "blog-images");
+    formData.append("folder", "service-images");
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && onProgress) {
@@ -65,39 +63,53 @@ const slugify = (text = "") =>
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 
-export default function EditBlogPage() {
+const hydrateHighlights = (data = []) => {
+  if (!Array.isArray(data)) return [];
+
+  return data
+    .map((highlight) => ({
+      title: highlight?.title || "",
+      text: highlight?.text || highlight?.description || "",
+    }))
+    .filter((highlight) => highlight.title || highlight.text);
+};
+
+export default function EditServicePage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
-  const [category, setCategory] = useState("Hairstyle");
-  const [status, setStatus] = useState("draft");
+  const [slug, setSlug] = useState("");
+  const [order, setOrder] = useState("0");
+
+  const [price, setPrice] = useState("");
+  const [duration, setDuration] = useState("");
 
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
-  const [slug, setSlug] = useState("");
+  const [status, setStatus] = useState("published");
 
   const [coverImage, setCoverImage] = useState("");
+  const [coverImageAlt, setCoverImageAlt] = useState("");
   const [coverProgress, setCoverProgress] = useState(0);
 
-  const [blocks, setBlocks] = useState([]);
-  const [originalStatus, setOriginalStatus] = useState("draft");
-  const [originalPublishedAt, setOriginalPublishedAt] = useState(null);
+  const [highlights, setHighlights] = useState([]);
 
   useEffect(() => {
-    const loadBlog = async () => {
-      setLoading(true);
+    const loadService = async () => {
+      setInitialLoading(true);
 
       try {
-        const snapshot = await getDoc(doc(db, "blogs", id));
+        const ref = doc(db, "services", id);
+        const snapshot = await getDoc(ref);
 
         if (!snapshot.exists()) {
-          message.error("Blog not found");
-          navigate("/admin/blogs", { replace: true });
+          message.error("Service not found");
+          navigate("/admin/services", { replace: true });
           return;
         }
 
@@ -105,54 +117,57 @@ export default function EditBlogPage() {
 
         setTitle(data.title || "");
         setExcerpt(data.excerpt || "");
-        setCategory(data.category || "Hairstyle");
-        setStatus(data.status || "draft");
-        setCoverImage(data.coverImage || "");
-        setSlug(data.slug || slugify(data.title || ""));
-        setMetaTitle(data.metaTitle || data.title || "");
-        setMetaDescription(data.metaDescription || data.excerpt || "");
-        setOriginalStatus(data.status || "draft");
-        setOriginalPublishedAt(data.publishedAt || null);
-        setBlocks(
-          normalizeBlogContentBlocks(Array.isArray(data.content) ? data.content : [])
+        setSlug(data.slug || "");
+        setOrder(
+          data.order === 0 || typeof data.order === "number"
+            ? String(data.order)
+            : "0"
         );
+        setPrice(data.price || "");
+        setDuration(data.duration || "");
+        setMetaTitle(data.metaTitle || "");
+        setMetaDescription(data.metaDescription || "");
+        setStatus(data.status || "published");
+        setCoverImage(data.coverImage || "");
+        setCoverImageAlt(data.coverImageAlt || "");
+        setHighlights(hydrateHighlights(data.highlights || []));
       } catch (error) {
         console.error(error);
-        message.error("Failed to load blog");
+        message.error("Failed to load service");
       } finally {
-        setLoading(false);
+        setInitialLoading(false);
       }
     };
 
-    loadBlog();
+    loadService();
   }, [id, navigate]);
 
-  const addBlock = (type) => {
-    setBlocks((prev) => [
-      ...prev,
-      type === "heading"
-        ? { type: "heading", text: "" }
-        : type === "image"
-        ? { type: "image", src: "", alt: "" }
-        : { type: "richtext", html: "" },
-    ]);
+  const addHighlight = () => {
+    if (highlights.length >= 6) {
+      message.warning("Maximum 6 highlights allowed");
+      return;
+    }
+    setHighlights((prev) => [...prev, { title: "", text: "" }]);
   };
 
-  const updateBlock = (index, key, value) => {
-    setBlocks((prev) => {
+  const updateHighlight = (index, key, value) => {
+    setHighlights((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], [key]: value };
       return next;
     });
   };
 
-  const removeBlock = (index) => {
-    setBlocks((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+  const removeHighlight = (index) => {
+    setHighlights((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
   };
 
-  const saveBlog = async (nextStatus = status) => {
+  const saveService = async () => {
     const cleanTitle = title.trim();
     const cleanExcerpt = excerpt.trim();
+    const cleanSlug = slugify(slug || cleanTitle);
+    const cleanCoverAlt = coverImageAlt.trim();
+    const parsedOrder = Number(order);
 
     if (!cleanTitle) {
       message.error("Title is required");
@@ -164,51 +179,68 @@ export default function EditBlogPage() {
       return;
     }
 
-    if (nextStatus === "published" && !coverImage) {
-      message.error("Cover image is required to publish");
+    if (!cleanSlug) {
+      message.error("Slug is required");
       return;
     }
 
-    const isPublishing =
-      originalStatus !== "published" && nextStatus === "published";
+    if (!coverImage) {
+      message.error("Cover image is required");
+      return;
+    }
+
+    if (!cleanCoverAlt) {
+      message.error("Cover image alt text is required");
+      return;
+    }
+
+    if (!Number.isFinite(parsedOrder)) {
+      message.error("Order must be a valid number");
+      return;
+    }
+
+    const cleanHighlights = highlights
+      .map((highlight) => ({
+        title: (highlight.title || "").trim(),
+        text: (highlight.text || "").trim(),
+      }))
+      .filter((highlight) => highlight.title.length > 0);
 
     setSaving(true);
 
     try {
-      await updateDoc(doc(db, "blogs", id), {
+      await updateDoc(doc(db, "services", id), {
+        slug: cleanSlug,
         title: cleanTitle,
         excerpt: cleanExcerpt,
-        slug: slugify(slug || cleanTitle),
+        coverImage,
+        coverImageAlt: cleanCoverAlt,
+        status: status || "published",
+        order: parsedOrder,
+        price: price.trim() || "",
+        duration: duration.trim() || "",
         metaTitle: metaTitle.trim() || cleanTitle,
         metaDescription: metaDescription.trim() || cleanExcerpt,
-        coverImage,
-        category,
-        status: nextStatus,
-        content: normalizeBlogContentBlocks(blocks),
+        highlights: cleanHighlights,
         updatedAt: serverTimestamp(),
-        publishedAt: isPublishing
-          ? serverTimestamp()
-          : nextStatus === "published"
-          ? originalPublishedAt ?? null
-          : null,
       });
 
-      message.success("Blog updated");
-      navigate("/admin/blogs");
+      message.success("Service updated");
+      navigate("/admin/services");
     } catch (error) {
       console.error(error);
-      message.error("Failed to save blog");
+      message.error("Failed to update service");
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <AdminDashboardShell
-        title="Edit blog"
-        description="Loading blog details."
-        eyebrow="Blog editor"
+        title="Edit service"
+        description="Loading service details."
+        eyebrow="Service editor"
       >
         <FormCard>
           <LoadingSpinner />
@@ -219,28 +251,28 @@ export default function EditBlogPage() {
 
   return (
     <AdminDashboardShell
-      title="Edit blog"
-      description="Update article content, publishing status, imagery, and search metadata."
-      eyebrow="Blog editor"
+      title="Edit service"
+      description="Update the public service page content, ordering, image, and search metadata."
+      eyebrow="Service editor"
       action={
         <button
           type="button"
-          onClick={() => navigate("/admin/blogs")}
+          onClick={() => navigate("/admin/services")}
           className={secondaryButtonClassName}
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Back to blogs
+          Back to services
         </button>
       }
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6">
           <FormCard
-            title="Post details"
-            description="Edit the visible article title, excerpt, category, and status."
+            title="Service details"
+            description="Edit the content and ordering used by the service listing."
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Blog title" className="md:col-span-2">
+              <Field label="Service title" className="md:col-span-2">
                 <input
                   className={inputClassName}
                   value={title}
@@ -257,17 +289,13 @@ export default function EditBlogPage() {
                 />
               </Field>
 
-              <Field label="Category">
-                <select
-                  className={selectClassName}
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                >
-                  <option value="Hairstyle">Hairstyle</option>
-                  <option value="Beard">Beard</option>
-                  <option value="Grooming">Grooming</option>
-                  <option value="Facility">Facility</option>
-                </select>
+              <Field label="Order">
+                <input
+                  type="number"
+                  className={inputClassName}
+                  value={order}
+                  onChange={(event) => setOrder(event.target.value)}
+                />
               </Field>
 
               <Field label="Status">
@@ -276,19 +304,35 @@ export default function EditBlogPage() {
                   value={status}
                   onChange={(event) => setStatus(event.target.value)}
                 >
-                  <option value="draft">Draft</option>
                   <option value="published">Published</option>
+                  <option value="draft">Draft</option>
                 </select>
+              </Field>
+
+              <Field label="Price">
+                <input
+                  className={inputClassName}
+                  value={price}
+                  onChange={(event) => setPrice(event.target.value)}
+                />
+              </Field>
+
+              <Field label="Duration">
+                <input
+                  className={inputClassName}
+                  value={duration}
+                  onChange={(event) => setDuration(event.target.value)}
+                />
               </Field>
             </div>
           </FormCard>
 
           <FormCard
             title="SEO"
-            description="Tune the slug and metadata before saving changes."
+            description="Keep links and search previews aligned with the service."
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Slug">
+              <Field label="Slug" className="md:col-span-2">
                 <input
                   className={inputClassName}
                   value={slug}
@@ -306,7 +350,7 @@ export default function EditBlogPage() {
                 <CharacterCount value={metaTitle} limit={60} />
               </Field>
 
-              <Field label="Meta description" className="md:col-span-2">
+              <Field label="Meta description">
                 <textarea
                   rows={3}
                   className={textareaClassName}
@@ -319,55 +363,39 @@ export default function EditBlogPage() {
           </FormCard>
 
           <FormCard
-            title="Content blocks"
-            description="Build the article body with headings, rich text, and inline images."
+            title="Highlights"
+            description="Add up to six quick selling points for the service page."
           >
-            <div className="mb-5 flex flex-wrap gap-2">
+            <div className="mb-5 flex justify-end">
               <button
                 type="button"
-                onClick={() => addBlock("heading")}
-                className={secondaryButtonClassName}
-              >
-                <Heading1 className="h-4 w-4" aria-hidden="true" />
-                Heading
-              </button>
-              <button
-                type="button"
-                onClick={() => addBlock("richtext")}
+                onClick={addHighlight}
+                disabled={highlights.length >= 6}
                 className={secondaryButtonClassName}
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />
-                Content
-              </button>
-              <button
-                type="button"
-                onClick={() => addBlock("image")}
-                className={secondaryButtonClassName}
-              >
-                <ImagePlus className="h-4 w-4" aria-hidden="true" />
-                Image
+                Add highlight
               </button>
             </div>
 
-            {blocks.length === 0 && (
-              <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
-                Add a block to start writing.
-              </div>
+            {highlights.length === 0 && (
+              <EmptyDashedState>No highlights yet.</EmptyDashedState>
             )}
 
             <div className="space-y-4">
-              {blocks.map((block, index) => (
+              {highlights.map((highlight, index) => (
                 <div
                   key={index}
                   className="rounded-lg border border-slate-200 bg-slate-50 p-4"
                 >
                   <div className="mb-4 flex items-center justify-between gap-3">
-                    <span className="rounded-md bg-white px-2.5 py-1 text-xs font-medium uppercase text-slate-500">
-                      {block.type} {index + 1}
+                    <span className="inline-flex items-center gap-2 rounded-md bg-white px-2.5 py-1 text-xs font-medium uppercase text-slate-500">
+                      <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                      Highlight {index + 1}
                     </span>
                     <button
                       type="button"
-                      onClick={() => removeBlock(index)}
+                      onClick={() => removeHighlight(index)}
                       className={cn(dangerButtonClassName, "h-9 px-3")}
                     >
                       <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -375,64 +403,28 @@ export default function EditBlogPage() {
                     </button>
                   </div>
 
-                  {block.type === "heading" && (
-                    <input
-                      className={inputClassName}
-                      placeholder="Section heading"
-                      value={block.text}
-                      onChange={(event) =>
-                        updateBlock(index, "text", event.target.value)
-                      }
-                    />
-                  )}
-
-                  {block.type === "richtext" && (
-                    <RichTextEditor
-                      value={block.html}
-                      onChange={(html) => updateBlock(index, "html", html)}
-                    />
-                  )}
-
-                  {block.type === "image" && (
-                    <div className="space-y-4">
-                      <Upload
-                        showUploadList={false}
-                        customRequest={async ({ file, onSuccess, onError }) => {
-                          try {
-                            const url = await uploadToCloudinary(file);
-                            updateBlock(index, "src", url);
-                            onSuccess?.("ok");
-                          } catch (error) {
-                            console.error(error);
-                            message.error("Failed to upload image");
-                            onError?.(error);
-                          }
-                        }}
-                      >
-                        <button type="button" className={secondaryButtonClassName}>
-                          <ImagePlus className="h-4 w-4" aria-hidden="true" />
-                          Upload image
-                        </button>
-                      </Upload>
-
-                      {block.src && (
-                        <img
-                          src={block.src}
-                          className="h-52 w-full rounded-lg object-cover"
-                          alt=""
-                        />
-                      )}
-
+                  <div className="grid gap-4">
+                    <Field label="Title">
                       <input
                         className={inputClassName}
-                        placeholder="Alt text"
-                        value={block.alt}
+                        value={highlight.title}
                         onChange={(event) =>
-                          updateBlock(index, "alt", event.target.value)
+                          updateHighlight(index, "title", event.target.value)
                         }
                       />
-                    </div>
-                  )}
+                    </Field>
+
+                    <Field label="Description">
+                      <textarea
+                        rows={3}
+                        className={textareaClassName}
+                        value={highlight.text}
+                        onChange={(event) =>
+                          updateHighlight(index, "text", event.target.value)
+                        }
+                      />
+                    </Field>
+                  </div>
                 </div>
               ))}
             </div>
@@ -442,7 +434,7 @@ export default function EditBlogPage() {
         <aside className="space-y-6">
           <FormCard
             title="Cover image"
-            description="Required before publishing."
+            description="Image and alt text are required."
             className="xl:sticky xl:top-6"
           >
             <Upload
@@ -472,39 +464,35 @@ export default function EditBlogPage() {
             )}
 
             {coverImage ? (
-              <img
-                src={coverImage}
-                className="mt-4 h-56 w-full rounded-lg object-cover"
-                alt="Cover preview"
-              />
+              <>
+                <img
+                  src={coverImage}
+                  className="mt-4 h-56 w-full rounded-lg object-cover"
+                  alt="Cover preview"
+                />
+                <Field label="Alt text" className="mt-4">
+                  <input
+                    className={inputClassName}
+                    value={coverImageAlt}
+                    onChange={(event) => setCoverImageAlt(event.target.value)}
+                  />
+                </Field>
+              </>
             ) : (
               <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
                 No cover selected.
               </div>
             )}
 
-            <div className="mt-6 grid gap-3">
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => saveBlog()}
-                className={primaryButtonClassName}
-              >
-                <Save className="h-4 w-4" aria-hidden="true" />
-                Save changes
-              </button>
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => {
-                  setStatus("published");
-                  saveBlog("published");
-                }}
-                className={accentButtonClassName}
-              >
-                Save and publish
-              </button>
-            </div>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={saveService}
+              className={cn(accentButtonClassName, "mt-6 w-full")}
+            >
+              <Save className="h-4 w-4" aria-hidden="true" />
+              Update service
+            </button>
           </FormCard>
         </aside>
       </div>

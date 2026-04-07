@@ -8,20 +8,27 @@ import {
   useParams,
 } from "react-router-dom";
 
-
-
 import LoadingSpinner from "./components/LoadingSpinner.jsx";
-
-
 
 // AUTH
 const LoginPage = lazy(() => import("./components/Login/Login.jsx"));
 
 // ADMIN
 const AdminGuard = lazy(() => import("./utils/AdminGuard.jsx"));
+
 const AdminBlogDashboard = lazy(() => import("./admin/AdminBlogDashboard.jsx"));
 const UploadBlogPage = lazy(() => import("./admin/UploadBlogPage.jsx"));
 const EditBlogPage = lazy(() => import("./admin/EditBlogPage.jsx"));
+
+const AdminServiceDashboard = lazy(() =>
+  import("./admin/AdminServiceDashboard.jsx")
+);
+const UploadServicePage = lazy(() =>
+  import("./admin/UploadServicePage.jsx")
+);
+const EditServicePage = lazy(() =>
+  import("./admin/EditServicePage.jsx")
+);
 
 function LegacyBlogRedirect() {
   const { slug = "" } = useParams();
@@ -38,20 +45,18 @@ function LegacyBlogRedirect() {
 function App() {
   return (
     <BrowserRouter>
-      
-
-      
       <main id="main-content">
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            {/* PUBLIC */}
-           
             {/* AUTH */}
             <Route path="/login" element={<LoginPage />} />
 
-            {/* ADMIN */}
+            {/* OPTIONAL: redirect root to blogs admin */}
+            <Route path="/" element={<Navigate to="/admin/blogs" replace />} />
+
+            {/* BLOG ADMIN */}
             <Route
-              path="/"
+              path="/admin/blogs"
               element={
                 <AdminGuard>
                   <AdminBlogDashboard />
@@ -74,14 +79,43 @@ function App() {
                 </AdminGuard>
               }
             />
+
+            {/* SERVICE ADMIN */}
+            <Route
+              path="/admin/services"
+              element={
+                <AdminGuard>
+                  <AdminServiceDashboard />
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/services/new"
+              element={
+                <AdminGuard>
+                  <UploadServicePage />
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/services/:id/edit"
+              element={
+                <AdminGuard>
+                  <EditServicePage />
+                </AdminGuard>
+              }
+            />
+
+            {/* OPTIONAL legacy redirect if needed later */}
+            <Route path="/blog/:slug" element={<LegacyBlogRedirect />} />
+
+            {/* FALLBACK */}
+            <Route path="*" element={<Navigate to="/admin/blogs" replace />} />
           </Routes>
         </Suspense>
       </main>
-
-      
     </BrowserRouter>
   );
 }
 
 export default memo(App);
-

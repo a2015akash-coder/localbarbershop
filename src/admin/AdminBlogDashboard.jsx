@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   collection,
   deleteDoc,
@@ -13,16 +13,48 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { db } from "../firebase";
+import {
+  CalendarDays,
+  Eye,
+  FileText,
+  Globe2,
+  Pencil,
+  Plus,
+  RefreshCcw,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { Link } from "react-router-dom";
+import { db } from "../firebase";
 import { BLOG_DETAIL_BASE_PATH } from "../utils/blogLinkUtils";
+import {
+  AdminDashboardShell,
+  AdminStatCard,
+  EmptyState,
+  StatusPill,
+} from "./AdminDashboardShell";
+import { cn } from "../lib/utils";
 
 const PAGE_SIZE = 8;
 
-/* ---------------- UTILS ---------------- */
+const tabOptions = [
+  { value: "all", label: "All" },
+  { value: "draft", label: "Drafts" },
+  { value: "published", label: "Published" },
+];
+
+const buttonBase =
+  "inline-flex h-9 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50";
+const buttonGhost =
+  "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950";
+const buttonPrimary = "bg-slate-950 text-white hover:bg-slate-800";
+const buttonAccent = "bg-orange-600 text-white hover:bg-orange-700";
+const buttonDanger =
+  "border border-red-200 bg-white text-red-600 hover:bg-red-50";
 
 function formatDate(ts) {
-  if (!ts?.toDate) return "—";
+  if (!ts?.toDate) return "-";
+
   return ts.toDate().toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
@@ -30,119 +62,126 @@ function formatDate(ts) {
   });
 }
 
-/* ---------------- STAT CARD ---------------- */
-
-function StatCard({ label, value, accent }) {
-  const accents = {
-    blue: "from-blue-500/20 to-blue-100",
-    green: "from-green-500/20 to-green-100",
-    orange: "from-orange-500/20 to-orange-100",
-    gray: "from-gray-200 to-gray-100",
-  };
-
-  const text = {
-    blue: "text-blue-600",
-    green: "text-green-600",
-    orange: "text-orange-600",
-    gray: "text-gray-900",
-  };
+function BlogRow({ blog, onPublish, onUnpublish, onDelete }) {
+  const viewPath =
+    blog.status === "published" && blog.slug
+      ? `${BLOG_DETAIL_BASE_PATH}/${blog.slug}`
+      : null;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition">
-      <div
-        className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accents[accent]}`}
-      />
-      <div className="text-sm font-medium text-gray-500">{label}</div>
-      <div className={`mt-3 text-4xl font-semibold ${text[accent]}`}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-/* ---------------- BLOG ROW CARD ---------------- */
-
-function BlogRowCard({ blog, onPublish, onUnpublish, onDelete }) {
-  return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm hover:shadow-md transition">
-      <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-
-        {/* INFO */}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900">
-            {blog.title}
-          </h3>
-
-          <p className="mt-1 text-xs text-gray-500 break-all">
-            {blog.slug}
-          </p>
-
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-            <span>{blog.category || "—"}</span>
-
-            <span
-              className={`rounded-full px-2 py-1 text-xs font-medium ${blog.status === "published"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-700"
-                }`}
-            >
-              {blog.status}
-            </span>
-
-            <span>Created: {formatDate(blog.createdAt)}</span>
-            <span>Published: {formatDate(blog.publishedAt)}</span>
-          </div>
-        </div>
-
-        {/* ACTIONS */}
-        <div className="flex flex-wrap gap-2 lg:justify-end">
-          <Link
-            to={`/admin/blogs/${blog.id}/edit`}
-            className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
-          >
-            Edit
-          </Link>
-
-          {blog.status === "draft" ? (
-            <button
-              onClick={() => onPublish(blog.id)}
-              className="rounded-lg bg-orange-600 px-4 py-2 text-sm text-white hover:bg-orange-700"
-            >
-              Publish
-            </button>
+    <div className="grid gap-4 p-4 transition-colors hover:bg-slate-50 lg:grid-cols-[minmax(0,1.6fr)_170px_220px_auto] lg:items-center">
+      <div className="flex min-w-0 gap-4">
+        <div className="hidden h-16 w-20 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-slate-100 sm:block">
+          {blog.coverImage ? (
+            <img
+              src={blog.coverImage}
+              alt={blog.title || "Blog cover"}
+              className="h-full w-full object-cover"
+            />
           ) : (
-            <button
-              onClick={() => onUnpublish(blog.id)}
-              className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
-            >
-              Unpublish
-            </button>
-          )}
-
-          <button
-            onClick={() => onDelete(blog.id, blog.title)}
-            className="rounded-lg border px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-          >
-            Delete
-          </button>
-
-          {blog.status === "published" && (
-            <Link
-              to={`${BLOG_DETAIL_BASE_PATH}/${blog.slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
-            >
-              View
-            </Link>
+            <div className="flex h-full w-full items-center justify-center text-slate-400">
+              <FileText className="h-5 w-5" aria-hidden="true" />
+            </div>
           )}
         </div>
+
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="truncate text-sm font-semibold text-slate-950">
+              {blog.title || "Untitled blog"}
+            </h3>
+            <StatusPill status={blog.status} />
+          </div>
+          <p className="mt-1 break-all text-xs text-slate-500">
+            {blog.slug || "missing-slug"}
+          </p>
+          <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">
+            {blog.excerpt || "No excerpt added yet."}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-1 text-sm text-slate-600">
+        <span className="text-xs font-medium uppercase text-slate-400">
+          Category
+        </span>
+        <span>{blog.category || "Uncategorized"}</span>
+      </div>
+
+      <div className="grid gap-1 text-sm text-slate-600">
+        <span className="text-xs font-medium uppercase text-slate-400">
+          Timeline
+        </span>
+        <span>Created {formatDate(blog.createdAt)}</span>
+        <span>Published {formatDate(blog.publishedAt)}</span>
+      </div>
+
+      <div className="flex flex-wrap gap-2 lg:justify-end">
+        <Link
+          to={`/admin/blogs/${blog.id}/edit`}
+          className={cn(buttonBase, buttonGhost)}
+        >
+          <Pencil className="h-4 w-4" aria-hidden="true" />
+          Edit
+        </Link>
+
+        {blog.status === "draft" ? (
+          <button
+            type="button"
+            onClick={() => onPublish(blog.id)}
+            className={cn(buttonBase, buttonAccent)}
+          >
+            Publish
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onUnpublish(blog.id)}
+            className={cn(buttonBase, buttonGhost)}
+          >
+            Unpublish
+          </button>
+        )}
+
+        {viewPath && (
+          <Link
+            to={viewPath}
+            target="_blank"
+            rel="noreferrer"
+            className={cn(buttonBase, buttonGhost)}
+          >
+            <Eye className="h-4 w-4" aria-hidden="true" />
+            View
+          </Link>
+        )}
+
+        <button
+          type="button"
+          onClick={() => onDelete(blog.id, blog.title)}
+          className={cn(buttonBase, buttonDanger)}
+        >
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
+          Delete
+        </button>
       </div>
     </div>
   );
 }
 
-/* ---------------- MAIN DASHBOARD ---------------- */
+function LoadingRows() {
+  return (
+    <div className="divide-y divide-slate-200">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="grid gap-4 p-4 lg:grid-cols-[1fr_170px_220px_240px]">
+          <div className="h-16 animate-pulse rounded-md bg-slate-100" />
+          <div className="h-12 animate-pulse rounded-md bg-slate-100" />
+          <div className="h-12 animate-pulse rounded-md bg-slate-100" />
+          <div className="h-12 animate-pulse rounded-md bg-slate-100" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function AdminBlogDashboard() {
   const [tab, setTab] = useState("all");
@@ -154,238 +193,326 @@ export default function AdminBlogDashboard() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState("");
 
-  /* ---------------- QUERY BUILDER ---------------- */
+  const buildQuery = useCallback(
+    (cursor = null) => {
+      const ref = collection(db, "blogs");
+      let q;
 
-  const buildQuery = (cursor = null) => {
-    const ref = collection(db, "blogs");
-    let q;
+      if (tab === "draft") {
+        q = query(
+          ref,
+          where("status", "==", "draft"),
+          orderBy("createdAt", "desc"),
+          limit(PAGE_SIZE)
+        );
+      } else if (tab === "published") {
+        q = query(
+          ref,
+          where("status", "==", "published"),
+          orderBy("publishedAt", "desc"),
+          limit(PAGE_SIZE)
+        );
+      } else {
+        q = query(ref, orderBy("createdAt", "desc"), limit(PAGE_SIZE));
+      }
 
-    if (tab === "draft") {
-      q = query(
-        ref,
-        where("status", "==", "draft"),
-        orderBy("createdAt", "desc"),
-        limit(PAGE_SIZE)
-      );
-    } else if (tab === "published") {
-      q = query(
-        ref,
-        where("status", "==", "published"),
-        orderBy("publishedAt", "desc"),
-        limit(PAGE_SIZE)
-      );
-    } else {
-      q = query(ref, orderBy("createdAt", "desc"), limit(PAGE_SIZE));
-    }
+      if (cursor) q = query(q, startAfter(cursor));
+      return q;
+    },
+    [tab]
+  );
 
-    if (cursor) q = query(q, startAfter(cursor));
-    return q;
-  };
-
-  /* ---------------- FETCHING ---------------- */
-
-  const fetchFirstPage = async () => {
+  const fetchFirstPage = useCallback(async () => {
     setLoading(true);
-    const snapshot = await getDocs(buildQuery());
-    const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-    setBlogs(data);
-    setLastDoc(snapshot.docs.at(-1) || null);
-    setHasMore(snapshot.docs.length === PAGE_SIZE);
-    setLoading(false);
-  };
+    setError("");
 
-  const fetchMore = async () => {
+    try {
+      const snapshot = await getDocs(buildQuery());
+      const data = snapshot.docs.map((item) => ({
+        id: item.id,
+        ...item.data(),
+      }));
+
+      setBlogs(data);
+      setLastDoc(snapshot.docs.at(-1) || null);
+      setHasMore(snapshot.docs.length === PAGE_SIZE);
+    } catch (err) {
+      console.error("Failed to fetch blogs:", err);
+      setError("Failed to load blogs. Try refreshing the dashboard.");
+    } finally {
+      setLoading(false);
+    }
+  }, [buildQuery]);
+
+  const fetchMore = useCallback(async () => {
     if (!hasMore || !lastDoc) return;
+
     setLoadingMore(true);
-    const snapshot = await getDocs(buildQuery(lastDoc));
-    const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-    setBlogs((p) => [...p, ...data]);
-    setLastDoc(snapshot.docs.at(-1) || null);
-    setHasMore(snapshot.docs.length === PAGE_SIZE);
-    setLoadingMore(false);
-  };
+    setError("");
+
+    try {
+      const snapshot = await getDocs(buildQuery(lastDoc));
+      const data = snapshot.docs.map((item) => ({
+        id: item.id,
+        ...item.data(),
+      }));
+
+      setBlogs((prev) => [...prev, ...data]);
+      setLastDoc(snapshot.docs.at(-1) || null);
+      setHasMore(snapshot.docs.length === PAGE_SIZE);
+    } catch (err) {
+      console.error("Failed to fetch more blogs:", err);
+      setError("Failed to load more blogs. Try again.");
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [buildQuery, hasMore, lastDoc]);
 
   useEffect(() => {
     fetchFirstPage();
-  }, [tab]);
+  }, [fetchFirstPage]);
 
-  /* ---------------- FILTERING ---------------- */
+  const categories = useMemo(() => {
+    const values = blogs
+      .map((blog) => blog.category)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b));
+
+    return ["all", ...Array.from(new Set(values))];
+  }, [blogs]);
 
   const filteredBlogs = useMemo(() => {
-    const s = search.toLowerCase();
-    return blogs.filter((b) => {
-      const matchCategory = category === "all" || b.category === category;
-      const matchSearch =
-        !s ||
-        b.title?.toLowerCase().includes(s) ||
-        b.slug?.toLowerCase().includes(s) ||
-        b.excerpt?.toLowerCase().includes(s);
-      return matchCategory && matchSearch;
-    });
-  }, [blogs, search, category]);
+    const searchTerm = search.trim().toLowerCase();
 
-  /* ---------------- FIXED PUBLISH LOGIC ---------------- */
+    return blogs.filter((blog) => {
+      const matchesCategory = category === "all" || blog.category === category;
+      const haystack = [blog.title, blog.slug, blog.excerpt, blog.category]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return matchesCategory && (!searchTerm || haystack.includes(searchTerm));
+    });
+  }, [blogs, category, search]);
+
+  const stats = useMemo(
+    () => ({
+      total: blogs.length,
+      drafts: blogs.filter((blog) => blog.status === "draft").length,
+      published: blogs.filter((blog) => blog.status === "published").length,
+      filtered: filteredBlogs.length,
+    }),
+    [blogs, filteredBlogs.length]
+  );
 
   const publishBlog = async (id) => {
-    const ref = doc(db, "blogs", id);
-    const snap = await getDoc(ref);
+    try {
+      const ref = doc(db, "blogs", id);
+      const snap = await getDoc(ref);
 
-    if (!snap.exists()) return;
+      if (!snap.exists()) return;
 
-    const data = snap.data();
-    const previousStatus = data.status;
+      const data = snap.data();
 
-    let publishedAt = data.publishedAt ?? null;
+      await updateDoc(ref, {
+        status: "published",
+        publishedAt:
+          data.status !== "published" ? serverTimestamp() : data.publishedAt ?? null,
+        updatedAt: serverTimestamp(),
+      });
 
-    if (previousStatus !== "published") {
-      publishedAt = serverTimestamp();
+      fetchFirstPage();
+    } catch (err) {
+      console.error("Failed to publish blog:", err);
+      setError("Failed to publish the blog.");
     }
-
-    await updateDoc(ref, {
-      status: "published",
-      publishedAt,
-      updatedAt: serverTimestamp(),
-    });
-
-    fetchFirstPage();
   };
 
   const unpublishBlog = async (id) => {
-    await updateDoc(doc(db, "blogs", id), {
-      status: "draft",
-      publishedAt: null,
-      updatedAt: serverTimestamp(),
-    });
+    try {
+      await updateDoc(doc(db, "blogs", id), {
+        status: "draft",
+        publishedAt: null,
+        updatedAt: serverTimestamp(),
+      });
 
-    fetchFirstPage();
+      fetchFirstPage();
+    } catch (err) {
+      console.error("Failed to unpublish blog:", err);
+      setError("Failed to unpublish the blog.");
+    }
   };
 
   const deleteBlog = async (id, title) => {
-    if (!confirm(`Delete "${title}"?`)) return;
-    await deleteDoc(doc(db, "blogs", id));
-    fetchFirstPage();
+    const confirmed = window.confirm(`Delete "${title || "Untitled blog"}"?`);
+    if (!confirmed) return;
+
+    try {
+      await deleteDoc(doc(db, "blogs", id));
+      setBlogs((prev) => prev.filter((blog) => blog.id !== id));
+    } catch (err) {
+      console.error("Failed to delete blog:", err);
+      setError("Failed to delete the blog.");
+    }
   };
-
-  /* ---------------- STATS ---------------- */
-
-  const stats = {
-    total: blogs.length,
-    drafts: blogs.filter((b) => b.status === "draft").length,
-    published: blogs.filter((b) => b.status === "published").length,
-  };
-
-  /* ---------------- RENDER ---------------- */
 
   return (
-    <section className="bg-gray-50 py-16">
-      <div className="max-w-screen-xl mx-auto px-4">
+    <AdminDashboardShell
+      title="Blog dashboard"
+      description="Write, publish, and maintain barber shop content from one focused workspace."
+      action={
+        <Link to="/admin/blogs/new" className={cn(buttonBase, buttonPrimary, "h-10 px-4")}>
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          New blog
+        </Link>
+      }
+    >
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard
+          label="Loaded blogs"
+          value={stats.total}
+          helper="From the current Firestore page"
+          icon={FileText}
+          tone="blue"
+        />
+        <AdminStatCard
+          label="Drafts"
+          value={stats.drafts}
+          helper="Ready for review"
+          icon={Pencil}
+          tone="slate"
+        />
+        <AdminStatCard
+          label="Published"
+          value={stats.published}
+          helper="Visible on the website"
+          icon={Globe2}
+          tone="green"
+        />
+        <AdminStatCard
+          label="Showing"
+          value={stats.filtered}
+          helper="After search and category filters"
+          icon={Search}
+          tone="orange"
+        />
+      </section>
 
-        {/* HEADER */}
-        <div className="flex justify-between items-end gap-6">
-          <div>
-            <h1 className="text-3xl font-semibold text-gray-900">
-              Blog Admin
-            </h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Manage drafts, published posts, edits and deletions.
-            </p>
+      <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="grid gap-4 xl:grid-cols-[auto_minmax(260px,1fr)_220px_auto] xl:items-center">
+          <div className="flex flex-wrap gap-2">
+            {tabOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setTab(option.value)}
+                className={cn(
+                  buttonBase,
+                  tab === option.value
+                    ? "bg-slate-950 text-white"
+                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
 
-          <Link
-            to="/admin/blogs/new"
-            className="rounded-xl bg-orange-600 px-6 py-3 text-white font-semibold hover:bg-orange-700"
-          >
-            + New Blog
-          </Link>
-        </div>
-
-        {/* STATS */}
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard label="Total Blogs" value={stats.total} accent="blue" />
-          <StatCard label="Drafts" value={stats.drafts} accent="gray" />
-          <StatCard label="Published" value={stats.published} accent="green" />
-          <StatCard label="Loaded" value={blogs.length} accent="orange" />
-        </div>
-
-        {/* TABS */}
-        <div className="mt-12 flex gap-3">
-          {["all", "draft", "published"].map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`rounded-full px-4 py-2 text-sm font-medium ${tab === t
-                  ? "bg-orange-600 text-white"
-                  : "bg-white shadow-sm hover:bg-gray-100"
-                }`}
-            >
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* FILTERS */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search blogs…"
-            className="rounded-xl border px-4 py-3"
-          />
+          <label className="relative block">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              aria-hidden="true"
+            />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search title, slug, excerpt, category..."
+              className="h-10 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+            />
+          </label>
 
           <select
-            className="rounded-xl border px-4 py-3"
+            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(event) => setCategory(event.target.value)}
           >
-            <option value="all">All categories</option>
-            <option value="Hairstyle">Hairstyle</option>
-            <option value="Beard">Beard</option>
-            <option value="Facility">Facility</option>
+            {categories.map((item) => (
+              <option key={item} value={item}>
+                {item === "all" ? "All categories" : item}
+              </option>
+            ))}
           </select>
 
           <button
+            type="button"
             onClick={fetchFirstPage}
-            className="rounded-xl border px-4 py-3 hover:bg-gray-100"
+            disabled={loading}
+            className={cn(buttonBase, buttonGhost, "h-10")}
           >
+            <RefreshCcw className={cn("h-4 w-4", loading && "animate-spin")} aria-hidden="true" />
             Refresh
           </button>
         </div>
+      </section>
 
-        {/* LIST */}
-        <div className="mt-10 space-y-4">
-          {loading && <p className="py-20 text-center">Loading…</p>}
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
-          {!loading && filteredBlogs.length === 0 && (
-            <p className="py-20 text-center text-gray-600">
-              No blogs found.
+      <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-col gap-2 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-slate-950">Posts</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              {filteredBlogs.length} of {blogs.length} loaded posts match the current view.
             </p>
-          )}
-
-          {filteredBlogs.map((blog) => (
-            <BlogRowCard
-              key={blog.id}
-              blog={blog}
-              onPublish={publishBlog}
-              onUnpublish={unpublishBlog}
-              onDelete={deleteBlog}
-            />
-          ))}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <CalendarDays className="h-4 w-4" aria-hidden="true" />
+            Sorted by latest activity
+          </div>
         </div>
 
-        {/* LOAD MORE */}
-        {hasMore && !loading && (
-          <div className="mt-10 flex justify-center">
-            <button
-              onClick={fetchMore}
-              disabled={loadingMore}
-              className="rounded-xl border px-6 py-3 hover:bg-gray-100 disabled:opacity-60"
-            >
-              {loadingMore ? "Loading…" : "Load more"}
-            </button>
+        {loading ? (
+          <LoadingRows />
+        ) : filteredBlogs.length === 0 ? (
+          <div className="p-4">
+            <EmptyState
+              title="No blogs found"
+              description="Try another search, switch tabs, or create a new blog post."
+            />
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-200">
+            {filteredBlogs.map((blog) => (
+              <BlogRow
+                key={blog.id}
+                blog={blog}
+                onPublish={publishBlog}
+                onUnpublish={unpublishBlog}
+                onDelete={deleteBlog}
+              />
+            ))}
           </div>
         )}
-      </div>
-    </section>
+      </section>
+
+      {hasMore && !loading && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={fetchMore}
+            disabled={loadingMore}
+            className={cn(buttonBase, buttonGhost, "h-10 px-4")}
+          >
+            {loadingMore ? "Loading..." : "Load more posts"}
+          </button>
+        </div>
+      )}
+    </AdminDashboardShell>
   );
 }

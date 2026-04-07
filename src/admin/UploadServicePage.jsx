@@ -2,22 +2,19 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Progress, Upload, message } from "antd";
-import { ArrowLeft, FileImage, Heading1, ImagePlus, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, FileImage, Plus, Save, Sparkles, Trash2 } from "lucide-react";
 import { db } from "../firebase";
-import RichTextEditor from "../components/RichTextEditor";
-import { normalizeBlogContentBlocks } from "../utils/blogLinkUtils";
 import { AdminDashboardShell } from "./AdminDashboardShell";
 import {
   accentButtonClassName,
   dangerButtonClassName,
   inputClassName,
-  primaryButtonClassName,
   secondaryButtonClassName,
-  selectClassName,
   textareaClassName,
 } from "./AdminFormClasses";
 import {
   CharacterCount,
+  EmptyDashedState,
   Field,
   FormCard,
 } from "./AdminFormPrimitives";
@@ -30,7 +27,7 @@ const uploadToCloudinary = (file, onProgress) =>
 
     formData.append("file", file);
     formData.append("upload_preset", "blog_uploads");
-    formData.append("folder", "blog-images");
+    formData.append("folder", "service-images");
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && onProgress) {
@@ -64,83 +61,118 @@ const slugify = (text = "") =>
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 
-export default function UploadBlogPage() {
+const EMPTY_HIGHLIGHT = { title: "", text: "" };
+
+export default function UploadServicePage() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
-  const [category, setCategory] = useState("Hairstyle");
+  const [slug, setSlug] = useState("");
+  const [order, setOrder] = useState("0");
+
+  const [price, setPrice] = useState("");
+  const [duration, setDuration] = useState("");
 
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
-  const [slug, setSlug] = useState("");
 
   const [coverImage, setCoverImage] = useState("");
+  const [coverImageAlt, setCoverImageAlt] = useState("");
   const [coverProgress, setCoverProgress] = useState(0);
 
-  const [blocks, setBlocks] = useState([]);
+  const [highlights, setHighlights] = useState([]);
   const [saving, setSaving] = useState(false);
 
-  const addBlock = (type) => {
-    setBlocks((prev) => [
-      ...prev,
-      type === "heading"
-        ? { type: "heading", text: "" }
-        : type === "image"
-        ? { type: "image", src: "", alt: "" }
-        : { type: "richtext", html: "" },
-    ]);
+  const addHighlight = () => {
+    if (highlights.length >= 6) {
+      message.warning("Maximum 6 highlights allowed");
+      return;
+    }
+    setHighlights((prev) => [...prev, { ...EMPTY_HIGHLIGHT }]);
   };
 
-  const updateBlock = (index, key, value) => {
-    setBlocks((prev) => {
+  const updateHighlight = (index, key, value) => {
+    setHighlights((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], [key]: value };
       return next;
     });
   };
 
-  const removeBlock = (index) => {
-    setBlocks((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+  const removeHighlight = (index) => {
+    setHighlights((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
   };
 
-  const saveBlog = async (publish = false) => {
+  const saveService = async () => {
     const cleanTitle = title.trim();
     const cleanExcerpt = excerpt.trim();
+    const cleanSlug = slugify(slug || cleanTitle);
+    const cleanCoverAlt = coverImageAlt.trim();
+    const parsedOrder = Number(order);
 
-    if (!cleanTitle || !cleanExcerpt) {
-      message.error("Title and excerpt are required");
+    if (!cleanTitle) {
+      message.error("Title is required");
       return;
     }
 
-    if (publish && !coverImage) {
-      message.error("Cover image is required to publish");
+    if (!cleanExcerpt) {
+      message.error("Excerpt is required");
       return;
     }
+
+    if (!cleanSlug) {
+      message.error("Slug is required");
+      return;
+    }
+
+    if (!coverImage) {
+      message.error("Cover image is required");
+      return;
+    }
+
+    if (!cleanCoverAlt) {
+      message.error("Cover image alt text is required");
+      return;
+    }
+
+    if (!Number.isFinite(parsedOrder)) {
+      message.error("Order must be a valid number");
+      return;
+    }
+
+    const cleanHighlights = highlights
+      .map((highlight) => ({
+        title: (highlight.title || "").trim(),
+        text: (highlight.text || "").trim(),
+      }))
+      .filter((highlight) => highlight.title.length > 0);
 
     setSaving(true);
 
     try {
-      await addDoc(collection(db, "blogs"), {
+      await addDoc(collection(db, "services"), {
+        slug: cleanSlug,
         title: cleanTitle,
         excerpt: cleanExcerpt,
-        category,
-        slug: slugify(slug || cleanTitle),
+        coverImage,
+        coverImageAlt: cleanCoverAlt,
+        status: "published",
+        order: parsedOrder,
+        price: price.trim() || "",
+        duration: duration.trim() || "",
         metaTitle: metaTitle.trim() || cleanTitle,
         metaDescription: metaDescription.trim() || cleanExcerpt,
-        status: publish ? "published" : "draft",
-        coverImage,
-        content: normalizeBlogContentBlocks(blocks),
+        highlights: cleanHighlights,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        publishedAt: publish ? serverTimestamp() : null,
       });
 
-      message.success(publish ? "Blog published" : "Draft saved");
-      navigate("/admin/blogs");
+      message.success("Service created");
+      navigate("/admin/services");
     } catch (error) {
       console.error(error);
-      message.error("Failed to save blog");
+      message.error("Failed to save service");
     } finally {
       setSaving(false);
     }
@@ -148,33 +180,37 @@ export default function UploadBlogPage() {
 
   return (
     <AdminDashboardShell
-      title="New blog"
-      description="Draft a search-ready article with a cover image, SEO metadata, and flexible content blocks."
-      eyebrow="Blog editor"
+      title="New service"
+      description="Create a public service page with ordering, pricing, SEO, and customer-facing highlights."
+      eyebrow="Service editor"
       action={
         <button
           type="button"
-          onClick={() => navigate("/admin/blogs")}
+          onClick={() => navigate("/admin/services")}
           className={secondaryButtonClassName}
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Back to blogs
+          Back to services
         </button>
       }
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6">
           <FormCard
-            title="Post details"
-            description="Set the visible title, excerpt, and category."
+            title="Service details"
+            description="Set the content that appears on the service page."
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Blog title" className="md:col-span-2">
+              <Field label="Service title" className="md:col-span-2">
                 <input
                   className={inputClassName}
-                  placeholder="Best skin fade in Kellyville"
+                  placeholder="Skin fade"
                   value={title}
-                  onChange={(event) => setTitle(event.target.value)}
+                  onChange={(event) => {
+                    const nextTitle = event.target.value;
+                    setTitle(nextTitle);
+                    if (!slug) setMetaTitle((current) => current || nextTitle);
+                  }}
                 />
               </Field>
 
@@ -182,36 +218,54 @@ export default function UploadBlogPage() {
                 <textarea
                   rows={4}
                   className={textareaClassName}
-                  placeholder="Short summary for cards and search snippets"
+                  placeholder="Short customer-facing service summary"
                   value={excerpt}
                   onChange={(event) => setExcerpt(event.target.value)}
                 />
               </Field>
 
-              <Field label="Category">
-                <select
-                  className={selectClassName}
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                >
-                  <option value="Hairstyle">Hairstyle</option>
-                  <option value="Beard">Beard</option>
-                  <option value="Grooming">Grooming</option>
-                  <option value="Facility">Facility</option>
-                </select>
+              <Field label="Order" hint="Lower numbers appear first.">
+                <input
+                  type="number"
+                  className={inputClassName}
+                  value={order}
+                  onChange={(event) => setOrder(event.target.value)}
+                />
+              </Field>
+
+              <Field label="Status">
+                <input className={inputClassName} value="published" disabled />
+              </Field>
+
+              <Field label="Price">
+                <input
+                  className={inputClassName}
+                  placeholder="$35"
+                  value={price}
+                  onChange={(event) => setPrice(event.target.value)}
+                />
+              </Field>
+
+              <Field label="Duration">
+                <input
+                  className={inputClassName}
+                  placeholder="45 minutes"
+                  value={duration}
+                  onChange={(event) => setDuration(event.target.value)}
+                />
               </Field>
             </div>
           </FormCard>
 
           <FormCard
             title="SEO"
-            description="Tune the slug and metadata before publishing."
+            description="Control how the service page reads in links and search results."
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Slug">
+              <Field label="Slug" className="md:col-span-2">
                 <input
                   className={inputClassName}
-                  placeholder="best-skin-fade-kellyville"
+                  placeholder="beard-trim-kellyville"
                   value={slug}
                   onChange={(event) => setSlug(slugify(event.target.value))}
                 />
@@ -228,7 +282,7 @@ export default function UploadBlogPage() {
                 <CharacterCount value={metaTitle} limit={60} />
               </Field>
 
-              <Field label="Meta description" className="md:col-span-2">
+              <Field label="Meta description">
                 <textarea
                   rows={3}
                   className={textareaClassName}
@@ -242,55 +296,39 @@ export default function UploadBlogPage() {
           </FormCard>
 
           <FormCard
-            title="Content blocks"
-            description="Build the article body with headings, rich text, and inline images."
+            title="Highlights"
+            description="Add up to six quick selling points for the service page."
           >
-            <div className="mb-5 flex flex-wrap gap-2">
+            <div className="mb-5 flex justify-end">
               <button
                 type="button"
-                onClick={() => addBlock("heading")}
-                className={secondaryButtonClassName}
-              >
-                <Heading1 className="h-4 w-4" aria-hidden="true" />
-                Heading
-              </button>
-              <button
-                type="button"
-                onClick={() => addBlock("richtext")}
+                onClick={addHighlight}
+                disabled={highlights.length >= 6}
                 className={secondaryButtonClassName}
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />
-                Content
-              </button>
-              <button
-                type="button"
-                onClick={() => addBlock("image")}
-                className={secondaryButtonClassName}
-              >
-                <ImagePlus className="h-4 w-4" aria-hidden="true" />
-                Image
+                Add highlight
               </button>
             </div>
 
-            {blocks.length === 0 && (
-              <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
-                Add a block to start writing.
-              </div>
+            {highlights.length === 0 && (
+              <EmptyDashedState>No highlights yet.</EmptyDashedState>
             )}
 
             <div className="space-y-4">
-              {blocks.map((block, index) => (
+              {highlights.map((highlight, index) => (
                 <div
                   key={index}
                   className="rounded-lg border border-slate-200 bg-slate-50 p-4"
                 >
                   <div className="mb-4 flex items-center justify-between gap-3">
-                    <span className="rounded-md bg-white px-2.5 py-1 text-xs font-medium uppercase text-slate-500">
-                      {block.type} {index + 1}
+                    <span className="inline-flex items-center gap-2 rounded-md bg-white px-2.5 py-1 text-xs font-medium uppercase text-slate-500">
+                      <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                      Highlight {index + 1}
                     </span>
                     <button
                       type="button"
-                      onClick={() => removeBlock(index)}
+                      onClick={() => removeHighlight(index)}
                       className={cn(dangerButtonClassName, "h-9 px-3")}
                     >
                       <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -298,64 +336,30 @@ export default function UploadBlogPage() {
                     </button>
                   </div>
 
-                  {block.type === "heading" && (
-                    <input
-                      className={inputClassName}
-                      placeholder="Section heading"
-                      value={block.text}
-                      onChange={(event) =>
-                        updateBlock(index, "text", event.target.value)
-                      }
-                    />
-                  )}
-
-                  {block.type === "richtext" && (
-                    <RichTextEditor
-                      value={block.html}
-                      onChange={(html) => updateBlock(index, "html", html)}
-                    />
-                  )}
-
-                  {block.type === "image" && (
-                    <div className="space-y-4">
-                      <Upload
-                        showUploadList={false}
-                        customRequest={async ({ file, onSuccess, onError }) => {
-                          try {
-                            const url = await uploadToCloudinary(file);
-                            updateBlock(index, "src", url);
-                            onSuccess?.("ok");
-                          } catch (error) {
-                            console.error(error);
-                            message.error("Failed to upload image");
-                            onError?.(error);
-                          }
-                        }}
-                      >
-                        <button type="button" className={secondaryButtonClassName}>
-                          <ImagePlus className="h-4 w-4" aria-hidden="true" />
-                          Upload image
-                        </button>
-                      </Upload>
-
-                      {block.src && (
-                        <img
-                          src={block.src}
-                          className="h-52 w-full rounded-lg object-cover"
-                          alt=""
-                        />
-                      )}
-
+                  <div className="grid gap-4">
+                    <Field label="Title">
                       <input
                         className={inputClassName}
-                        placeholder="Alt text"
-                        value={block.alt}
+                        placeholder="Crisp line-up"
+                        value={highlight.title}
                         onChange={(event) =>
-                          updateBlock(index, "alt", event.target.value)
+                          updateHighlight(index, "title", event.target.value)
                         }
                       />
-                    </div>
-                  )}
+                    </Field>
+
+                    <Field label="Description">
+                      <textarea
+                        rows={3}
+                        className={textareaClassName}
+                        placeholder="Short description of this feature"
+                        value={highlight.text}
+                        onChange={(event) =>
+                          updateHighlight(index, "text", event.target.value)
+                        }
+                      />
+                    </Field>
+                  </div>
                 </div>
               ))}
             </div>
@@ -365,7 +369,7 @@ export default function UploadBlogPage() {
         <aside className="space-y-6">
           <FormCard
             title="Cover image"
-            description="Required before publishing."
+            description="Image and alt text are required."
             className="xl:sticky xl:top-6"
           >
             <Upload
@@ -395,36 +399,36 @@ export default function UploadBlogPage() {
             )}
 
             {coverImage ? (
-              <img
-                src={coverImage}
-                className="mt-4 h-56 w-full rounded-lg object-cover"
-                alt="Cover preview"
-              />
+              <>
+                <img
+                  src={coverImage}
+                  className="mt-4 h-56 w-full rounded-lg object-cover"
+                  alt="Cover preview"
+                />
+                <Field label="Alt text" className="mt-4">
+                  <input
+                    className={inputClassName}
+                    placeholder="Barber finishing a skin fade"
+                    value={coverImageAlt}
+                    onChange={(event) => setCoverImageAlt(event.target.value)}
+                  />
+                </Field>
+              </>
             ) : (
               <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
                 No cover selected.
               </div>
             )}
 
-            <div className="mt-6 grid gap-3">
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => saveBlog(false)}
-                className={primaryButtonClassName}
-              >
-                <Save className="h-4 w-4" aria-hidden="true" />
-                Save draft
-              </button>
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => saveBlog(true)}
-                className={accentButtonClassName}
-              >
-                Publish
-              </button>
-            </div>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={saveService}
+              className={cn(accentButtonClassName, "mt-6 w-full")}
+            >
+              <Save className="h-4 w-4" aria-hidden="true" />
+              Save service
+            </button>
           </FormCard>
         </aside>
       </div>
