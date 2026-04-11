@@ -1,15 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  orderBy,
-  query,
-} from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import {
   Clock,
-  DollarSign,
   Eye,
   Layers3,
   Pencil,
@@ -17,6 +9,7 @@ import {
   RefreshCcw,
   Scissors,
   Search,
+  Sparkles,
   Trash2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -39,17 +32,54 @@ const buttonPrimary = "bg-slate-950 text-white hover:bg-slate-800";
 const buttonDanger =
   "border border-red-200 bg-white text-red-600 hover:bg-red-50";
 
+const getTimestampValue = (value) =>
+  typeof value?.toMillis === "function" ? value.toMillis() : 0;
+
+const getServiceImage = (service) => service.hero?.image || service.coverImage || "";
+
+const getServiceImageAlt = (service) =>
+  service.hero?.imageAlt || service.coverImageAlt || service.title || "Service cover";
+
+const getServiceSummary = (service) =>
+  service.hero?.subtitle ||
+  service.hero?.description ||
+  service.excerpt ||
+  "No hero summary added yet.";
+
+const getServiceStatus = (service) =>
+  typeof service.isActive === "boolean"
+    ? service.isActive
+      ? "active"
+      : "inactive"
+    : service.status === "draft"
+    ? "inactive"
+    : "active";
+
+const hasSeoMetadata = (service) =>
+  Boolean(
+    (service.seo?.metaTitle || service.metaTitle) &&
+      (service.seo?.metaDescription || service.metaDescription)
+  );
+
 function ServiceRow({ service, onDelete }) {
   const hasViewLink = Boolean(service.slug);
+  const image = getServiceImage(service);
+  const summary = getServiceSummary(service);
+  const status = getServiceStatus(service);
+  const includesCount = Array.isArray(service.includes) ? service.includes.length : 0;
+  const suitableForCount = Array.isArray(service.suitableFor)
+    ? service.suitableFor.length
+    : 0;
+  const processCount = Array.isArray(service.process) ? service.process.length : 0;
 
   return (
     <div className="grid gap-4 p-4 transition-colors hover:bg-slate-50 lg:grid-cols-[minmax(0,1.7fr)_180px_180px_auto] lg:items-center">
       <div className="flex min-w-0 gap-4">
         <div className="h-20 w-24 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-slate-100">
-          {service.coverImage ? (
+          {image ? (
             <img
-              src={service.coverImage}
-              alt={service.coverImageAlt || service.title || "Service cover"}
+              src={image}
+              alt={getServiceImageAlt(service)}
               className="h-full w-full object-cover"
             />
           ) : (
@@ -64,31 +94,33 @@ function ServiceRow({ service, onDelete }) {
             <h3 className="truncate text-sm font-semibold text-slate-950">
               {service.title || "Untitled service"}
             </h3>
-            <StatusPill status={service.status || "published"} />
+            <StatusPill status={status} />
           </div>
           <p className="mt-1 break-all text-xs text-slate-500">
             {service.slug || "missing-slug"}
           </p>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">
-            {service.excerpt || "No excerpt added yet."}
+            {summary}
           </p>
         </div>
       </div>
 
       <div className="grid gap-1 text-sm text-slate-600">
         <span className="text-xs font-medium uppercase text-slate-400">
-          Details
+          Content
         </span>
-        <span>{service.price || "No price"}</span>
         <span>{service.duration || "No duration"}</span>
+        <span>{includesCount} included items</span>
+        <span>{processCount} process steps</span>
       </div>
 
       <div className="grid gap-1 text-sm text-slate-600">
         <span className="text-xs font-medium uppercase text-slate-400">
-          Publishing
+          Metadata
         </span>
-        <span>Order {service.order ?? "-"}</span>
-        <span>SEO {service.metaTitle || service.metaDescription ? "ready" : "missing"}</span>
+        <span>{suitableForCount} suitability points</span>
+        <span>{service.isRecommended ? "Recommended" : "Standard"}</span>
+        <span>SEO {hasSeoMetadata(service) ? "ready" : "missing"}</span>
       </div>
 
       <div className="flex flex-wrap gap-2 lg:justify-end">
@@ -151,14 +183,21 @@ export default function AdminServiceDashboard() {
     setError("");
 
     try {
-      const ref = collection(db, "services");
-      const q = query(ref, orderBy("order", "asc"));
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(collection(db, "services"));
 
-      const data = snapshot.docs.map((docItem) => ({
-        id: docItem.id,
-        ...docItem.data(),
-      }));
+      const data = snapshot.docs
+        .map((docItem) => ({
+          id: docItem.id,
+          ...docItem.data(),
+        }))
+        .sort((left, right) => {
+          const timestampDelta =
+            getTimestampValue(right.updatedAt) - getTimestampValue(left.updatedAt);
+
+          if (timestampDelta !== 0) return timestampDelta;
+
+          return (left.title || "").localeCompare(right.title || "");
+        });
 
       setServices(data);
     } catch (err) {
@@ -182,12 +221,23 @@ export default function AdminServiceDashboard() {
       const haystack = [
         service.title,
         service.slug,
-        service.excerpt,
-        service.price,
         service.duration,
+        service.hero?.title,
+        service.hero?.subtitle,
+        service.hero?.description,
+        service.excerpt,
+        service.seo?.metaTitle,
+        service.seo?.metaDescription,
         service.metaTitle,
         service.metaDescription,
-        service.status,
+        ...(Array.isArray(service.includes) ? service.includes : []),
+        ...(Array.isArray(service.suitableFor) ? service.suitableFor : []),
+        ...(Array.isArray(service.highlights) ? service.highlights : []),
+        ...(Array.isArray(service.process)
+          ? service.process.flatMap((step) => [step?.title, step?.description])
+          : []),
+        getServiceStatus(service),
+        service.isRecommended ? "recommended" : "standard",
       ]
         .filter(Boolean)
         .join(" ")
@@ -200,8 +250,8 @@ export default function AdminServiceDashboard() {
   const stats = useMemo(
     () => ({
       total: services.length,
-      published: services.filter((item) => item.status === "published").length,
-      withPrice: services.filter((item) => item.price).length,
+      active: services.filter((item) => getServiceStatus(item) === "active").length,
+      recommended: services.filter((item) => item.isRecommended).length,
       withDuration: services.filter((item) => item.duration).length,
       filtered: filteredServices.length,
     }),
@@ -226,7 +276,7 @@ export default function AdminServiceDashboard() {
   return (
     <AdminDashboardShell
       title="Service dashboard"
-      description="Keep service pages ordered, priced, searchable, and ready for customers."
+      description="Keep service pages active, searchable, and aligned with the current content schema."
       action={
         <Link
           to="/admin/services/new"
@@ -246,17 +296,17 @@ export default function AdminServiceDashboard() {
           tone="blue"
         />
         <AdminStatCard
-          label="Published"
-          value={stats.published}
-          helper="Visible on the website"
+          label="Active"
+          value={stats.active}
+          helper="Ready for the public website"
           icon={Layers3}
           tone="green"
         />
         <AdminStatCard
-          label="With price"
-          value={stats.withPrice}
-          helper="Pricing details completed"
-          icon={DollarSign}
+          label="Recommended"
+          value={stats.recommended}
+          helper="Featured or preferred services"
+          icon={Sparkles}
           tone="orange"
         />
         <AdminStatCard
@@ -279,7 +329,7 @@ export default function AdminServiceDashboard() {
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search title, slug, excerpt, price, duration..."
+              placeholder="Search title, slug, hero copy, SEO, includes..."
               className="h-10 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-950 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
             />
           </label>
@@ -310,7 +360,7 @@ export default function AdminServiceDashboard() {
               {filteredServices.length} of {services.length} services match the current view.
             </p>
           </div>
-          <div className="text-sm text-slate-500">Sorted by service order</div>
+          <div className="text-sm text-slate-500">Sorted by last updated</div>
         </div>
 
         {loading ? (
@@ -319,7 +369,7 @@ export default function AdminServiceDashboard() {
           <div className="p-4">
             <EmptyState
               title="No services found"
-              description="Try another search or add a new service page."
+              description="Try another search or add a new service record."
             />
           </div>
         ) : (
